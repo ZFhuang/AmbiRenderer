@@ -1,4 +1,4 @@
-# Prerequisites
+﻿# Prerequisites
 *.d
 
 # Compiled Object files
@@ -208,4 +208,4 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
-# .vs/
+.vs/
