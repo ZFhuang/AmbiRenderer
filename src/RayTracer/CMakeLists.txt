@@ -1,11 +1,12 @@
-﻿# 最低的CMake版本
-cmake_minimum_required (VERSION 3.8)
+﻿# 将下列的文件加入起名的库中
+set(target_name "RayTracer")
 
-project(AmbiRenderer)
+set(RAYTRACER_FILES
+	include/RayTracer.hpp
+	src/RayTracer.hpp
+	src/RayTracer.cpp)
 
-# 将下列的文件加入起名的库中
-add_library(RayTracer STATIC
-  include/RayTracer.h
-  src/RayTracer.h
-  src/RayTracer.cpp
-)
+add_library(${target_name} STATIC ${RAYTRACER_FILES})
+
+target_include_directories(${target_name} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${target_name} PRIVATE DLL_EXPORT)

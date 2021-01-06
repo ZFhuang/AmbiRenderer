@@ -1,4 +1,4 @@
-﻿#include "RayTracer.h"
+﻿#include "RayTracer.hpp"
 using namespace std;
 
 int run_RayTracer() {
@@ -7,8 +7,7 @@ int run_RayTracer() {
 	const int image_height = 256;
 
 	// 将输出重定向到图片文件上
-	FILE* outFile;
-	freopen_s(&outFile, "result.ppm", "w", stdout);
+	freopen("result.ppm", "w", stdout);
 	// 写入头信息
 	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
