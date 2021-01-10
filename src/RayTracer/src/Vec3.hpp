@@ -28,7 +28,7 @@ public:
 	double& operator[](int i) { return e[i]; }
 
 	// 重载加号
-	Vec3 operator+=(const Vec3& v) {
+	Vec3& operator+=(const Vec3& v) {
 		e[0] += v.e[0];
 		e[1] += v.e[1];
 		e[2] += v.e[2];
@@ -36,7 +36,7 @@ public:
 	}
 
 	// 重载乘号, 这里是统一的缩放
-	Vec3 operator*=(const double s) {
+	Vec3& operator*=(const double s) {
 		e[0] *= s;
 		e[1] *= s;
 		e[2] *= s;
@@ -44,8 +44,8 @@ public:
 	}
 
 	// 重载除法, 用乘1/s实现
-	Vec3 operator/=(const double s) {
-		return *this *= 1 / s;
+	Vec3& operator/=(const double s) {
+		return (*this) *= (1 / s);
 	}
 
 	// 返回向量长度
@@ -101,8 +101,8 @@ inline Vec3 operator*(const Vec3& v, double s) {
 }
 
 // 重载除号, 除号只有一种顺序
-inline Vec3 operator/(const Vec3& v, double s) {
-	return v / s;
+inline Vec3 operator/(Vec3 v, double s) {
+	return (1 / s)*v;
 }
 
 // 向量点乘函数, 得到两个向量对应分量相乘后的求和, 结果是常数, u * v'
@@ -120,6 +120,6 @@ inline Vec3 cross(const Vec3& u, const Vec3& v) {
 }
 
 // 返回单位向量形式的向量v, 也就是除了自己的模
-inline Vec3 uint_vector(Vec3 v) {
+inline Vec3 unit_vector(Vec3 v) {
 	return v / v.length();
 }
