@@ -5,14 +5,13 @@ My rendering playground
 
 ## In progress...
 
-**了解如何组织C++项目**
+### Ray Tracing in One Weekend学习
 
-- [x] 将VS项目搬移到CMake组织下
-- [x] ~把#pragma once去掉~, 去掉MS专用的函数, 维护跨平台性
-- [x] 优化CMake的缓冲文件
-- [x] 学习CMake写法, 现在的链接库法似乎有点不对劲
-- [x] 改变内容的输出文件夹
-- [ ] 完善第一部分的注释
+- [ ] **Chapter1,2** 学习写入ppm图像文件
+- [ ] **Chapter3** 编写基础数据结构Vec3
+- [ ] **Chapter4** 编写射线类, 绘制场景背景
+- [ ] **Chapter5** 绘制一个球
+- [ ] **Chapter6** 绘制法线
 
 
 ## Ray Tracing

@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required (VERSION 3.8)
-# 项目名
+# 项目名, 后面可以跟版本号
 project(AmbiRenderer VERSION 0.1)
 
 # 添加子目录, 子目录要保证也有CMakeLists

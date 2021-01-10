@@ -11,6 +11,6 @@ add_subdirectory (src bin)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-# 打印当前的一些信息
+# 打印当前的项目路径信息
 MESSAGE(STATUS "***This is BINARY dir " ${PROJECT_BINARY_DIR})
 MESSAGE(STATUS "***This is SOURCE dir " ${PROJECT_SOURCE_DIR})
