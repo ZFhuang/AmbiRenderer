@@ -43,7 +43,7 @@ int testImage(int image_width, int image_height) {
 	for (int j = image_height - 1; j >= 0; --j) {
 		// 由于标准输出流被文件占用, 因此将当前执行进度输出到日志流, 一样会显示在命令行中
 		// 用\r来让输出保持在同一行
-		std::clog<< "\rScanlines remaining: " << j << ' ' << std::flush;
+		std::clog << "\rScanlines remaining: " << j << ' ' << std::flush;
 		for (int i = 0; i < image_width; ++i) {
 			// 写入的内容暂时是测试用的渐变颜色
 			auto r = double(i) / (image_width - 1);
@@ -57,6 +57,6 @@ int testImage(int image_width, int image_height) {
 			std::cout << ir << ' ' << ig << ' ' << ib << '\n';
 		}
 	}
-	std::clog << "\nDone."<<std::endl;
+	std::clog << "\nDone." << std::endl;
 	return 0;
 }
