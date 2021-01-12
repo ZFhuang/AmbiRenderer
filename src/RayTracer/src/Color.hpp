@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include"Vec3.hpp"
-#include<iostream>
+#include "Vec3.hpp"
+#include <iostream>
 
 // 专门的color文件用来保存那些和颜色有关的函数
 

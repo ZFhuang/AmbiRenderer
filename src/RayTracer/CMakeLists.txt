@@ -10,7 +10,15 @@ set(RAYTRACER_FILES
 	 "src/Color.hpp"
 	 "include/Color.hpp" 
 	 "include/Ray.hpp" 
-	 "src/Ray.hpp")
+	 "src/Ray.hpp"
+	 "src/Hittable.hpp"
+	 "include/Hittable.hpp"
+	 "src/Sphere.hpp"
+	 "include/Sphere.hpp"
+	 "src/HittableList.hpp"
+	 "include/HittableList.hpp"
+	 "src/RTweekend.hpp"
+	  "include/RTweekend.hpp")
 
 # 目前不知道为什么动态链接不能生产ilk文件, 所以使用了静态链接
 # 将上面的文件添加到库${target_name}中, 也就是RayTracer

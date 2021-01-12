@@ -10,11 +10,15 @@
 - [x] **Chapter1,2** 学习写入ppm图像文件
 - [x] **Chapter3** 编写基础数据结构Vec3
 - [x] **Chapter4** 编写射线类, 绘制场景背景
-- [ ] **Chapter5** 绘制一个球
-- [ ] **Chapter6** 绘制法线
+- [x] **Chapter5** 绘制一个球
+- [x] **Chapter6** 绘制法线和多个球, 其中一个作为地面
+- [ ] 重构一下代码, 把一些实现的头文件和源文件分离, 减少重定义问题
+- [ ] **Chapter7** 随机超采样反走样
+- [ ] **Chapter8** 绘制场景的漫反射
+- [ ] **Chapter9** 金属反射材质效果
 
 **现状:**
 
-![Result](doc/Chapter4_result.jpg)
+![Result](doc/Chapter6_result.jpg)
 
 ## Ray Tracing

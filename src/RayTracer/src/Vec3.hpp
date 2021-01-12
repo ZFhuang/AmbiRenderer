@@ -53,14 +53,14 @@ public:
 		return sqrt(length_squa());
 	}
 
-private:
-	// 储存向量值的数组
-	double e[3];
-
 	// 返回向量模的平方
 	double length_squa() const {
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
 	}
+
+private:
+	// 储存向量值的数组
+	double e[3];
 };
 
 // 用using重命名Vec3
@@ -102,7 +102,7 @@ inline Vec3 operator*(const Vec3& v, double s) {
 
 // 重载除号, 除号只有一种顺序
 inline Vec3 operator/(Vec3 v, double s) {
-	return (1 / s)*v;
+	return (1 / s) * v;
 }
 
 // 向量点乘函数, 得到两个向量对应分量相乘后的求和, 结果是常数, u * v'
