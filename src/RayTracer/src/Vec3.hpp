@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include<cmath>
-#include<iostream>
+#include <iostream>
+
+#include "RTweekend.hpp"
 
 using std::sqrt;
 
@@ -56,6 +57,11 @@ public:
 	// 返回向量模的平方
 	double length_squa() const {
 		return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+	}
+
+	// 生成随机向量
+	inline static Vec3 random(double min=0.0, double max=1.0) {
+		return Vec3(random_double(min, max), random_double(min, max), random_double(min, max));
 	}
 
 private:
@@ -120,6 +126,37 @@ inline Vec3 cross(const Vec3& u, const Vec3& v) {
 }
 
 // 返回单位向量形式的向量v, 也就是除了自己的模
-inline Vec3 unit_vector(Vec3 v) {
+inline Vec3 unit_vector(const Vec3& v) {
 	return v / v.length();
+}
+
+// 用来模拟漫反射的随机向量, 在单位圆内随机分布, 直接使用的话会使得分布比较集中于中心
+inline Vec3 random_in_unit_sphere() {
+	// 反复生成
+	while (true) {
+		auto p = Vec3::random(-1.0, 1.0);
+		// 接受-拒绝采样
+		if (p.length_squa() >= 1) {
+			continue;
+		}
+		return p;
+	}
+}
+
+// 真正的理想漫反射方程是在法线半球上改变而不是叠加分量, 主要问题在于叠加分量的话会导致
+// 反射光溢出, 能量超过cos. 正确的做法就是直接在半球上采样然后使用
+inline Vec3 random_in_hemisphere(const Vec3& normal) {
+	Vec3 in_unit_sphere = random_in_unit_sphere();
+	if (dot(in_unit_sphere, normal) > 0.0) {
+		return in_unit_sphere;
+	}
+	else {
+		return -in_unit_sphere;
+	}
+}
+
+// 将用来模拟漫反射的单位圆随机向量单位向量化, 也就是只取圆上的点了, 让向量分布更加均匀
+// 可想像一下, 单位化后一个切线球上的采样效果类似于一个切半球, 且是均匀分布的
+inline Vec3 random_unit_vector() {
+	return unit_vector(random_in_unit_sphere());
 }

@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Vec3.hpp"
 #include "Ray.hpp"
 
 // 对当前射线已经发生的命中进行记录

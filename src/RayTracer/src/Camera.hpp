@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "RTweekend.hpp"
+#include "Vec3.hpp"
+#include "Ray.hpp"
 
 class Camera
 {

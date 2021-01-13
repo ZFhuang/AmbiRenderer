@@ -12,13 +12,17 @@
 - [x] **Chapter4** 编写射线类, 绘制场景背景
 - [x] **Chapter5** 绘制一个球
 - [x] **Chapter6** 绘制法线和多个球, 其中一个作为地面
-- [ ] 重构一下代码, 把一些实现的头文件和源文件分离, 减少重定义问题
+- [x] 重构一下代码, 把一些实现的头文件和源文件分离, 减少重定义问题
 - [x] **Chapter7** 随机超采样反走样
-- [ ] **Chapter8** 绘制场景的漫反射
-- [ ] **Chapter9** 金属反射材质效果
+- [x] **Chapter8** 绘制场景的漫反射
+- [ ] **Chapter9** 金属材质的镜面反射效果
+- [ ] **Chapter10** 玻璃等材质的透射效果
+- [ ] **Chapter11** 可调整的相机
+- [ ] **Chapter12** 散焦效果
+- [ ] **Chapter13** 最终场景
 
 **现状:**
 
-![Result](doc/Chapter6_result.jpg)
+![Result](doc/Chapter8_result.jpg)
 
 ## Ray Tracing

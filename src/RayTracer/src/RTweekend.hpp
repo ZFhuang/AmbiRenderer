@@ -5,9 +5,6 @@
 #include <memory>
 #include <random>
 
-#include "Ray.hpp"
-#include "Vec3.hpp"
-
 // 保存Ray Tracing in One Weekend项目所需的基本常量和函数
 
 using std::shared_ptr;
@@ -24,9 +21,14 @@ inline double degrees_to_radians(double degrees) {
 
 // 生成范围内的double均匀分布随机数
 inline double random_double(double min = 0.0, double max = 1.0) {
-	static std::uniform_real_distribution<double> distribution(min, max);
-	static std::mt19937 generator;
-	return distribution(generator);
+	// 生成种子
+	static std::random_device rd;
+	// 调用生成器
+	static std::mt19937 generator(rd());
+	// 注意这个该死的生成器只能生成非负数
+	static std::uniform_real_distribution<double> distribution(0.0, 1.0);
+	// 移动分布范围
+	return min+(max-min)*distribution(generator);
 }
 
 // 按照min和max对值进行截断
