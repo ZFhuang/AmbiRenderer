@@ -1,14 +1,58 @@
-﻿#include <iostream>
-#include <memory>
-
-#include "RayTracer.hpp"
-#include "Color.hpp"
-#include "Ray.hpp"
-#include "Sphere.hpp"
-#include "RTweekend.hpp"
+﻿#include "RayTracer.hpp"
 
 using std::shared_ptr;
 using std::make_shared;
+
+int run_RayTracer() {
+	// 设置要绘制的图像宽度和长宽比和反走样倍率等参数
+	const double aspect_ratio = 16.0 / 9.0;
+	const int image_width = 720;
+	const int image_height = static_cast<int>(image_width / aspect_ratio);
+	const int sample_times = 16;
+
+	// 设置场景对象
+	HittableList scene;
+	scene.add(make_shared<Sphere>(Point3(0, 0, -1), 0.5));
+	scene.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100));
+
+	// 设置相机
+	Camera cam(aspect_ratio);
+
+	// 测试输出, 保存在图片"test.ppm"中
+	return renderImage(image_width, image_height, cam, scene, sample_times);
+}
+
+int renderImage(int image_width, int image_height, Camera cam, HittableList scene, int sampleTimes = 1) {
+	// 输出流重定向到图片文件
+	freopen("result.ppm", "w", stdout);
+	// 头信息
+	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+
+	// 注意图片是从上往下, 从左往右绘制的
+	for (int j = image_height - 1; j >= 0; --j) {
+		std::clog << "\rScanlines remaining: " << j << ' ' << std::flush;
+		for (int i = 0; i < image_width; ++i) {
+			// 计算这个像素射线计算应该着色的颜色
+			Color pixel(0, 0, 0);
+			// 进行超采样反走样, 也就是对每个像素都进行一点扰动然后采样多次来平均
+			for (int k = 0; k < sampleTimes; ++k) {
+				// 计算出当前像素映射到0-1之中的比例
+				// 对每个像素索引随机扰动(0 - 1)从而让生成的射线在一个像素内有所变化, 达到超采样的效果
+				double u = (static_cast<double>(i) + random_double()) / (image_width - 1);
+				double v = (static_cast<double>(j) + random_double()) / (image_height - 1);
+				// 利用这个比例计算对应到视平面的位置, 与相机原点相减就得到对应像素的视角射线向量
+				Ray r = cam.getRay(u, v);
+				// 累加这个像素着色的颜色
+				pixel += ray_color(r, scene);
+			}
+
+			// 写入颜色到图片的像素, 内部对像素值进行了裁剪
+			write_color(std::cout, pixel, sampleTimes);
+		}
+	}
+	std::clog << "\nDone." << std::endl;
+	return 0;
+}
 
 Color ray_color(const Ray& r, const HittableList& scene) {
 	HitRecord rec;
@@ -24,71 +68,6 @@ Color ray_color(const Ray& r, const HittableList& scene) {
 	// 因此y的变化并不是均匀的, 而是会表现出弧线的性质. 权重从0.5到1
 	auto s = 0.5 * (unit_direction.y() + 1.0);
 	return (1.0 - s) * Color(1.0, 1.0, 1.0) + s * Color(0.5, 0.7, 1.0);
-}
-
-int run_RayTracer() {
-	// 设置要绘制的图像宽度和长宽比
-	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 720;
-	const int image_height = static_cast<int>(image_width / aspect_ratio);
-
-	// 设置场景对象
-	HittableList scene;
-	scene.add(make_shared<Sphere>(Point3(0, 0, -1), 0.5));
-	scene.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100));
-
-	// 设置渲染的相机参数, 世界坐标系中的视平面大小和焦长
-	double viewport_height = 2.0;
-	double viewport_width = aspect_ratio * viewport_height;
-	double focal_length = 1.0;
-	// 处理后的相机参数
-	auto camera_args = setCamera(viewport_width, viewport_height, focal_length);
-
-	// 测试输出, 保存在图片"test.ppm"中
-	return renderImage(image_width, image_height, camera_args, scene);
-}
-
-int renderImage(int image_width, int image_height, Vec3* camera_args, HittableList scene) {
-	// 输出流重定向到图片文件
-	freopen("result.ppm", "w", stdout);
-	// 头信息
-	std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
-	// 注意图片是从上往下, 从左往右绘制的
-	for (int j = image_height - 1; j >= 0; --j) {
-		std::clog << "\rScanlines remaining: " << j << ' ' << std::flush;
-		for (int i = 0; i < image_width; ++i) {
-			// 计算出当前像素映射到0-1之中的比例
-			double u = static_cast<double>(i) / (image_width - 1);
-			double v = static_cast<double>(j) / (image_height - 1);
-			// 利用这个比例计算对应到视平面的位置, 与相机原点相减就得到对应像素的视角射线向量
-			Ray r(camera_args[0], camera_args[3] + u * camera_args[1] + v * camera_args[2] - camera_args[0]);
-			// 计算这个射线计算应该着色的颜色
-			Color pixel = ray_color(r, scene);
-			// 写入颜色到图片的像素
-			write_color(std::cout, pixel);
-		}
-	}
-	std::clog << "\nDone." << std::endl;
-	return 0;
-}
-
-Vec3* setCamera(double viewport_width, double viewport_height, double focal_length) {
-	// 相机当前位置
-	Point3 origin = Point3(0, 0, 0);
-	// 水平方向的长度向量
-	Vec3 horizontal = Vec3(viewport_width, 0, 0);
-	// 垂直方向的长度向量
-	Vec3 vertical = Vec3(0, viewport_height, 0);
-	// 计算出视平面左下角的真实位置
-	auto lower_left_corner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focal_length);
-	// 填充到参数集中
-	Vec3* camera_args=new Vec3[4];
-	camera_args[0] = origin;
-	camera_args[1] = horizontal;
-	camera_args[2] = vertical;
-	camera_args[3] = lower_left_corner;
-	return camera_args;
 }
 
 int testImage(int image_width, int image_height) {
