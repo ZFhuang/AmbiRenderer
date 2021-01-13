@@ -1,25 +1,32 @@
 ﻿#include "RayTracer.hpp"
 
-using std::shared_ptr;
-using std::make_shared;
-
 int run_RayTracer() {
 	// 设置要绘制的图像宽度和长宽比和反走样倍率等参数
 	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 720;
+	const int image_width = 70;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
-	const int sample_times = 16;
+	const int sample_times = 6;
 
 	// 设置场景对象
 	HittableList scene;
 	scene.add(make_shared<Sphere>(Point3(0, 0, -1), 0.5));
 	scene.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100));
 
+	// 开始帧计时
+	auto startTime = std::chrono::system_clock::now();
+
 	// 设置相机
 	Camera cam(aspect_ratio);
 
 	// 测试输出, 保存在图片"test.ppm"中
-	return renderImage(image_width, image_height, cam, scene, sample_times);
+	renderImage(image_width, image_height, cam, scene, sample_times);
+
+	// 结束帧计时, 输出渲染本帧所用的毫秒数
+	auto endTime = std::chrono::system_clock::now();
+	std::clog << "Frame time: "
+		<< std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count()
+		<< "ms" << std::endl;
+	return 0;
 }
 
 int renderImage(int image_width, int image_height, Camera cam, HittableList scene, int sampleTimes = 1) {

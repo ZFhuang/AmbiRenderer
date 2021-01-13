@@ -2,14 +2,17 @@
 
 #include <iostream>
 #include <memory>
+#include <chrono>
 
 #include "RayTracer.hpp"
 #include "Color.hpp"
-#include "Ray.hpp"
 #include "Sphere.hpp"
 #include "RTweekend.hpp"
 #include "Camera.hpp"
 #include "HittableList.hpp"
+
+using std::shared_ptr;
+using std::make_shared;
 
 // 光追渲染器的入口
 int run_RayTracer();
