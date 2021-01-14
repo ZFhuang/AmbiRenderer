@@ -4,6 +4,7 @@
 #include "RayTracer.hpp"
 #include "Sphere.hpp"
 #include "Color.hpp"
+#include "Material.hpp"
 
 int run_RayTracer() {
 	// 设置要绘制的长宽比和图像宽度
@@ -11,14 +12,22 @@ int run_RayTracer() {
 	const int image_width = 720;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
-	const int sample_times = 150;
+	const int sample_times = 200;
 	// 光线的反弹次数
 	const int max_depth = 100;
 
+	// 设置需要用的几个对象材质指针, 参数是物体对材质的反照率
+	auto material_ground = make_shared<Lambertian>(Color(1, 1, 1));
+	auto material_center = make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
+	auto material_left = make_shared<Metal>(Color(0.8, 0.8, 0.8));
+	auto material_right = make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.5);
+
 	// 设置场景对象
 	HittableList scene;
-	scene.add(make_shared<Sphere>(Point3(0, 0, -1), 0.5));
-	scene.add(make_shared<Sphere>(Point3(0, -100.5, -1), 100));
+	scene.add(make_shared<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
+	scene.add(make_shared<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
+	scene.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
+	scene.add(make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
 
 	// 开始帧计时
 	auto startTime = std::chrono::system_clock::now();
@@ -78,21 +87,20 @@ Color ray_color(const Ray& r, const HittableList& scene, int depth) {
 	HitRecord rec;
 	// 命中球的时候会随机进行反射, 最小距离设置为0.001, 防止精度误差导致的误反射
 	if (scene.hit(r, 0.001, infinity, rec)) {
-		// 计算反射向量, 命中点到法线的向量加上随机单位向量组合
-
-		//// 漫反射方向的错误近似, 问题在于这里使用了叠加, 会使得能量溢出, cos^3(θ)
-		//Point3 target = rec.p + rec.normal + random_unit_vector();
-
-		// 正确漫反射方向, 直接使用法线半球上采样的单位向量
-		// 朗伯定律不管入射光来自何方，沿各方向漫射光的发光强度总与cosθ成正比
-		Point3 target = rec.p + random_in_hemisphere(rec.normal);
-
-		// 命中的时候递归计算从命中点开始的下一层反射, 直到递归极限或者无命中(天空)
-		// 每次反射颜色都*0.5模拟能量耗散
-		return 0.5 * ray_color(Ray(rec.p, target - rec.p), scene, depth - 1);
+		// 暂存反射向量
+		Ray scattered;
+		// 暂存衰减值, 也就是能量被吸收的比例
+		Color attenuation;
+		// 调用物体表面的材质散射计算, 得到反射向量和亮度
+		if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+			// 进行递归, 每层返回都会衰减
+			return attenuation * ray_color(scattered, scene, depth - 1);
+		}
+		// 没有材质的表面不需要颜色
+		return Color(0, 0, 0);
 	}
 
-	// 没有命中的时候绘制背景, 先归一化当前射线向量
+	// 没有命中的时候背景(光源)就被用来给全局着色了
 	Vec3 unit_direction = unit_vector(r.direction());
 	// 在白色和浅蓝色之间利用向量的y方向进行加权平均, 由于向量被归一化了
 	// 因此y的变化并不是均匀的, 而是会表现出弧线的性质. 权重从0.5到1

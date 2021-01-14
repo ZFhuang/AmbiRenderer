@@ -60,8 +60,14 @@ public:
 	}
 
 	// 生成随机向量
-	inline static Vec3 random(double min=0.0, double max=1.0) {
+	inline static Vec3 random(double min = 0.0, double max = 1.0) {
 		return Vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+	}
+
+	// 判断当前向量是否很接近零向量
+	bool near_zero() const {
+		const auto s = 1e-8;
+		return  (fabs(e[0] < s) && fabs(e[1] < s) && fabs(e[2] < s));
 	}
 
 private:
@@ -159,4 +165,11 @@ inline Vec3 random_in_hemisphere(const Vec3& normal) {
 // 可想像一下, 单位化后一个切线球上的采样效果类似于一个切半球, 且是均匀分布的
 inline Vec3 random_unit_vector() {
 	return unit_vector(random_in_unit_sphere());
+}
+
+// 根据入射向量和法线, 返回射线的反射向量, 长度与入射向量相同
+inline Vec3 reflect(const Vec3& v, const Vec3& n) {
+	// n是单位向量但是v可能不是, 因此通过dot(v, n)*n来得到符合反射向量的法线方向边长
+	// 然后用向量加来得到反射向量
+	return v - 2 * dot(v, n) * n;
 }

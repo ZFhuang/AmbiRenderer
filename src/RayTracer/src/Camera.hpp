@@ -19,6 +19,7 @@ public:
 		lower_left_corner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focal_length);
 	}
 
+	// 输入视图的(0-1)比例, 返回相机射出的射线
 	Ray getRay(double u, double v) const {
 		return Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
 	}

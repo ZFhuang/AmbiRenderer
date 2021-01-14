@@ -28,7 +28,7 @@ inline double random_double(double min = 0.0, double max = 1.0) {
 	// 注意这个该死的生成器只能生成非负数
 	static std::uniform_real_distribution<double> distribution(0.0, 1.0);
 	// 移动分布范围
-	return min+(max-min)*distribution(generator);
+	return min + (max - min) * distribution(generator);
 }
 
 // 按照min和max对值进行截断

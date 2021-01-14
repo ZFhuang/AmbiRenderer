@@ -15,7 +15,7 @@
 - [x] 重构一下代码, 把一些实现的头文件和源文件分离, 减少重定义问题
 - [x] **Chapter7** 随机超采样反走样
 - [x] **Chapter8** 绘制场景的漫反射
-- [ ] **Chapter9** 金属材质的镜面反射效果
+- [x] **Chapter9** 金属材质的镜面反射效果
 - [ ] **Chapter10** 玻璃等材质的透射效果
 - [ ] **Chapter11** 可调整的相机
 - [ ] **Chapter12** 散焦效果
@@ -23,6 +23,6 @@
 
 **现状:**
 
-![Result](doc/Chapter8_result.jpg)
+![Result](doc/Chapter9_result.jpg)
 
 ## Ray Tracing

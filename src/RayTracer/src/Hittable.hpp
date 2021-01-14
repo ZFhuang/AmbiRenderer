@@ -1,6 +1,13 @@
 ﻿#pragma once
 
 #include "Ray.hpp"
+#include "Material.hpp"
+#include <memory>
+
+using std::shared_ptr;
+
+// 前置声明
+class Material;
 
 // 对当前射线已经发生的命中进行记录
 struct HitRecord
@@ -13,6 +20,8 @@ struct HitRecord
 	double s;
 	// 是否命中的是正面
 	bool front_face;
+	// 对命中对象材质的标志指针
+	shared_ptr<Material> mat_ptr;
 
 	// 通过输入的法线和当前朝外的法线来判断是否从正面命中
 	inline void set_face_normal(const Ray& r, const Vec3& outward_normal) {
