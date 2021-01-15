@@ -41,3 +41,20 @@ public:
 	// 模糊度, 控制漫反射强度, abs(>=0), 0就是完全镜面反射
 	double fuzz;
 };
+
+// 玻璃折射材质
+class Dielectric :public Material {
+public:
+	// 设置材质折射指数
+	Dielectric(double index_of_refraction) :ir(index_of_refraction) {}
+
+	// 控制射线在对象上的折射效果
+	virtual bool scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const override;
+
+	// 折射指数
+	double ir;
+
+private:
+	// Schlick近似, 模拟在大角度观察折射物体时会在边缘发生的反射现象
+	static double reflectance(double cosine, double ref_idx);
+};

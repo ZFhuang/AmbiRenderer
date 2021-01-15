@@ -12,21 +12,25 @@ int run_RayTracer() {
 	const int image_width = 720;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
-	const int sample_times = 200;
+	const int sample_times = 400;
 	// 光线的反弹次数
 	const int max_depth = 100;
 
 	// 设置需要用的几个对象材质指针, 参数是物体对材质的反照率
-	auto material_ground = make_shared<Lambertian>(Color(1, 1, 1));
+	auto material_ground = make_shared<Lambertian>(Color(0.8, 0.8, 0.8));
 	auto material_center = make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
-	auto material_left = make_shared<Metal>(Color(0.8, 0.8, 0.8));
-	auto material_right = make_shared<Metal>(Color(0.8, 0.6, 0.2), 0.5);
+	// 正常的折射效果
+	auto material_left = make_shared<Dielectric>(1.5);
+	// 折射指数小, 会导致折射变成反射
+	auto material_right = make_shared<Dielectric>(0.5);
 
 	// 设置场景对象
 	HittableList scene;
 	scene.add(make_shared<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
 	scene.add(make_shared<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
+	// 这里左边放了两个玻璃球, 一个正面一个反面, 反面的玻璃球可以得到中空玻璃的效果
 	scene.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
+	scene.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), -0.45, material_left));
 	scene.add(make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
 
 	// 开始帧计时

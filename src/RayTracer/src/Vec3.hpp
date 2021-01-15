@@ -173,3 +173,15 @@ inline Vec3 reflect(const Vec3& v, const Vec3& n) {
 	// 然后用向量加来得到反射向量
 	return v - 2 * dot(v, n) * n;
 }
+
+// 根据入射向量, 法线和两种介质折射率的比率eta/eta', 返回射线的折射向量
+// 算法原理是Snell法则, 目标是求r_out, 算法是将其计算分解为垂直平行分量再相加
+inline Vec3 refract(const Vec3& uv, const Vec3& n, double etai_over_etat) {
+	auto cos_theta = fmin(dot(-uv, n), 1.0);
+	// 垂直的分量
+	Vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
+	// 平行的分量
+	Vec3 r_out_para = -sqrt(fabs(1.0 - r_out_perp.length_squa())) * n;
+	// 分量相加得到出射向量
+	return r_out_perp + r_out_para;
+}
