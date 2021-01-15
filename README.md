@@ -17,7 +17,7 @@
 - [x] **Chapter8** 绘制场景的漫反射
 - [x] **Chapter9** 金属材质的镜面反射效果
 - [x] **Chapter10** 玻璃等材质的透射效果
-- [ ] **Chapter11** 可调整的相机
+- [x] **Chapter11** 可调整的相机
 - [ ] **Chapter12** 散焦效果
 - [ ] **Chapter13** 最终场景
 - [ ] 阅读书上内容, 搞明白折射方程
@@ -25,6 +25,6 @@
 
 **现状:**
 
-![Result](doc/Chapter10_result.jpg)
+![Result](doc/Chapter11_result.jpg)
 
 ## Ray Tracing

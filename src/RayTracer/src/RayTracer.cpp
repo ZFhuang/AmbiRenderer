@@ -7,22 +7,24 @@
 #include "Material.hpp"
 
 int run_RayTracer() {
-	// 设置要绘制的长宽比和图像宽度
+	// 设置图像宽度和宽高比
 	const double aspect_ratio = 16.0 / 9.0;
 	const int image_width = 720;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
+	// 设置相机垂直fov
+	const double vfov = 60;
 	// 反走样的超采样次数
 	const int sample_times = 400;
 	// 光线的反弹次数
 	const int max_depth = 100;
 
-	// 设置需要用的几个对象材质指针, 参数是物体对材质的反照率
-	auto material_ground = make_shared<Lambertian>(Color(0.8, 0.8, 0.8));
+	// 设置需要用的几个对象材质指针
+	auto material_ground = make_shared<Metal>(Color(0.7, 0.7, 0.7), 0.3);
 	auto material_center = make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
 	// 正常的折射效果
 	auto material_left = make_shared<Dielectric>(1.5);
-	// 折射指数小, 会导致折射变成反射
-	auto material_right = make_shared<Dielectric>(0.5);
+	// 金属球
+	auto material_right = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0);
 
 	// 设置场景对象
 	HittableList scene;
@@ -36,8 +38,8 @@ int run_RayTracer() {
 	// 开始帧计时
 	auto startTime = std::chrono::system_clock::now();
 
-	// 设置相机
-	Camera cam(aspect_ratio);
+	// 设置相机参数
+	Camera cam(Point3(-2, 2, 1), Point3(0, 0, -1), Vec3(0, 1, 0), vfov, aspect_ratio);
 
 	// 测试输出, 保存在图片"test.ppm"中
 	renderImage(image_width, image_height, cam, scene, sample_times, max_depth);

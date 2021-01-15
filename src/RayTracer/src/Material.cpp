@@ -28,8 +28,8 @@ bool Metal::scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray
 }
 
 bool Dielectric::scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const {
-	// 反照率暂时设置全反照
-	attenuation = Color(1.0, 1.0, 1.0);
+	// 反照率暂时设置全反照但是稍微暗一点
+	attenuation = Color(0.95, 0.95, 0.95);
 	// 计算两种介质的折射率比例, 原始折射率设置为空气, 除新折射率, 内部则直接设置为不变
 	double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
 	// 将入射向量单位化
