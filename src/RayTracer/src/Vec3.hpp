@@ -167,6 +167,16 @@ inline Vec3 random_unit_vector() {
 	return unit_vector(random_in_unit_sphere());
 }
 
+// 用来模拟相机光圈成像, 随机用接受-拒绝采样在单位圆上取二维点.
+inline Vec3 random_in_unit_disk() {
+	while (true) {
+		auto p = Vec3(random_double(-1, 1), random_double(-1, 1), 0);
+		if (p.length_squa() >= 1)
+			continue;
+		return p;
+	}
+}
+
 // 根据入射向量和法线, 返回射线的反射向量, 长度与入射向量相同
 inline Vec3 reflect(const Vec3& v, const Vec3& n) {
 	// n是单位向量但是v可能不是, 因此通过dot(v, n)*n来得到符合反射向量的法线方向边长

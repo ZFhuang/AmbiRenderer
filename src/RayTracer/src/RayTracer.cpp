@@ -11,12 +11,10 @@ int run_RayTracer() {
 	const double aspect_ratio = 16.0 / 9.0;
 	const int image_width = 720;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
-	// 设置相机垂直fov
-	const double vfov = 60;
 	// 反走样的超采样次数
-	const int sample_times = 400;
+	const int sample_times = 40;
 	// 光线的反弹次数
-	const int max_depth = 100;
+	const int max_depth = 10;
 
 	// 设置需要用的几个对象材质指针
 	auto material_ground = make_shared<Metal>(Color(0.7, 0.7, 0.7), 0.3);
@@ -39,7 +37,16 @@ int run_RayTracer() {
 	auto startTime = std::chrono::system_clock::now();
 
 	// 设置相机参数
-	Camera cam(Point3(-2, 2, 1), Point3(0, 0, -1), Vec3(0, 1, 0), vfov, aspect_ratio);
+	Point3 lookfrom(3, 3, 2);
+	Point3 lookat(0, 0, -1);
+	Vec3 vup(0, 1, 0);
+	// 设置相机垂直fov
+	const double vfov = 30;
+	// 计算想要对焦的物体的距离
+	auto dist_to_focus = (lookfrom - lookat).length();
+	// 光圈大小
+	double aperture = 1.0;
+	Camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus);
 
 	// 测试输出, 保存在图片"test.ppm"中
 	renderImage(image_width, image_height, cam, scene, sample_times, max_depth);
