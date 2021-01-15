@@ -19,12 +19,12 @@
 - [x] **Chapter10** 玻璃等材质的透射效果
 - [x] **Chapter11** 可调整的相机
 - [x] **Chapter12** 焦散效果
-- [ ] **Chapter13** 最终场景
+- [x] **Chapter13** 最终场景
 - [ ] 阅读书上内容, 搞明白折射方程
 - [ ] 阅读书上内容, 搞明白Schlick近似
 
 **现状:**
 
-![Result](doc/Chapter12_result.jpg)
+![Result](doc/Chapter13_result.jpg)
 
 ## Ray Tracing

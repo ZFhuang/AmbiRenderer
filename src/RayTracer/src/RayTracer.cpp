@@ -8,44 +8,30 @@
 
 int run_RayTracer() {
 	// 设置图像宽度和宽高比
-	const double aspect_ratio = 16.0 / 9.0;
+	const double aspect_ratio = 3.0 / 2.0;
 	const int image_width = 720;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
-	const int sample_times = 40;
+	const int sample_times = 300;
 	// 光线的反弹次数
-	const int max_depth = 10;
-
-	// 设置需要用的几个对象材质指针
-	auto material_ground = make_shared<Metal>(Color(0.7, 0.7, 0.7), 0.3);
-	auto material_center = make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
-	// 正常的折射效果
-	auto material_left = make_shared<Dielectric>(1.5);
-	// 金属球
-	auto material_right = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0);
+	const int max_depth = 40;
 
 	// 设置场景对象
-	HittableList scene;
-	scene.add(make_shared<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
-	scene.add(make_shared<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
-	// 这里左边放了两个玻璃球, 一个正面一个反面, 反面的玻璃球可以得到中空玻璃的效果
-	scene.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
-	scene.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), -0.45, material_left));
-	scene.add(make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
+	HittableList scene = random_scene();
 
 	// 开始帧计时
 	auto startTime = std::chrono::system_clock::now();
 
 	// 设置相机参数
-	Point3 lookfrom(3, 3, 2);
-	Point3 lookat(0, 0, -1);
+	Point3 lookfrom(13, 2, 3);
+	Point3 lookat(0, 0, 0);
 	Vec3 vup(0, 1, 0);
 	// 设置相机垂直fov
-	const double vfov = 30;
+	const double vfov = 20;
 	// 计算想要对焦的物体的距离
-	auto dist_to_focus = (lookfrom - lookat).length();
+	auto dist_to_focus = 10.0;
 	// 光圈大小
-	double aperture = 1.0;
+	double aperture = 0.1;
 	Camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus);
 
 	// 测试输出, 保存在图片"test.ppm"中
@@ -67,7 +53,8 @@ int renderImage(int image_width, int image_height, Camera cam, HittableList scen
 
 	// 注意图片是从上往下, 从左往右绘制的
 	for (int j = image_height - 1; j >= 0; --j) {
-		std::clog << "\rScanlines remaining: " << j << ' ' << std::flush;
+		std::clog << "\rScanlines remaining: " << j << ";  ";
+		auto line_startTime = std::chrono::system_clock::now();
 		for (int i = 0; i < image_width; ++i) {
 			// 计算这个像素射线计算应该着色的颜色
 			Color pixel(0, 0, 0);
@@ -86,6 +73,11 @@ int renderImage(int image_width, int image_height, Camera cam, HittableList scen
 			// 写入颜色到图片的像素, 内部对像素值进行了裁剪
 			write_color(std::cout, pixel, sampleTimes);
 		}
+		// 结束行计时, 输出剩余时间
+		auto line_endTime = std::chrono::system_clock::now();
+		std::clog << "Scanlines remaining: "
+			<< std::chrono::duration_cast<std::chrono::milliseconds>(line_endTime - line_startTime).count() / 60000.0 * j
+			<< " min" << std::flush;
 	}
 	std::clog << "\nDone." << std::endl;
 	return 0;
@@ -119,6 +111,73 @@ Color ray_color(const Ray& r, const HittableList& scene, int depth) {
 	// 因此y的变化并不是均匀的, 而是会表现出弧线的性质. 权重从0.5到1
 	auto s = 0.5 * (unit_direction.y() + 1.0);
 	return (1.0 - s) * Color(1.0, 1.0, 1.0) + s * Color(0.5, 0.7, 1.0);
+}
+
+HittableList test_scene() {
+	// 设置需要用的几个对象材质指针
+	auto material_ground = make_shared<Metal>(Color(0.7, 0.7, 0.7), 0.3);
+	auto material_center = make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
+	// 正常的折射效果
+	auto material_left = make_shared<Dielectric>(1.5);
+	// 金属球
+	auto material_right = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0);
+
+	HittableList scene;
+	scene.add(make_shared<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
+	scene.add(make_shared<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
+	// 这里左边放了两个玻璃球, 一个正面一个反面, 反面的玻璃球可以得到中空玻璃的效果
+	scene.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
+	scene.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), -0.45, material_left));
+	scene.add(make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
+	return scene;
+}
+
+HittableList random_scene() {
+	HittableList scene;
+
+	auto ground_mat = make_shared<Metal>(Color(0.5, 0.5, 0.5), 0.3);
+	scene.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, ground_mat));
+
+	for (int a = -11; a < 11; a++) {
+		for (int b = -11; b < 11; b++) {
+			auto choose_mat = random_double();
+			Point3 center(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
+
+			if ((center - Point3(4, 0.2, 0)).length() > 0.9) {
+				shared_ptr<Material> sphere_mat;
+
+				if (choose_mat < 0.7) {
+					// 大部分是漫反射lambertian
+					auto albedo = Color::random() * Color::random();
+					sphere_mat = make_shared<Lambertian>(albedo);
+					scene.add(make_shared<Sphere>(center, 0.2, sphere_mat));
+				}
+				else if (choose_mat < 0.9) {
+					// 少部分反射metal
+					auto albedo = Color::random(0.5, 1);
+					auto fuzz = random_double(0, 0.5);
+					sphere_mat = make_shared<Metal>(albedo, fuzz);
+					scene.add(make_shared<Sphere>(center, 0.2, sphere_mat));
+				}
+				else {
+					// 更少部分折射dielect
+					sphere_mat = make_shared<Dielectric>(1.5);
+					scene.add(make_shared<Sphere>(center, 0.2, sphere_mat));
+				}
+			}
+		}
+	}
+
+	auto material_center = make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
+	auto material_right = make_shared<Dielectric>(1.5);
+	auto material_left = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0);
+
+	scene.add(make_shared<Sphere>(Point3(0.0, 1.0, 0), 1, material_center));
+	scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), 1, material_right));
+	scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), -0.9, material_right));
+	scene.add(make_shared<Sphere>(Point3(-4.0, 1.0, 0), 1, material_left));
+
+	return scene;
 }
 
 int testImage(int image_width, int image_height) {
