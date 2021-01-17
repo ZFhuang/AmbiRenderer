@@ -1,7 +1,7 @@
 ﻿# AmbiRenderer
 #### 施工中的玩具渲染器
 
-#### *Here is my rendering playground*
+#### *Hey! Here is my rendering playground!*
 
 ## In progress...
 
@@ -20,11 +20,18 @@
 - [x] **Chapter11** 可调整的相机
 - [x] **Chapter12** 焦散效果
 - [x] **Chapter13** 最终场景
-- [ ] 阅读书上内容, 搞明白折射方程
-- [ ] 阅读书上内容, 搞明白Schlick近似
+- [x] 阅读书上内容, 搞明白折射方程
+- [x] 阅读书上内容, 搞明白Schlick近似
 
 **现状:**
 
 ![Result](doc/Chapter13_result.jpg)
 
-## Ray Tracing
+### 软光追渲染器
+
+- [ ] 学习imgui的写法
+- [ ] 加入简单图形界面
+- [ ] 实现层次超采样
+- [ ] 实现三角网格模型的读取和渲染
+- [ ] 实现多线程处理
+- [ ] 实现透明材质吸收率的设置
