@@ -1,0 +1,641 @@
+﻿// dear imgui: standalone example application for DirectX 12
+// If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
+// FIXME: 64-bit only for now! (Because sizeof(ImTextureId) == sizeof(void*))
+
+#include "lib/imgui.h"
+#include "lib/imgui_impl_win32.h"
+#include "lib/imgui_impl_dx12.h"
+#include "Gui_core.hpp"
+#include <d3d12.h>
+#include <dxgi1_4.h>
+#include <tchar.h>
+
+#ifdef _DEBUG
+#define DX12_ENABLE_DEBUG_LAYER
+#endif
+
+#ifdef DX12_ENABLE_DEBUG_LAYER
+#include <dxgidebug.h>
+#pragma comment(lib, "dxguid.lib")
+#endif
+
+struct FrameContext
+{
+	ID3D12CommandAllocator* CommandAllocator;
+	UINT64                  FenceValue;
+};
+
+// Data
+static int const                    NUM_FRAMES_IN_FLIGHT = 3;
+static FrameContext                 g_frameContext[NUM_FRAMES_IN_FLIGHT] = {};
+static UINT                         g_frameIndex = 0;
+
+static int const                    NUM_BACK_BUFFERS = 3;
+static ID3D12Device* g_pd3dDevice = NULL;
+static ID3D12DescriptorHeap* g_pd3dRtvDescHeap = NULL;
+static ID3D12DescriptorHeap* g_pd3dSrvDescHeap = NULL;
+static ID3D12CommandQueue* g_pd3dCommandQueue = NULL;
+static ID3D12GraphicsCommandList* g_pd3dCommandList = NULL;
+static ID3D12Fence* g_fence = NULL;
+static HANDLE                       g_fenceEvent = NULL;
+static UINT64                       g_fenceLastSignaledValue = 0;
+static IDXGISwapChain3* g_pSwapChain = NULL;
+static HANDLE                       g_hSwapChainWaitableObject = NULL;
+static ID3D12Resource* g_mainRenderTargetResource[NUM_BACK_BUFFERS] = {};
+static D3D12_CPU_DESCRIPTOR_HANDLE  g_mainRenderTargetDescriptor[NUM_BACK_BUFFERS] = {};
+
+// Forward declarations of helper functions
+bool CreateDeviceD3D(HWND hWnd);
+void CleanupDeviceD3D();
+void CreateRenderTarget();
+void CleanupRenderTarget();
+void WaitForLastSubmittedFrame();
+FrameContext* WaitForNextFrameResources();
+void ResizeSwapChain(HWND hWnd, int width, int height);
+LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+bool LoadTextureFromFile(const char* filename, ID3D12Device* d3d_device, D3D12_CPU_DESCRIPTOR_HANDLE srv_cpu_handle, ID3D12Resource** out_tex_resource, int* out_width, int* out_height);
+
+// Main code
+int gui_main(int, char**)
+{
+	// Create application window
+	//ImGui_ImplWin32_EnableDpiAwareness();
+	WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
+	::RegisterClassEx(&wc);
+	HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Dear ImGui DirectX12 Example"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+
+	// Initialize Direct3D
+	if (!CreateDeviceD3D(hwnd))
+	{
+		CleanupDeviceD3D();
+		::UnregisterClass(wc.lpszClassName, wc.hInstance);
+		return 1;
+	}
+
+	// Show the window
+	::ShowWindow(hwnd, SW_SHOWDEFAULT);
+	::UpdateWindow(hwnd);
+
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsClassic();
+
+	// Setup Platform/Renderer bindings
+	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplDX12_Init(g_pd3dDevice, NUM_FRAMES_IN_FLIGHT,
+		DXGI_FORMAT_R8G8B8A8_UNORM, g_pd3dSrvDescHeap,
+		g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart(),
+		g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart());
+
+	// Load Fonts
+	// - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+	// - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
+	// - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+	// - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
+	// - Read 'docs/FONTS.md' for more instructions and details.
+	// - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
+	//io.Fonts->AddFontDefault();
+	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
+	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+	//IM_ASSERT(font != NULL);
+
+	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	// We need to pass a D3D12_CPU_DESCRIPTOR_HANDLE in ImTextureID, so make sure it will fit
+	static_assert(sizeof(ImTextureID) >= sizeof(D3D12_CPU_DESCRIPTOR_HANDLE), "D3D12_CPU_DESCRIPTOR_HANDLE is too large to fit in an ImTextureID");
+
+	// We presume here that we have our D3D device pointer in g_pd3dDevice
+
+	int my_image_width = 0;
+	int my_image_height = 0;
+	ID3D12Resource* my_texture = NULL;
+
+	// Get CPU/GPU handles for the shader resource view
+	// Normally your engine will have some sort of allocator for these - here we assume that there's an SRV descriptor heap in
+	// g_pd3dSrvDescHeap with at least two descriptors allocated, and descriptor 1 is unused
+	UINT handle_increment = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	int descriptor_index = 1; // The descriptor table index to use (not normally a hard-coded constant, but in this case we'll assume we have slot 1 reserved for us)
+	D3D12_CPU_DESCRIPTOR_HANDLE my_texture_srv_cpu_handle = g_pd3dSrvDescHeap->GetCPUDescriptorHandleForHeapStart();
+	my_texture_srv_cpu_handle.ptr += (handle_increment * descriptor_index);
+	D3D12_GPU_DESCRIPTOR_HANDLE my_texture_srv_gpu_handle = g_pd3dSrvDescHeap->GetGPUDescriptorHandleForHeapStart();
+	my_texture_srv_gpu_handle.ptr += (handle_increment * descriptor_index);
+
+	// Main loop
+	MSG msg;
+	ZeroMemory(&msg, sizeof(msg));
+	// 主循环
+	while (msg.message != WM_QUIT)
+	{
+		// Poll and handle messages (inputs, window resize, etc.)
+		// You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+		// - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+		// - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+		// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+		if (::PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
+		{
+			::TranslateMessage(&msg);
+			::DispatchMessage(&msg);
+			continue;
+		}
+
+		// Start the Dear ImGui frame
+		ImGui_ImplDX12_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+
+		// 绘制UI部分
+		gui_core();
+
+		// 绘制渲染出来的图像部分
+		{
+			ImGui::Begin("DirectX12 Texture Test");
+			//ImGui::Text("CPU handle = %p", my_texture_srv_cpu_handle.ptr);
+			//ImGui::Text("GPU handle = %p", my_texture_srv_gpu_handle.ptr);
+			//ImGui::Text("size = %d x %d", my_image_width, my_image_height);
+			ImGui::SetWindowPos(ImVec2(350, 0));
+			ImGui::SetWindowSize(ImVec2(900, 750));
+			// Load the texture from a file
+			// 读取图像
+			bool ret = LoadTextureFromFile("test.jpg", g_pd3dDevice, my_texture_srv_cpu_handle, &my_texture, &my_image_width, &my_image_height);
+			IM_ASSERT(ret);
+			// Note that we pass the GPU SRV handle here, *not* the CPU handle. We're passing the internal pointer value, cast to an ImTextureID
+			ImGui::Image((ImTextureID)my_texture_srv_gpu_handle.ptr, ImVec2((float)900, (float)750));
+			ImGui::End();
+		}
+
+		// Rendering
+		FrameContext* frameCtxt = WaitForNextFrameResources();
+		UINT backBufferIdx = g_pSwapChain->GetCurrentBackBufferIndex();
+		frameCtxt->CommandAllocator->Reset();
+
+		D3D12_RESOURCE_BARRIER barrier = {};
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		barrier.Transition.pResource = g_mainRenderTargetResource[backBufferIdx];
+		barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+
+		g_pd3dCommandList->Reset(frameCtxt->CommandAllocator, NULL);
+		g_pd3dCommandList->ResourceBarrier(1, &barrier);
+		// 刷新窗口
+		g_pd3dCommandList->ClearRenderTargetView(g_mainRenderTargetDescriptor[backBufferIdx], (float*)&clear_color, 0, NULL);
+		g_pd3dCommandList->OMSetRenderTargets(1, &g_mainRenderTargetDescriptor[backBufferIdx], FALSE, NULL);
+		g_pd3dCommandList->SetDescriptorHeaps(1, &g_pd3dSrvDescHeap);
+		ImGui::Render();
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), g_pd3dCommandList);
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+		g_pd3dCommandList->ResourceBarrier(1, &barrier);
+		g_pd3dCommandList->Close();
+
+		g_pd3dCommandQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&g_pd3dCommandList);
+
+		g_pSwapChain->Present(1, 0); // Present with vsync
+		//g_pSwapChain->Present(0, 0); // Present without vsync
+
+		UINT64 fenceValue = g_fenceLastSignaledValue + 1;
+		g_pd3dCommandQueue->Signal(g_fence, fenceValue);
+		g_fenceLastSignaledValue = fenceValue;
+		frameCtxt->FenceValue = fenceValue;
+	}
+
+	WaitForLastSubmittedFrame();
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
+	CleanupDeviceD3D();
+	::DestroyWindow(hwnd);
+	::UnregisterClass(wc.lpszClassName, wc.hInstance);
+
+	return 0;
+}
+
+// Helper functions
+
+bool CreateDeviceD3D(HWND hWnd)
+{
+	// Setup swap chain
+	DXGI_SWAP_CHAIN_DESC1 sd;
+	{
+		ZeroMemory(&sd, sizeof(sd));
+		sd.BufferCount = NUM_BACK_BUFFERS;
+		sd.Width = 0;
+		sd.Height = 0;
+		sd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		sd.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sd.SampleDesc.Count = 1;
+		sd.SampleDesc.Quality = 0;
+		sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+		sd.Scaling = DXGI_SCALING_STRETCH;
+		sd.Stereo = FALSE;
+	}
+
+	// [DEBUG] Enable debug interface
+#ifdef DX12_ENABLE_DEBUG_LAYER
+	ID3D12Debug* pdx12Debug = NULL;
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&pdx12Debug))))
+		pdx12Debug->EnableDebugLayer();
+#endif
+
+	// Create device
+	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
+	if (D3D12CreateDevice(NULL, featureLevel, IID_PPV_ARGS(&g_pd3dDevice)) != S_OK)
+		return false;
+
+	// [DEBUG] Setup debug interface to break on any warnings/errors
+#ifdef DX12_ENABLE_DEBUG_LAYER
+	if (pdx12Debug != NULL)
+	{
+		ID3D12InfoQueue* pInfoQueue = NULL;
+		g_pd3dDevice->QueryInterface(IID_PPV_ARGS(&pInfoQueue));
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+		pInfoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+		pInfoQueue->Release();
+		pdx12Debug->Release();
+	}
+#endif
+
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		desc.NumDescriptors = NUM_BACK_BUFFERS;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		desc.NodeMask = 1;
+		if (g_pd3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&g_pd3dRtvDescHeap)) != S_OK)
+			return false;
+
+		SIZE_T rtvDescriptorSize = g_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = g_pd3dRtvDescHeap->GetCPUDescriptorHandleForHeapStart();
+		for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
+		{
+			g_mainRenderTargetDescriptor[i] = rtvHandle;
+			rtvHandle.ptr += rtvDescriptorSize;
+		}
+	}
+
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		desc.NumDescriptors = 1;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		if (g_pd3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&g_pd3dSrvDescHeap)) != S_OK)
+			return false;
+	}
+
+	{
+		D3D12_COMMAND_QUEUE_DESC desc = {};
+		desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+		desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+		desc.NodeMask = 1;
+		if (g_pd3dDevice->CreateCommandQueue(&desc, IID_PPV_ARGS(&g_pd3dCommandQueue)) != S_OK)
+			return false;
+	}
+
+	for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; i++)
+		if (g_pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&g_frameContext[i].CommandAllocator)) != S_OK)
+			return false;
+
+	if (g_pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, g_frameContext[0].CommandAllocator, NULL, IID_PPV_ARGS(&g_pd3dCommandList)) != S_OK ||
+		g_pd3dCommandList->Close() != S_OK)
+		return false;
+
+	if (g_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&g_fence)) != S_OK)
+		return false;
+
+	g_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (g_fenceEvent == NULL)
+		return false;
+
+	{
+		IDXGIFactory4* dxgiFactory = NULL;
+		IDXGISwapChain1* swapChain1 = NULL;
+		if (CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory)) != S_OK ||
+			dxgiFactory->CreateSwapChainForHwnd(g_pd3dCommandQueue, hWnd, &sd, NULL, NULL, &swapChain1) != S_OK ||
+			swapChain1->QueryInterface(IID_PPV_ARGS(&g_pSwapChain)) != S_OK)
+			return false;
+		swapChain1->Release();
+		dxgiFactory->Release();
+		g_pSwapChain->SetMaximumFrameLatency(NUM_BACK_BUFFERS);
+		g_hSwapChainWaitableObject = g_pSwapChain->GetFrameLatencyWaitableObject();
+	}
+
+	CreateRenderTarget();
+	return true;
+}
+
+void CleanupDeviceD3D()
+{
+	CleanupRenderTarget();
+	if (g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = NULL; }
+	if (g_hSwapChainWaitableObject != NULL) { CloseHandle(g_hSwapChainWaitableObject); }
+	for (UINT i = 0; i < NUM_FRAMES_IN_FLIGHT; i++)
+		if (g_frameContext[i].CommandAllocator) { g_frameContext[i].CommandAllocator->Release(); g_frameContext[i].CommandAllocator = NULL; }
+	if (g_pd3dCommandQueue) { g_pd3dCommandQueue->Release(); g_pd3dCommandQueue = NULL; }
+	if (g_pd3dCommandList) { g_pd3dCommandList->Release(); g_pd3dCommandList = NULL; }
+	if (g_pd3dRtvDescHeap) { g_pd3dRtvDescHeap->Release(); g_pd3dRtvDescHeap = NULL; }
+	if (g_pd3dSrvDescHeap) { g_pd3dSrvDescHeap->Release(); g_pd3dSrvDescHeap = NULL; }
+	if (g_fence) { g_fence->Release(); g_fence = NULL; }
+	if (g_fenceEvent) { CloseHandle(g_fenceEvent); g_fenceEvent = NULL; }
+	if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = NULL; }
+
+#ifdef DX12_ENABLE_DEBUG_LAYER
+	IDXGIDebug1* pDebug = NULL;
+	if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&pDebug))))
+	{
+		pDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_SUMMARY);
+		pDebug->Release();
+	}
+#endif
+}
+
+void CreateRenderTarget()
+{
+	for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
+	{
+		ID3D12Resource* pBackBuffer = NULL;
+		g_pSwapChain->GetBuffer(i, IID_PPV_ARGS(&pBackBuffer));
+		g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, g_mainRenderTargetDescriptor[i]);
+		g_mainRenderTargetResource[i] = pBackBuffer;
+	}
+}
+
+void CleanupRenderTarget()
+{
+	WaitForLastSubmittedFrame();
+
+	for (UINT i = 0; i < NUM_BACK_BUFFERS; i++)
+		if (g_mainRenderTargetResource[i]) { g_mainRenderTargetResource[i]->Release(); g_mainRenderTargetResource[i] = NULL; }
+}
+
+void WaitForLastSubmittedFrame()
+{
+	FrameContext* frameCtxt = &g_frameContext[g_frameIndex % NUM_FRAMES_IN_FLIGHT];
+
+	UINT64 fenceValue = frameCtxt->FenceValue;
+	if (fenceValue == 0)
+		return; // No fence was signaled
+
+	frameCtxt->FenceValue = 0;
+	if (g_fence->GetCompletedValue() >= fenceValue)
+		return;
+
+	g_fence->SetEventOnCompletion(fenceValue, g_fenceEvent);
+	WaitForSingleObject(g_fenceEvent, INFINITE);
+}
+
+FrameContext* WaitForNextFrameResources()
+{
+	UINT nextFrameIndex = g_frameIndex + 1;
+	g_frameIndex = nextFrameIndex;
+
+	HANDLE waitableObjects[] = { g_hSwapChainWaitableObject, NULL };
+	DWORD numWaitableObjects = 1;
+
+	FrameContext* frameCtxt = &g_frameContext[nextFrameIndex % NUM_FRAMES_IN_FLIGHT];
+	UINT64 fenceValue = frameCtxt->FenceValue;
+	if (fenceValue != 0) // means no fence was signaled
+	{
+		frameCtxt->FenceValue = 0;
+		g_fence->SetEventOnCompletion(fenceValue, g_fenceEvent);
+		waitableObjects[1] = g_fenceEvent;
+		numWaitableObjects = 2;
+	}
+
+	WaitForMultipleObjects(numWaitableObjects, waitableObjects, TRUE, INFINITE);
+
+	return frameCtxt;
+}
+
+void ResizeSwapChain(HWND hWnd, int width, int height)
+{
+	DXGI_SWAP_CHAIN_DESC1 sd;
+	g_pSwapChain->GetDesc1(&sd);
+	sd.Width = width;
+	sd.Height = height;
+
+	IDXGIFactory4* dxgiFactory = NULL;
+	g_pSwapChain->GetParent(IID_PPV_ARGS(&dxgiFactory));
+
+	g_pSwapChain->Release();
+	CloseHandle(g_hSwapChainWaitableObject);
+
+	IDXGISwapChain1* swapChain1 = NULL;
+	dxgiFactory->CreateSwapChainForHwnd(g_pd3dCommandQueue, hWnd, &sd, NULL, NULL, &swapChain1);
+	swapChain1->QueryInterface(IID_PPV_ARGS(&g_pSwapChain));
+	swapChain1->Release();
+	dxgiFactory->Release();
+
+	g_pSwapChain->SetMaximumFrameLatency(NUM_BACK_BUFFERS);
+
+	g_hSwapChainWaitableObject = g_pSwapChain->GetFrameLatencyWaitableObject();
+	assert(g_hSwapChainWaitableObject != NULL);
+}
+
+// Forward declare message handler from imgui_impl_win32.cpp
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+// Win32 message handler
+LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+		return true;
+
+	switch (msg)
+	{
+	case WM_SIZE:
+		if (g_pd3dDevice != NULL && wParam != SIZE_MINIMIZED)
+		{
+			WaitForLastSubmittedFrame();
+			ImGui_ImplDX12_InvalidateDeviceObjects();
+			CleanupRenderTarget();
+			ResizeSwapChain(hWnd, (UINT)LOWORD(lParam), (UINT)HIWORD(lParam));
+			CreateRenderTarget();
+			ImGui_ImplDX12_CreateDeviceObjects();
+		}
+		return 0;
+	case WM_SYSCOMMAND:
+		if ((wParam & 0xfff0) == SC_KEYMENU) // Disable ALT application menu
+			return 0;
+		break;
+	case WM_DESTROY:
+		::PostQuitMessage(0);
+		return 0;
+	}
+	return ::DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+// 读取图片的样例函数
+// Simple helper function to load an image into a DX12 texture with common settings
+// Returns true on success, with the SRV CPU handle having an SRV for the newly-created texture placed in it (srv_cpu_handle must be a handle in a valid descriptor heap)
+#define STB_IMAGE_IMPLEMENTATION
+#include "lib/stb_image.h"
+bool LoadTextureFromFile(const char* filename, ID3D12Device* d3d_device, D3D12_CPU_DESCRIPTOR_HANDLE srv_cpu_handle, ID3D12Resource** out_tex_resource, int* out_width, int* out_height)
+{
+	// Load from disk into a raw RGBA buffer
+	int image_width = 0;
+	int image_height = 0;
+	unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+	if (image_data == NULL)
+		return false;
+
+	// Create texture resource
+	D3D12_HEAP_PROPERTIES props;
+	memset(&props, 0, sizeof(D3D12_HEAP_PROPERTIES));
+	props.Type = D3D12_HEAP_TYPE_DEFAULT;
+	props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+	D3D12_RESOURCE_DESC desc;
+	ZeroMemory(&desc, sizeof(desc));
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	desc.Alignment = 0;
+	desc.Width = image_width;
+	desc.Height = image_height;
+	desc.DepthOrArraySize = 1;
+	desc.MipLevels = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+	ID3D12Resource* pTexture = NULL;
+	d3d_device->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+		D3D12_RESOURCE_STATE_COPY_DEST, NULL, IID_PPV_ARGS(&pTexture));
+
+	// Create a temporary upload resource to move the data in
+	UINT uploadPitch = (image_width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+	UINT uploadSize = image_height * uploadPitch;
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	desc.Alignment = 0;
+	desc.Width = uploadSize;
+	desc.Height = 1;
+	desc.DepthOrArraySize = 1;
+	desc.MipLevels = 1;
+	desc.Format = DXGI_FORMAT_UNKNOWN;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality = 0;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+	props.Type = D3D12_HEAP_TYPE_UPLOAD;
+	props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	props.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+	ID3D12Resource* uploadBuffer = NULL;
+	HRESULT hr = d3d_device->CreateCommittedResource(&props, D3D12_HEAP_FLAG_NONE, &desc,
+		D3D12_RESOURCE_STATE_GENERIC_READ, NULL, IID_PPV_ARGS(&uploadBuffer));
+	IM_ASSERT(SUCCEEDED(hr));
+
+	// Write pixels into the upload resource
+	void* mapped = NULL;
+	D3D12_RANGE range = { 0, uploadSize };
+	hr = uploadBuffer->Map(0, &range, &mapped);
+	IM_ASSERT(SUCCEEDED(hr));
+	for (int y = 0; y < image_height; y++)
+		memcpy((void*)((uintptr_t)mapped + y * uploadPitch), image_data + y * image_width * 4, image_width * 4);
+	uploadBuffer->Unmap(0, &range);
+
+	// Copy the upload resource content into the real resource
+	D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
+	srcLocation.pResource = uploadBuffer;
+	srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+	srcLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srcLocation.PlacedFootprint.Footprint.Width = image_width;
+	srcLocation.PlacedFootprint.Footprint.Height = image_height;
+	srcLocation.PlacedFootprint.Footprint.Depth = 1;
+	srcLocation.PlacedFootprint.Footprint.RowPitch = uploadPitch;
+
+	D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
+	dstLocation.pResource = pTexture;
+	dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+	dstLocation.SubresourceIndex = 0;
+
+	D3D12_RESOURCE_BARRIER barrier = {};
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = pTexture;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+
+	// Create a temporary command queue to do the copy with
+	ID3D12Fence* fence = NULL;
+	hr = d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	IM_ASSERT(SUCCEEDED(hr));
+
+	HANDLE event = CreateEvent(0, 0, 0, 0);
+	IM_ASSERT(event != NULL);
+
+	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	queueDesc.NodeMask = 1;
+
+	ID3D12CommandQueue* cmdQueue = NULL;
+	hr = d3d_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&cmdQueue));
+	IM_ASSERT(SUCCEEDED(hr));
+
+	ID3D12CommandAllocator* cmdAlloc = NULL;
+	hr = d3d_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdAlloc));
+	IM_ASSERT(SUCCEEDED(hr));
+
+	ID3D12GraphicsCommandList* cmdList = NULL;
+	hr = d3d_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, cmdAlloc, NULL, IID_PPV_ARGS(&cmdList));
+	IM_ASSERT(SUCCEEDED(hr));
+
+	cmdList->CopyTextureRegion(&dstLocation, 0, 0, 0, &srcLocation, NULL);
+	cmdList->ResourceBarrier(1, &barrier);
+
+	hr = cmdList->Close();
+	IM_ASSERT(SUCCEEDED(hr));
+
+	// Execute the copy
+	cmdQueue->ExecuteCommandLists(1, (ID3D12CommandList* const*)&cmdList);
+	hr = cmdQueue->Signal(fence, 1);
+	IM_ASSERT(SUCCEEDED(hr));
+
+	// Wait for everything to complete
+	fence->SetEventOnCompletion(1, event);
+	WaitForSingleObject(event, INFINITE);
+
+	// Tear down our temporary command queue and release the upload resource
+	cmdList->Release();
+	cmdAlloc->Release();
+	cmdQueue->Release();
+	CloseHandle(event);
+	fence->Release();
+	uploadBuffer->Release();
+
+	// Create a shader resource view for the texture
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	ZeroMemory(&srvDesc, sizeof(srvDesc));
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MipLevels = desc.MipLevels;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	d3d_device->CreateShaderResourceView(pTexture, &srvDesc, srv_cpu_handle);
+
+	// Return results
+	*out_tex_resource = pTexture;
+	*out_width = image_width;
+	*out_height = image_height;
+	stbi_image_free(image_data);
+
+	return true;
+}
