@@ -14,7 +14,9 @@ public:
 		double fov_vertical,
 		double aspect_ratio,
 		double aperture, // 光圈大小, 0的时候是完美渲染, 越大则越虚
-		double focus_dist // 像距
+		double focus_dist, // 像距
+		double _time0 = 0,	// 相机记录此次快门打开的时间
+		double _time1 = 0	// 快门关闭的时间
 	) {
 		// fov是视平面范围, 改变fov调整视平面的大小, 这个参数和焦长是可以互相抵消的
 		// 实际上就是假定焦长为1.0时, 上下边与相机中心形成的角度
@@ -47,20 +49,20 @@ public:
 		lower_left_corner = origin - horizontal / 2 - vertical / 2 - focus_dist * w;
 		// 光圈半径
 		lens_radius = aperture / 2;
+		time0 = _time0;
+		time1 = _time1;
 	}
 
 	// 输入视图的(0-1)比例, 返回相机射出的射线
 	Ray getRay(double s, double t) const {
-		if (lens_radius > 0) {
-			// 光圈不为0时, 在光圈圆盘上随机采样点作为新的成像点, 用那个点成像
-			// 因此光圈越大, 成像越不准确(模糊)
-			Vec3 offset;
-			// 由于随机数是在(-1,1)取值, 因此需要用除二的半径来当倍率
-			Vec3 rd = lens_radius * random_in_unit_disk();
-			offset = u * rd.x() + v * rd.y();
-			return Ray(origin + offset, lower_left_corner + s * horizontal + t * vertical - origin - offset);
-		}
-		return Ray(origin, lower_left_corner + s * horizontal + t * vertical - origin);
+		// 光圈不为0时, 在光圈圆盘上随机采样点作为新的成像点, 用那个点成像
+		// 因此光圈越大, 成像越不准确(模糊)
+		Vec3 offset;
+		// 由于随机数是在(-1,1)取值, 因此需要用除二的半径来当倍率
+		Vec3 rd = lens_radius * random_in_unit_disk();
+		offset = u * rd.x() + v * rd.y();
+		// 加入时间因素
+		return Ray(origin + offset, lower_left_corner + s * horizontal + t * vertical - origin - offset, random_double(time0, time1));
 	}
 
 private:
@@ -71,4 +73,8 @@ private:
 	Vec3 u, v, w;
 	// 光圈半径
 	double lens_radius;
+	// 快门打开的时间点
+	double time0;
+	// 快门关闭的时间点
+	double time1;
 };

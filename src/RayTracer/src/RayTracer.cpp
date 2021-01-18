@@ -3,16 +3,17 @@
 
 #include "RayTracer.hpp"
 #include "Sphere.hpp"
+#include "MovingSphere.hpp"
 #include "Color.hpp"
 #include "Material.hpp"
 
 int run_RayTracer() {
 	// 设置图像宽度和宽高比
 	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 2560;
+	const int image_width = 720;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
-	const int sample_times = 100;
+	const int sample_times = 10;
 	// 光线的反弹次数
 	const int max_depth = 40;
 
@@ -32,7 +33,8 @@ int run_RayTracer() {
 	auto dist_to_focus = 10.0;
 	// 光圈大小
 	double aperture = 0.1;
-	Camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus);
+	// 为了计算动态模糊, 相机也要在最后加上快门的开闭时间
+	Camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
 	// 测试输出, 保存在图片"test.ppm"中
 	renderImage(image_width, image_height, cam, scene, sample_times, max_depth);
@@ -53,32 +55,21 @@ int renderImage(int image_width, int image_height, Camera cam, HittableList scen
 
 	// 注意图片是从上往下, 从左往右绘制的
 	for (int j = image_height - 1; j >= 0; --j) {
-		std::clog << "\rProcessing: " << static_cast<double>(j)/ image_height*100 << "%;  ";
+		std::clog << "\rProcessing: " << static_cast<double>(image_height - j) / image_height * 100 << "%;  ";
 		auto line_startTime = std::chrono::system_clock::now();
 		for (int i = 0; i < image_width; ++i) {
 			// 计算这个像素射线计算应该着色的颜色
 			Color pixel(0, 0, 0);
-			if (sampleTimes == 1) {
-				// 没有超采样的时候, 不要增加扰动
-				double u = (static_cast<double>(i)) / (image_width - 1);
-				double v = (static_cast<double>(j)) / (image_height - 1);
+			// 进行超采样反走样, 也就是对每个像素都进行一点扰动然后采样多次来平均
+			for (int k = 0; k < sampleTimes; ++k) {
+				// 计算出当前像素映射到0-1之中的比例
+				// 对每个像素索引随机扰动(0 - 1)从而让生成的射线在一个像素内有所变化, 达到超采样的效果
+				double u = (static_cast<double>(i) + random_double()) / (image_width - 1);
+				double v = (static_cast<double>(j) + random_double()) / (image_height - 1);
 				// 利用这个比例计算对应到视平面的位置, 与相机原点相减就得到对应像素的视角射线向量
 				Ray r = cam.getRay(u, v);
 				// 累加这个像素着色的颜色
 				pixel += ray_color(r, scene, max_depth);
-			}
-			else {
-				// 进行超采样反走样, 也就是对每个像素都进行一点扰动然后采样多次来平均
-				for (int k = 0; k < sampleTimes; ++k) {
-					// 计算出当前像素映射到0-1之中的比例
-					// 对每个像素索引随机扰动(0 - 1)从而让生成的射线在一个像素内有所变化, 达到超采样的效果
-					double u = (static_cast<double>(i) + random_double()) / (image_width - 1);
-					double v = (static_cast<double>(j) + random_double()) / (image_height - 1);
-					// 利用这个比例计算对应到视平面的位置, 与相机原点相减就得到对应像素的视角射线向量
-					Ray r = cam.getRay(u, v);
-					// 累加这个像素着色的颜色
-					pixel += ray_color(r, scene, max_depth);
-				}
 			}
 			// 写入颜色到图片的像素, 内部对像素值进行了裁剪
 			write_color(std::cout, pixel, sampleTimes);
@@ -87,7 +78,7 @@ int renderImage(int image_width, int image_height, Camera cam, HittableList scen
 		auto line_endTime = std::chrono::system_clock::now();
 		std::clog << "Scantime remaining: "
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(line_endTime - line_startTime).count() / 60000.0 * j
-			<< " min" << std::flush;
+			<< " min                  " << std::flush;
 	}
 	std::clog << "\nDone." << std::endl;
 	return 0;
@@ -160,7 +151,11 @@ HittableList random_scene() {
 					// 大部分是漫反射lambertian
 					auto albedo = Color::random() * Color::random();
 					sphere_mat = make_shared<Lambertian>(albedo);
-					scene.add(make_shared<Sphere>(center, 0.2, sphere_mat));
+					// 在场景里给漫反射物体加上运动来渲染动态模糊
+					// 计算目标位置
+					auto center2 = center + Vec3(0, random_double(0, 0.5), 0);
+					// 加入运动的持续时间
+					scene.add(make_shared<MovingSphere>(center, center2, 0.0, 1.0, 0.2, sphere_mat));
 				}
 				else if (choose_mat < 0.9) {
 					// 少部分反射metal

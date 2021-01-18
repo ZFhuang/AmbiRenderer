@@ -9,8 +9,8 @@ bool Lambertian::scatter(const Ray& in, const HitRecord& rec, Color& attenuation
 		// 散射新向量很接近零向量时, 直接从法线方向散射
 		scatter_direction = rec.normal;
 	}
-	// 返回新射线
-	scattered = Ray(rec.p, scatter_direction);
+	// 返回新射线, 记得要考虑时间
+	scattered = Ray(rec.p, scatter_direction, in.time());
 	// 应用反照率
 	attenuation = albedo;
 	return true;
@@ -19,8 +19,8 @@ bool Lambertian::scatter(const Ray& in, const HitRecord& rec, Color& attenuation
 bool Metal::scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const {
 	// 镜面反射得到新的散射方向
 	Vec3 reflected = reflect(unit_vector(in.direction()), rec.normal);
-	// 返回新射线, 除了镜面反射外, 通过参数控制模糊程度, 给反射加上随机扰动
-	scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere());
+	// 返回新射线, 除了镜面反射外, 通过参数控制模糊程度, 给反射加上随机扰动, 要考虑时间
+	scattered = Ray(rec.p, reflected + fuzz * random_in_unit_sphere(), in.time());
 	// 应用反照率
 	attenuation = albedo;
 	// 只有当反射角度和法线同侧时才认为正确反射了, 否则认为是从背面进入的射线, 不计算
@@ -50,8 +50,8 @@ bool Dielectric::scatter(const Ray& in, const HitRecord& rec, Color& attenuation
 		// 折射
 		direction = refract(unit_direction, rec.normal, refraction_ratio);
 	}
-	// 返回新射线
-	scattered = Ray(rec.p, direction);
+	// 返回新射线, 要考虑时间
+	scattered = Ray(rec.p, direction, in.time());
 	return true;
 }
 

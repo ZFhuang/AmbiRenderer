@@ -9,7 +9,7 @@
 
 ### Ray Tracing The Next Week学习
 
-- [ ] **Chapter2** 动态模糊效果
+- [x] **Chapter2** 动态模糊效果
 - [ ] **Chapter3** 层次包围盒
 - [ ] **Chapter4** 实体纹理
 - [ ] **Chapter5** Perlin噪声
@@ -21,4 +21,4 @@
 
 **现状:**
 
-![Result](doc/Chapter13_result.jpg)
+![Result](doc/Ray_Tracing_The_Next_Week/Chapter2.jpg)
