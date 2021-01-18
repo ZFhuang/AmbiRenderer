@@ -7,7 +7,6 @@ set(IMGUI_FILES
 	 "lib/imgui.h"
 	 "lib/imgui_demo.cpp"
 	 "lib/imgui_draw.cpp"
-     "dx12example_main.cpp"
 	 "lib/imgui_impl_dx12.cpp"
 	 "lib/imgui_impl_dx12.h"
 	 "lib/imgui_impl_win32.cpp"
@@ -17,6 +16,11 @@ set(IMGUI_FILES
 	 "lib/imstb_rectpack.h"
 	 "lib/imstb_textedit.h"
 	 "lib/imstb_truetype.h"
+	 "lib/stb_image.h"
+	 "dx12example_main.cpp"
+	 "Gui_main.cpp"
+	 "Gui_core.cpp"
+	 "Gui_core.hpp"
 	 )
 
 #  π”√æ≤Ã¨¡¥Ω”
