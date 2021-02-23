@@ -31,6 +31,10 @@ inline double random_double(double min = 0.0, double max = 1.0) {
 	return min + (max - min) * distribution(generator);
 }
 
+inline int random_int(int min = 0, int max = 1) {
+	return static_cast<int>(random_double(min, max + 1));
+}
+
 // 按照min和max对值进行截断
 inline double clamp(double x, double min, double max) {
 	if (x < min) {

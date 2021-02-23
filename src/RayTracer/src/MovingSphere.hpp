@@ -11,6 +11,7 @@ public:
 		:center0(cen0), center1(cen1), time0(_time0), time1(_time1), radius(r), mat_ptr(mat) {}
 
 	virtual bool hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const override;
+	virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;
 	Point3 center(double t) const;
 
 	Point3 center0, center1;

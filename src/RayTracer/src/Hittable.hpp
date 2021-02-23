@@ -2,6 +2,7 @@
 
 #include "Ray.hpp"
 #include "Material.hpp"
+#include "AABB.hpp"
 #include <memory>
 
 using std::shared_ptr;
@@ -40,4 +41,7 @@ public:
 	// 这里判断命中用到的是min, max区间, 这能让我们对后来的代码进行进一步优化
 	// 传递Hit_record用来记录发生的命中
 	virtual bool hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const = 0;
+	// 返回可命中物体的包围盒, 这个最小包围盒是用来协助场景层次包围盒的
+	// 有time参数得以处理动态模糊效果, 部分物体返回false代表无需包围盒
+	virtual bool bounding_box(double time0, double time1, AABB& output_box) const = 0;
 };

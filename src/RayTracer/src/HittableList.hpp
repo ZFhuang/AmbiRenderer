@@ -24,4 +24,5 @@ public:
 	std::vector<shared_ptr<Hittable>> objects;
 	// 同样继承了虚函数判断是否命中
 	virtual bool hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const override;
+	virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;
 };

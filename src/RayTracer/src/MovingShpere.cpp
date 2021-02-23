@@ -34,3 +34,17 @@ bool MovingSphere::hit(const Ray& r, double s_min, double s_max, HitRecord& rec)
 
 	return true;
 }
+
+// 球的包围盒, 盒的对角顶点就是以圆心为重心, 半径为距离的点
+bool MovingSphere::bounding_box(double time0, double time1, AABB& output_box) const {
+	AABB start_box(
+		center(time0) - Vec3(radius, radius, radius),
+		center(time0) + Vec3(radius, radius, radius)
+	);
+	AABB end_box(
+		center(time1) - Vec3(radius, radius, radius),
+		center(time1) + Vec3(radius, radius, radius)
+	);
+	output_box = surrounding_box(start_box, end_box);
+	return true;
+}

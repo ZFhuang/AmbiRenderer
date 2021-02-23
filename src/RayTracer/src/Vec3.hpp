@@ -70,7 +70,6 @@ public:
 		return  (fabs(e[0] < s) && fabs(e[1] < s) && fabs(e[2] < s));
 	}
 
-private:
 	// 储存向量值的数组
 	double e[3];
 };
