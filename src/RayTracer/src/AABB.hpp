@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 #include "Vec3.hpp"
 #include "Ray.hpp"
 
 class AABB {
 public:
 	AABB() {}
-	// ·½ºĞ, ×î´óµãºÍ×îĞ¡µã
+	// æ–¹ç›’, æœ€å¤§ç‚¹å’Œæœ€å°ç‚¹
 	AABB(const Point3& minp, const Point3& maxp) {
 		minimum = minp;
 		maximum = maxp;
@@ -19,22 +19,22 @@ public:
 		return maximum;
 	}
 
-	// ÅĞ¶Ïµ±Ç°ÉäÏßÊÇ·ñÃüÖĞµ±Ç°°üÎ§ºĞ, ÖØµãÊÇĞèÒªÉäÏßÔÚÈı¸öÖáÉÏ¶¼ÓĞÖØµşOverlap²¿·Ö, ¼û2-P16
-	bool hit(const Ray& r, double t_min, double t_max) const {
-		// ¶Ôx, y, z
+	// åˆ¤æ–­å½“å‰å°„çº¿æ˜¯å¦å‘½ä¸­å½“å‰åŒ…å›´ç›’, é‡ç‚¹æ˜¯éœ€è¦å°„çº¿åœ¨ä¸‰ä¸ªè½´ä¸Šéƒ½æœ‰é‡å Overlapéƒ¨åˆ†, è§2-P16
+	inline bool hit(const Ray& r, double t_min, double t_max) const {
+		// å¯¹x, y, z
 		for (int a = 0; a < 3; ++a) {
-			// ¼õÉÙ³ı·¨ÔËËãµÄÓÅ»¯Ğ´·¨
-			auto invD=1.0f/ r.direction()[a];
-			auto t0 = (minimum[a] - r.origin()[a]) * invD;
-			auto t1 = (maximum[a] - r.origin()[a]) * invD;
+			// å‡å°‘é™¤æ³•è¿ç®—çš„ä¼˜åŒ–å†™æ³•
+			auto invD = 1.0f / r.direction()[a];
+			auto t0 = (min()[a] - r.origin()[a]) * invD;
+			auto t1 = (max()[a] - r.origin()[a]) * invD;
 			if (invD < 0.0f)
 				std::swap(t0, t1);
-			// ÕâÒ»²½ÓÃÓÚ¸üĞÂµ±Ç°µÄÖØµş²¿·Ö, Ëæ×ÅÅĞ¶ÏµÄÖá±ä¶à, t_minºÍt_max»áÔ½À´Ô½½Ó½ü
-			// ÓÃÈıÔªÔËËã·û´úÌæmin¼ÆËã»òÕßif¼ÆËã
-			t_min = t0>t_min?t0:t_min;
-			t_max = t1 > t_max ? t1 : t_max;
-			// Èô»¥Ïà³¬¹ıÔòËµÃ÷ÓĞÒ»Öá²»ÖØµşÁË
-			if (t_max <= t_min) 
+			// è¿™ä¸€æ­¥ç”¨äºæ›´æ–°å½“å‰çš„é‡å éƒ¨åˆ†, éšç€åˆ¤æ–­çš„è½´å˜å¤š, t_minå’Œt_maxä¼šè¶Šæ¥è¶Šæ¥è¿‘
+			// ç”¨ä¸‰å…ƒè¿ç®—ç¬¦ä»£æ›¿minè®¡ç®—æˆ–è€…ifè®¡ç®—
+			t_min = t0 > t_min ? t0 : t_min;
+			t_max = t1 < t_max ? t1 : t_max;
+			// è‹¥äº’ç›¸è¶…è¿‡åˆ™è¯´æ˜æœ‰ä¸€è½´ä¸é‡å äº†
+			if (t_max <= t_min)
 				return false;
 		}
 		return true;
@@ -44,5 +44,5 @@ public:
 	Point3 maximum;
 };
 
-// ´ÓÁ½¸ö°üÎ§ºĞÖĞ·µ»ØÄÜ¹»ÈİÄÉÁ½¸öºĞµÄ×îĞ¡°üÎ§ºĞ
+// ä»ä¸¤ä¸ªåŒ…å›´ç›’ä¸­è¿”å›èƒ½å¤Ÿå®¹çº³ä¸¤ä¸ªç›’çš„æœ€å°åŒ…å›´ç›’
 AABB surrounding_box(AABB a, AABB b);

@@ -11,15 +11,17 @@
 int run_RayTracer() {
 	// 设置图像宽度和宽高比
 	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 560;
+	const int image_width = 2560;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
-	const int sample_times = 100;
+	const int sample_times = 40;
 	// 光线的反弹次数
 	const int max_depth = 50;
 
 	// 设置场景对象
-	HittableList scene = test_scene();
+	HittableList objs = random_scene();
+	// 应用BVH加速, 用当前场景对象初始化BVH树, 为什么反而是减速
+	HittableList scene(make_shared<BVH_Node>(objs, 0, 1));
 
 	// 开始帧计时
 	auto startTime = std::chrono::system_clock::now();
@@ -180,31 +182,9 @@ HittableList random_scene() {
 
 	scene.add(make_shared<Sphere>(Point3(0.0, 1.0, 0), 1, material_center));
 	scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), 1, material_right));
-	scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), -0.9, material_right));
+	//scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), -0.9, material_right));
 	scene.add(make_shared<Sphere>(Point3(-4.0, 1.0, 0), 1, material_left));
 
-	return scene;
-}
-
-HittableList bvh_scene()
-{
-	// 设置需要用的几个对象材质指针
-	auto material_ground = make_shared<Metal>(Color(0.7, 0.7, 0.7), 0.3);
-	auto material_center = make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
-	// 正常的折射效果
-	auto material_left = make_shared<Dielectric>(1.5);
-	// 金属球
-	auto material_right = make_shared<Metal>(Color(0.9, 0.9, 0.9), 0);
-
-	HittableList objs;
-	objs.add(make_shared<Sphere>(Point3(0.0, -100.5, -1.0), 100.0, material_ground));
-	objs.add(make_shared<Sphere>(Point3(0.0, 0.0, -1.0), 0.5, material_center));
-	// 这里左边放了两个玻璃球, 一个正面一个反面, 反面的玻璃球可以得到中空玻璃的效果
-	objs.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), 0.5, material_left));
-	objs.add(make_shared<Sphere>(Point3(-1.0, 0.0, -1.0), -0.45, material_left));
-	objs.add(make_shared<Sphere>(Point3(1.0, 0.0, -1.0), 0.5, material_right));
-	HittableList scene;
-	scene.add(make_shared<BVH_Node>(objs, 0, 1));
 	return scene;
 }
 

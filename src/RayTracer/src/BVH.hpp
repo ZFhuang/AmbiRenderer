@@ -1,21 +1,21 @@
-#pragma once
+ï»¿#pragma once
 
 //#include "RTweekend.hpp"
 #include "Hittable.hpp"
 #include "HittableList.hpp"
 
-// ²ã´Î°üÎ§ºĞ½áµã, Êµ¼ÊÉÏ¾ÍÊÇ¶ş²æÊ÷½á¹¹
+// å±‚æ¬¡åŒ…å›´ç›’ç»“ç‚¹, å®é™…ä¸Šå°±æ˜¯äºŒå‰æ ‘ç»“æ„
 class BVH_Node :public Hittable {
 public:
 	BVH_Node();
-	BVH_Node(const HittableList& list, double time0, double time1) :BVH_Node(list.objects,0,list.objects.size(),time0,time1){}
+	BVH_Node(const HittableList& list, double time0, double time1) :BVH_Node(list.objects, 0, list.objects.size(), time0, time1) {}
 	BVH_Node(
 		const std::vector<shared_ptr<Hittable>>& src_objects,
 		size_t start,
 		size_t end,
 		double time0,
 		double time1
-		);
+	);
 	virtual bool hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const override;
 	virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;
 
@@ -25,8 +25,8 @@ private:
 	AABB box;
 };
 
-// ±È½ÏÆ÷, ÓÃÀ´¸øsortº¯ÊıÊ¹ÓÃ, ±È½ÏÁ½¸ö°üÎ§ºĞÔÚÖáÏòÉÏµÄ×ø±ê
+// æ¯”è¾ƒå™¨, ç”¨æ¥ç»™sortå‡½æ•°ä½¿ç”¨, æ¯”è¾ƒä¸¤ä¸ªåŒ…å›´ç›’åœ¨è½´å‘ä¸Šçš„åæ ‡
 inline bool box_compare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b, int axis);
-bool box_x_compare(const shared_ptr<Hittable> a, shared_ptr<Hittable> b);
-bool box_y_compare(const shared_ptr<Hittable> a, shared_ptr<Hittable> b);
-bool box_z_compare(const shared_ptr<Hittable> a, shared_ptr<Hittable> b);
+inline bool box_x_compare(const shared_ptr<Hittable> a, shared_ptr<Hittable> b);
+inline bool box_y_compare(const shared_ptr<Hittable> a, shared_ptr<Hittable> b);
+inline bool box_z_compare(const shared_ptr<Hittable> a, shared_ptr<Hittable> b);

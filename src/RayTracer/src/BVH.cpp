@@ -1,27 +1,27 @@
-#include "BVH.hpp"
+ï»¿#include "BVH.hpp"
 #include <algorithm>
 
-// ½¨Ê÷, ×î¹Ø¼üµÄÒ»²½, ÕâÊÇÒ»¸öµİ¹éº¯Êı
+// å»ºæ ‘, æœ€å…³é”®çš„ä¸€æ­¥, è¿™æ˜¯ä¸€ä¸ªé€’å½’å‡½æ•°
 BVH_Node::BVH_Node(const std::vector<shared_ptr<Hittable>>& src_objects, size_t start, size_t end, double time0, double time1)
 {
-	// »ñµÃÒ»¸öÃ»ÓĞconstµÄµ±Ç°¶ÔÏó±í
+	// è·å¾—ä¸€ä¸ªæ²¡æœ‰constçš„å½“å‰å¯¹è±¡è¡¨
 	auto objects = src_objects;
 
-	// Ëæ»úÌôÑ¡Ò»¸öÇĞ·Ö¿Õ¼äµÄ×ø±êÖá
+	// éšæœºæŒ‘é€‰ä¸€ä¸ªåˆ‡åˆ†ç©ºé—´çš„åæ ‡è½´
 	int axis = random_int(0, 2);
-	// »ñµÃ¶ÔÓ¦µÄÖá±È½ÏµÄº¯ÊıÖ¸Õë
+	// è·å¾—å¯¹åº”çš„è½´æ¯”è¾ƒçš„å‡½æ•°æŒ‡é’ˆ
 	auto comparator = (axis == 0) ? &box_x_compare
 		: (axis == 1) ? &box_y_compare
 		: &box_z_compare;
-	// ¶ÔÏóµÄÊıÁ¿
+	// å½“å‰ç»“ç‚¹ä¸‹æ–¹æ‰€å‰©å¯¹è±¡çš„æ•°é‡
 	size_t object_span = end - start;
 
 	if (object_span == 1) {
-		// Ö»ÓĞÒ»¸ö¶ÔÏóÊ±, Ö¸ÕëÏàÍ¬
+		// åªæœ‰ä¸€ä¸ªæ—¶, æ˜¯å¶å­,æŒ‡é’ˆç›¸åŒ, æŒ‡é’ˆæŒ‡å‘å¯¹è±¡æœ¬èº«
 		left = right = objects[start];
 	}
 	else if (object_span == 2) {
-		// Á½¸öÊ±, ±È½ÏÖáÏòÎ»ÖÃ, Ğ¡×ó´óÓÒ
+		// ä¸¤ä¸ªæ—¶, æ˜¯å¶å­, æ¯”è¾ƒè½´å‘ä½ç½®, å°å·¦å¤§å³, æŒ‡é’ˆæŒ‡å‘å¯¹è±¡æœ¬èº«
 		if (comparator(objects[start], objects[start + 1])) {
 			left = objects[start];
 			right = objects[start + 1];
@@ -32,11 +32,11 @@ BVH_Node::BVH_Node(const std::vector<shared_ptr<Hittable>>& src_objects, size_t 
 		}
 	}
 	else {
-		// ¶à¸öÊ±, ÏÈ¶ÔÎïÌå°´ÕÕ¶ÔÓ¦µÄÖá½øĞĞÅÅĞò
+		// å¤šä¸ªæ—¶, å…ˆå¯¹ç‰©ä½“æŒ‰ç…§å¯¹åº”çš„è½´è¿›è¡Œæ’åº
 		std::sort(objects.begin() + start, objects.begin() + end, comparator);
-		// ÕÒµ½ĞòºÅÔÚÖĞ¼äµÄÎïÌå
+		// æ‰¾åˆ°åºå·åœ¨ä¸­é—´çš„ç‰©ä½“
 		auto mid = start + object_span / 2;
-		// ×óÓÒµİ¹é½¨Ê÷
+		// å·¦å³é€’å½’å»ºæ ‘,, æŒ‡é’ˆæŒ‡å‘ä¸‹ä¸€ä¸ªæ ‘ç»“ç‚¹
 		left = make_shared<BVH_Node>(objects, start, mid, time0, time1);
 		right = make_shared<BVH_Node>(objects, mid, end, time0, time1);
 	}
@@ -46,25 +46,26 @@ BVH_Node::BVH_Node(const std::vector<shared_ptr<Hittable>>& src_objects, size_t 
 		std::cerr << "No bounding box in bvh_node constructor.\n";
 	}
 
-	// ×îºó½«µ±Ç°½áµãµÄ×îĞ¡°üÎ§ºĞĞ´Èë´ú±íµ±Ç°½áµã°üÎ§ºĞµÄbox
+	// æœ€åå°†å½“å‰ç»“ç‚¹çš„æœ€å°åŒ…å›´ç›’å†™å…¥ä»£è¡¨å½“å‰ç»“ç‚¹åŒ…å›´ç›’çš„box
 	box = surrounding_box(box_left, box_right);
 }
 
-// ºÍ¶ş²æÊ÷Ò»Ñù, ÀûÓÃhitÓë·ñÀ´×óÓÒ±éÀú
-bool BVH_Node::hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const
+// å’ŒäºŒå‰æ ‘ä¸€æ ·, åˆ©ç”¨hitä¸å¦æ¥å·¦å³éå†
+inline bool BVH_Node::hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const
 {
 	if (!box.hit(r, s_min, s_max)) {
 		return false;
 	}
 
 	bool hit_left = left->hit(r, s_min, s_max, rec);
-	bool hit_right = right->hit(r, s_min, s_max, rec);
+	// å½“å·¦hitæ—¶, å³è¾¹å¿…é¡»è¿‘äºå·¦, å¦åˆ™ä»ç„¶é‡‡ç”¨max
+	bool hit_right = right->hit(r, s_min, hit_left ? rec.s : s_max, rec);
 
 	return hit_left || hit_right;
 }
 
-// ·µ»Øµ±Ç°½áµãµÄbox
-bool BVH_Node::bounding_box(double time0, double time1, AABB& output_box) const
+// è¿”å›å½“å‰ç»“ç‚¹çš„box
+inline bool BVH_Node::bounding_box(double time0, double time1, AABB& output_box) const
 {
 	output_box = box;
 	return true;
@@ -74,24 +75,25 @@ inline bool box_compare(const shared_ptr<Hittable> a, const shared_ptr<Hittable>
 {
 	AABB box_a;
 	AABB box_b;
+	// è·å¾—å„è‡ªçš„åŒ…å›´ç›’
 	if (!a->bounding_box(0, 0, box_a) || !b->bounding_box(0, 0, box_b)) {
 		std::cerr << "No bounding box in bvh_node constructor.\n";
 	}
-	// ±È½ÏÁ½¸ö°üÎ§ºĞÔÚÖáÏòÉÏµÄ×îĞ¡Öµ
+	// æ¯”è¾ƒä¸¤ä¸ªåŒ…å›´ç›’åœ¨è½´å‘ä¸Šçš„æœ€å°å€¼
 	return box_a.min().e[axis] < box_b.min().e[axis];
 }
 
-bool box_x_compare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b)
+inline bool box_x_compare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b)
 {
 	return box_compare(a, b, 0);
 }
 
-bool box_y_compare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b)
+inline bool box_y_compare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b)
 {
 	return box_compare(a, b, 1);
 }
 
-bool box_z_compare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b)
+inline bool box_z_compare(const shared_ptr<Hittable> a, const shared_ptr<Hittable> b)
 {
 	return box_compare(a, b, 2);
 }

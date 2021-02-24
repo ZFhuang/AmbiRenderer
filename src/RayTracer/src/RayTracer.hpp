@@ -17,7 +17,5 @@ Color ray_color(const Ray& r, const HittableList& scene, int depth);
 HittableList test_scene();
 // 生成随机球场景
 HittableList random_scene();
-// 生成BVH测试场景
-HittableList bvh_scene();
 // 测试输出颜色到图片
 int testImage(int image_width, int image_height);
