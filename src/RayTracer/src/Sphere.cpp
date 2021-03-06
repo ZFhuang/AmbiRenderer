@@ -41,6 +41,7 @@ bool Sphere::hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const
 	Vec3 out_normal = (rec.p - center) / radius;
 	// 自动设定正确法线和命中内外的属性
 	rec.set_face_normal(r, out_normal);
+	get_sphere_uv(out_normal, rec.u, rec.v);
 	rec.mat_ptr = mat_ptr;
 
 	return true;

@@ -3,6 +3,7 @@
 #include "Ray.hpp"
 #include "Vec3.hpp"
 #include "Hittable.hpp"
+#include "Texture.hpp"
 
 // 前置声明
 struct HitRecord;
@@ -18,13 +19,14 @@ public:
 class Lambertian : public Material
 {
 public:
-	Lambertian(const Color& albedo) :albedo(albedo) {}
+	Lambertian(const Color& a) :albedo(make_shared<SolidColor>(a)) {}
+	Lambertian(shared_ptr<SolidColor> a):albedo(a){}
 
 	// 控制射线在对象上的散射效果
 	virtual bool scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const override;
 
-	// 反照率, 控制光线能量吸收强度
-	Color albedo;
+	// 反照的材质颜色
+	shared_ptr<SolidColor> albedo;
 };
 
 // 金属反射材质

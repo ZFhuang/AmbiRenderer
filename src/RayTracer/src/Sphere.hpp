@@ -15,4 +15,13 @@ public:
 	Point3 center;
 	double radius;
 	shared_ptr<Material> mat_ptr;
+
+private:
+	static void get_sphere_uv(const Point3& p, double& u, double& v) {
+		// 球坐标系公式, 从表面的法线转二维点, 直接修改引用来返回
+		auto theta = acos(-p.y());
+		auto phi = atan2(-p.z(), p.x()) + pi;
+		u = phi / (2 * pi);
+		v = theta / pi;
+	}
 };

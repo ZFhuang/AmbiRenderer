@@ -12,7 +12,7 @@ bool Lambertian::scatter(const Ray& in, const HitRecord& rec, Color& attenuation
 	// 返回新射线, 记得要考虑时间
 	scattered = Ray(rec.p, scatter_direction, in.time());
 	// 应用反照率
-	attenuation = albedo;
+	attenuation = albedo->color_value(rec.u,rec.v,rec.p);
 	return true;
 }
 

@@ -19,6 +19,9 @@ struct HitRecord
 	Vec3 normal;
 	// 命中时射线的长度比例
 	double s;
+	// 二维参数表面的坐标
+	double u;
+	double v;
 	// 是否命中的是正面
 	bool front_face;
 	// 对命中对象材质的标志指针

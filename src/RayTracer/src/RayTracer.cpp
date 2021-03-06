@@ -7,11 +7,12 @@
 #include "Color.hpp"
 #include "Material.hpp"
 #include "BVH.hpp"
+#include "Texture.hpp"
 
 int run_RayTracer() {
 	// 设置图像宽度和宽高比
 	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 2560;
+	const int image_width = 256;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
 	const int sample_times = 40;
@@ -19,23 +20,42 @@ int run_RayTracer() {
 	const int max_depth = 50;
 
 	// 设置场景对象
-	HittableList objs = random_scene();
-	// 应用BVH加速, 用当前场景对象初始化BVH树, 为什么反而是减速
-	HittableList scene(make_shared<BVH_Node>(objs, 0, 1));
+	HittableList scene;
+	Point3 lookfrom;
+	Point3 lookat;
+	// 设置相机垂直fov
+	double vfov;
+	// 光圈大小
+	double aperture;
+	switch (1)
+	{
+	case 1:
+		// 应用BVH加速, 用当前场景对象初始化BVH树
+		scene= HittableList(make_shared<BVH_Node>(random_scene(), 0, 1));
+		// 设置相机参数
+		lookfrom = Point3(13, 2, 3);
+		lookat = Point3(0, 0, 0);
+		vfov = 20.0;
+		aperture = 0.1;
+		break;
+	case 2:
+		scene = HittableList(make_shared<BVH_Node>(test_scene(), 0, 1));
+		lookfrom = Point3(13, 2, 3);
+		lookat = Point3(0, 0, 0);
+		vfov = 20.0;
+		aperture = 0.1;
+		break;
+	default:
+		break;
+	}
 
 	// 开始帧计时
 	auto startTime = std::chrono::system_clock::now();
 
-	// 设置相机参数
-	Point3 lookfrom(13, 2, 3);
-	Point3 lookat(0, 0, 0);
 	Vec3 vup(0, 1, 0);
-	// 设置相机垂直fov
-	const double vfov = 20;
 	// 计算想要对焦的物体的距离
 	auto dist_to_focus = 10.0;
-	// 光圈大小
-	double aperture = 0.1;
+
 	// 为了计算动态模糊, 相机也要在最后加上快门的开闭时间
 	Camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
@@ -139,8 +159,9 @@ HittableList test_scene() {
 HittableList random_scene() {
 	HittableList scene;
 
-	auto ground_mat = make_shared<Metal>(Color(0.5, 0.5, 0.5), 0.3);
-	scene.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, ground_mat));
+	// 地面使用棋盘格实体纹理
+	auto ground_mat = make_shared<CheckerTexture>(Color(0.5, 0.5, 0.5), Color(0.9,0.9,0.9));
+	scene.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, make_shared<Lambertian>(ground_mat)));
 
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
