@@ -135,7 +135,8 @@ inline Vec3 unit_vector(const Vec3& v) {
 	return v / v.length();
 }
 
-// 用来模拟漫反射的随机向量, 在单位圆内随机分布, 直接使用的话会使得分布比较集中于中心
+// 用来模拟漫反射的随机向量, 在单位[-1,1]球内随机分布
+// 如果不单位化直接使用的话和法向量叠加后的强度不均匀
 inline Vec3 random_in_unit_sphere() {
 	// 反复生成
 	while (true) {
@@ -148,8 +149,7 @@ inline Vec3 random_in_unit_sphere() {
 	}
 }
 
-// 真正的理想漫反射方程是在法线半球上改变而不是叠加分量, 主要问题在于叠加分量的话会导致
-// 反射光溢出, 能量超过cos. 正确的做法就是直接在半球上采样然后使用
+// 在球上随机取点, 并按照法线方向进行返回, 因此可以将[-1,1]转为[0,2], 强度均匀
 inline Vec3 random_in_hemisphere(const Vec3& normal) {
 	Vec3 in_unit_sphere = random_in_unit_sphere();
 	if (dot(in_unit_sphere, normal) > 0.0) {
@@ -160,8 +160,7 @@ inline Vec3 random_in_hemisphere(const Vec3& normal) {
 	}
 }
 
-// 将用来模拟漫反射的单位圆随机向量单位向量化, 也就是只取圆上的点了, 让向量分布更加均匀
-// 可想像一下, 单位化后一个切线球上的采样效果类似于一个切半球, 且是均匀分布的
+// 将用来模拟漫反射的单位圆随机向量单位向量化, 强度均匀, 返回后和法向量相加从而将[-1,1]转为[0,2]
 inline Vec3 random_unit_vector() {
 	return unit_vector(random_in_unit_sphere());
 }

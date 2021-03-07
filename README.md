@@ -23,3 +23,7 @@
 **现状:**
 
 ![Result](doc/Ray_Tracing_The_Next_Week/Chapter4.jpg)
+
+## Notes
+
+["Ray Tracing: In One Weekend" Notes](./doc/Notes/Ray%20Tracing%20In%20One%20Weekend/README.md)

@@ -1,9 +1,11 @@
 ﻿#include "Material.hpp"
 
 bool Lambertian::scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const {
-	// 随机得到新的散射方向, 正确的漫反射
+	// 错误的漫反射, 向量没有进行归一化, 尽管散射方向也是集中在法线附近, 但是强度不一
+	//auto scatter_direction = rec.normal + random_in_unit_sphere();
+	// 归一化得到正确的漫反射, 方向也是集中于法线, 但是强度是均匀的, 这里要注意
 	auto scatter_direction = rec.normal + random_unit_vector();
-	// 半球漫反射, 是一种不太好的早期漫反射近似, 反射与法线方向无关, 由此得到的阴影比较淡
+	// 半球漫反射, 与上面是等价的
 	//auto scatter_direction = random_in_hemisphere(rec.normal);
 	if (scatter_direction.near_zero()) {
 		// 散射新向量很接近零向量时, 直接从法线方向散射
@@ -12,7 +14,7 @@ bool Lambertian::scatter(const Ray& in, const HitRecord& rec, Color& attenuation
 	// 返回新射线, 记得要考虑时间
 	scattered = Ray(rec.p, scatter_direction, in.time());
 	// 应用反照率
-	attenuation = albedo->color_value(rec.u,rec.v,rec.p);
+	attenuation = albedo->value(rec.u,rec.v,rec.p);
 	return true;
 }
 
