@@ -12,7 +12,7 @@
 - [x] **Chapter2** 动态模糊效果
 - [x] **Chapter3** 层次包围盒
 - [x] **Chapter4** 实体纹理
-- [ ] **Chapter5** Perlin噪声
+- [x] **Chapter5** Perlin噪声
 - [ ] **Chapter6** 图片纹理映射
 - [ ] **Chapter7** 立方体与光照
 - [ ] **Chapter8** 实例
@@ -22,7 +22,7 @@
 
 **现状:**
 
-![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter4.jpg)
+![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter5.jpg)
 
 ## Notes
 

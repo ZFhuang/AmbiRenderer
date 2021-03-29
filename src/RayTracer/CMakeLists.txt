@@ -18,7 +18,7 @@ set(RAYTRACER_FILES
 	 "src/HittableList.hpp"
 	 "include/HittableList.hpp"
 	 "src/RTweekend.hpp"
-	  "include/RTweekend.hpp" "src/Camera.hpp" "include/Camera.hpp" "src/HittableList.cpp" "src/Sphere.cpp" "src/Material.hpp" "src/Material.cpp" "include/Material.hpp" "src/MovingSphere.hpp" "src/MovingShpere.cpp" "src/AABB.hpp" "src/BVH.hpp" "src/BVH.cpp" "src/AABB.cpp" "src/Texture.hpp")
+	  "include/RTweekend.hpp" "src/Camera.hpp" "include/Camera.hpp" "src/HittableList.cpp" "src/Sphere.cpp" "src/Material.hpp" "src/Material.cpp" "include/Material.hpp" "src/MovingSphere.hpp" "src/MovingShpere.cpp" "src/AABB.hpp" "src/BVH.hpp" "src/BVH.cpp" "src/AABB.cpp" "src/Texture.hpp" "src/Perlin.hpp")
 
 # 目前不知道为什么动态链接不能生产ilk文件, 所以使用了静态链接
 # 将上面的文件添加到库${target_name}中, 也就是RayTracer

@@ -12,10 +12,10 @@
 int run_RayTracer() {
 	// 设置图像宽度和宽高比
 	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 256;
+	const int image_width = 1920;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
-	const int sample_times = 40;
+	const int sample_times = 100;
 	// 光线的反弹次数
 	const int max_depth = 50;
 
@@ -27,7 +27,7 @@ int run_RayTracer() {
 	double vfov;
 	// 光圈大小
 	double aperture;
-	switch (1)
+	switch (3)
 	{
 	case 1:
 		// 应用BVH加速, 用当前场景对象初始化BVH树
@@ -45,6 +45,12 @@ int run_RayTracer() {
 		vfov = 20.0;
 		aperture = 0.1;
 		break;
+	case 3:
+		scene=HittableList(make_shared<BVH_Node>(two_perlin_scene(), 0, 1));
+		lookfrom = Point3(13, 2, 3);
+		lookat = Point3(0, 0, 0);
+		vfov = 20.0;
+		aperture = 0.1;
 	default:
 		break;
 	}
@@ -57,7 +63,7 @@ int run_RayTracer() {
 	auto dist_to_focus = 10.0;
 
 	// 为了计算动态模糊, 相机也要在最后加上快门的开闭时间
-	Camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
+	Camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, dist_to_focus, aperture, 0.0, 1.0);
 
 	// 测试输出, 保存在图片"test.ppm"中
 	renderImage(image_width, image_height, cam, scene, sample_times, max_depth);
@@ -206,6 +212,18 @@ HittableList random_scene() {
 	//scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), -0.9, material_right));
 	scene.add(make_shared<Sphere>(Point3(-4.0, 1.0, 0), 1, material_left));
 
+	return scene;
+}
+
+HittableList two_perlin_scene()
+{
+	HittableList scene;
+
+	auto perlin_texture = make_shared<PerlinNoiseTexture>(4);
+	auto ground_mat = make_shared<CheckerTexture>(Color(0.5, 0.5, 0.5), Color(0.9, 0.9, 0.9));
+	// 这里Perlin噪声作为漫反射纹理应用
+	scene.add(make_shared<Sphere>(Point3(0, -1000, 0),1000,make_shared<Lambertian>(ground_mat)));
+	scene.add(make_shared<Sphere>(Point3(0, 2, 0), 2, make_shared<Lambertian>(perlin_texture)));
 	return scene;
 }
 

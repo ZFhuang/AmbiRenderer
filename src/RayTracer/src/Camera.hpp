@@ -13,8 +13,8 @@ public:
 		Vec3 vup,	// 设置相机朝上的方向, 实际上用来约束相机左右转动的方向
 		double fov_vertical,
 		double aspect_ratio,
-		double aperture, // 光圈大小, 0的时候是完美渲染, 越大则越虚
 		double focus_dist, // 像距
+		double aperture = 0, // 光圈大小, 0的时候是完美渲染, 越大则越虚
 		double _time0 = 0,	// 相机记录此次快门打开的时间
 		double _time1 = 0	// 快门关闭的时间
 	) {
