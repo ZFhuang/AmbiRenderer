@@ -12,7 +12,7 @@
 int run_RayTracer() {
 	// 设置图像宽度和宽高比
 	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 1920;
+	const int image_width = 192;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
 	const int sample_times = 100;
@@ -51,6 +51,11 @@ int run_RayTracer() {
 		lookat = Point3(0, 0, 0);
 		vfov = 20.0;
 		aperture = 0.1;
+	case 4:
+		scene = HittableList(make_shared<BVH_Node>(earth_scene(), 0, 1));
+		lookfrom = Point3(13, 2, 3);
+		lookat = Point3(0, 0, 0);
+		vfov = 20.0;
 	default:
 		break;
 	}
@@ -224,6 +229,15 @@ HittableList two_perlin_scene()
 	// 这里Perlin噪声作为漫反射纹理应用
 	scene.add(make_shared<Sphere>(Point3(0, -1000, 0),1000,make_shared<Lambertian>(ground_mat)));
 	scene.add(make_shared<Sphere>(Point3(0, 2, 0), 2, make_shared<Lambertian>(perlin_texture)));
+	return scene;
+}
+
+HittableList earth_scene()
+{
+	HittableList scene;
+
+	auto earth_texture = make_shared<ImageTexture>("../../Resources/earthmap.jpg");
+	scene.add(make_shared<Sphere>(Point3(0, 0, 0), 2, make_shared<Lambertian>(earth_texture)));
 	return scene;
 }
 

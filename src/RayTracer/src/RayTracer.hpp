@@ -19,5 +19,7 @@ HittableList test_scene();
 HittableList random_scene();
 // 生成大小球的柏林噪声场景
 HittableList two_perlin_scene();
+// 生成单地球场景
+HittableList earth_scene();
 // 测试输出颜色到图片
 int testImage(int image_width, int image_height);

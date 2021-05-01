@@ -20,13 +20,13 @@ class Lambertian : public Material
 {
 public:
 	Lambertian(const Color& a) :albedo(make_shared<SolidColor>(a)) {}
-	Lambertian(shared_ptr<SolidColor> a):albedo(a){}
+	Lambertian(shared_ptr<Texture> a):albedo(a){}
 
 	// 控制射线在对象上的散射效果
 	virtual bool scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const override;
 
 	// 反照的材质颜色
-	shared_ptr<SolidColor> albedo;
+	shared_ptr<Texture> albedo;
 };
 
 // 金属反射材质
