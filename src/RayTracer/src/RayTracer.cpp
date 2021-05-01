@@ -12,7 +12,7 @@
 int run_RayTracer() {
 	// 设置图像宽度和宽高比
 	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 192;
+	const int image_width = 1920;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
 	const int sample_times = 100;
@@ -235,8 +235,8 @@ HittableList two_perlin_scene()
 HittableList earth_scene()
 {
 	HittableList scene;
-
-	auto earth_texture = make_shared<ImageTexture>("../../Resources/earthmap.jpg");
+	// 暂时使用了绝对路径
+	auto earth_texture = make_shared<ImageTexture>("C:/Work/AmbiRenderer/src/Resources/earthmap.jpg");
 	scene.add(make_shared<Sphere>(Point3(0, 0, 0), 2, make_shared<Lambertian>(earth_texture)));
 	return scene;
 }

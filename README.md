@@ -13,7 +13,7 @@
 - [x] **Chapter3** 层次包围盒
 - [x] **Chapter4** 实体纹理
 - [x] **Chapter5** Perlin噪声
-- [ ] **Chapter6** 图片纹理映射
+- [x] **Chapter6** 图片纹理映射
 - [ ] **Chapter7** 立方体与光照
 - [ ] **Chapter8** 实例
 - [ ] **Chapter9** 体积雾
@@ -22,7 +22,7 @@
 
 **现状:**
 
-![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter5.jpg)
+![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter6.jpg)
 
 ## Notes
 
