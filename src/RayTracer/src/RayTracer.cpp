@@ -11,28 +11,26 @@
 #include "AArect.hpp"
 
 int run_RayTracer() {
-	// 设置图像宽度和宽高比
-	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 1280;
-	const int image_height = static_cast<int>(image_width / aspect_ratio);
-	// 反走样的超采样次数
-	const int sample_times = 100;
-	// 光线的反弹次数
-	const int max_depth = 50;
-
 	// 设置场景对象
 	HittableList scene;
 	Point3 lookfrom;
 	Point3 lookat;
 	// 设置相机垂直fov
-	double vfov;
+	double vfov = 20.0;
 	// 光圈大小
-	double aperture;
+	double aperture = 0.1;
 	// 背景色
 	Color background(0, 0, 0);
-	int scene_choose = 5;
-	aperture = 0.1;
-	vfov = 20.0;
+	// 图像宽高
+	double aspect_ratio = 16.0 / 9.0;
+	// 设置图像大小
+	int image_width = 800;
+	// 反走样的超采样次数
+	int sample_times = 200;
+	// 光线的反弹次数
+	int max_depth = 50;
+
+	int scene_choose = 6;
 	switch (scene_choose)
 	{
 	case 1:
@@ -62,16 +60,28 @@ int run_RayTracer() {
 		lookat = Point3(0, 0, 0);
 		break;
 	case 5:
-		//scene = simple_light_scene();
 		scene = HittableList(make_shared<BVH_Node>(simple_light_scene(), 0, 1));
 		background = Color(0, 0, 0);
 		lookfrom = Point3(26, 3, 6);
 		lookat = Point3(0, 2, 0);
 		break;
-	default:
+	case 6:
+		scene = HittableList(make_shared<BVH_Node>(comell_box_scene(), 0, 1));
+		aspect_ratio = 1, 0;
 		background = Color(0, 0, 0);
+		lookfrom = Point3(278, 278, -800);
+		lookat = Point3(278, 278, 0);
+		vfov = 40.0;
+		break;
+	default:
+		background = Color(1, 1, 1);
+		lookfrom = Point3(26, 3, 6);
+		lookat = Point3(0, 2, 0);
 		break;
 	}
+
+	// 计算图像尺寸
+	int image_height = static_cast<int>(image_width / aspect_ratio);
 
 	// 开始帧计时
 	auto startTime = std::chrono::system_clock::now();
@@ -257,11 +267,28 @@ HittableList simple_light_scene()
 	HittableList scene;
 	auto perlinTex = make_shared<PerlinNoiseTexture>(4);
 	// 场景两个球
-	scene.add(make_shared<Sphere>(Point3(0, -1000, 0),1000, make_shared<Lambertian>(perlinTex)));
+	scene.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, make_shared<Lambertian>(perlinTex)));
 	scene.add(make_shared<Sphere>(Point3(0, 2, 0), 2, make_shared<Lambertian>(perlinTex)));
 
 	// 光源材质传递给矩形, k是轴向距离, 注意光源设置的值比较大(比1大)为了让其经受住更多次反弹的削减
 	scene.add(make_shared<XY_Rect>(3, 5, 1, 3, -2, make_shared<DiffuseLight>(Color(4, 4, 4))));
+	return scene;
+}
+
+HittableList comell_box_scene()
+{
+	HittableList scene;
+	auto red = make_shared<Lambertian>(Color(0.65, 0.05, 0.05));
+	auto white = make_shared<Lambertian>(Color(0.73, 0.73, 0.73));
+	auto green = make_shared<Lambertian>(Color(0.12, 0.45, 0.15));
+	auto light = make_shared<DiffuseLight>(Color(15, 15, 15));
+	// 构造盒子
+	scene.add(make_shared<YZ_Rect>(0, 555, 0, 555, 555, green));
+	scene.add(make_shared<YZ_Rect>(0, 555, 0, 555, 0, red));
+	scene.add(make_shared<XZ_Rect>(213, 343, 227, 332, 554, light));
+	scene.add(make_shared<XZ_Rect>(0, 555, 0, 555, 0, white));
+	scene.add(make_shared<XZ_Rect>(0, 555, 0, 555, 555, white));
+	scene.add(make_shared<XY_Rect>(0, 555, 0, 555, 555, white));
 	return scene;
 }
 

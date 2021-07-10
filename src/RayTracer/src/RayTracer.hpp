@@ -23,5 +23,7 @@ HittableList two_perlin_scene();
 HittableList earth_scene();
 // 生成矩形光源场景
 HittableList simple_light_scene();
+// 最关键的场景: Comell盒
+HittableList comell_box_scene();
 // 测试输出颜色到图片
 int testImage(int image_width, int image_height);

@@ -14,7 +14,7 @@
 - [x] **Chapter4** 实体纹理
 - [x] **Chapter5** Perlin噪声
 - [x] **Chapter6** 图片纹理映射
-- [ ] **Chapter7** 矩形与光照
+- [x] **Chapter7** 矩形与光照
 - [ ] **Chapter8** 实例
 - [ ] **Chapter9** 体积雾
 - [ ] **Chapter10** 最终场景渲染
@@ -23,8 +23,10 @@
 
 **现状:**
 
-![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter6.jpg)
+![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter7.jpg)
 
 ## Notes
 
 ["Ray Tracing: In One Weekend" Notes](./doc/Notes/Ray_Tracing_in_One_Weekend/README.md)
+
+["Ray Tracing: The Next Weekend" Notes](./doc/Notes/Ray_Tracing_The_Next_Week/README.md)
