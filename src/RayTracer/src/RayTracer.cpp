@@ -8,11 +8,12 @@
 #include "Material.hpp"
 #include "BVH.hpp"
 #include "Texture.hpp"
+#include "AArect.hpp"
 
 int run_RayTracer() {
 	// 设置图像宽度和宽高比
 	const double aspect_ratio = 16.0 / 9.0;
-	const int image_width = 1920;
+	const int image_width = 1280;
 	const int image_height = static_cast<int>(image_width / aspect_ratio);
 	// 反走样的超采样次数
 	const int sample_times = 100;
@@ -27,36 +28,48 @@ int run_RayTracer() {
 	double vfov;
 	// 光圈大小
 	double aperture;
-	switch (3)
+	// 背景色
+	Color background(0, 0, 0);
+	int scene_choose = 5;
+	aperture = 0.1;
+	vfov = 20.0;
+	switch (scene_choose)
 	{
 	case 1:
 		// 应用BVH加速, 用当前场景对象初始化BVH树
-		scene= HittableList(make_shared<BVH_Node>(random_scene(), 0, 1));
+		scene = HittableList(make_shared<BVH_Node>(random_scene(), 0, 1));
 		// 设置相机参数
+		background = Color(0.7, 0.8, 1);
 		lookfrom = Point3(13, 2, 3);
 		lookat = Point3(0, 0, 0);
-		vfov = 20.0;
-		aperture = 0.1;
 		break;
 	case 2:
 		scene = HittableList(make_shared<BVH_Node>(test_scene(), 0, 1));
+		background = Color(0.7, 0.8, 1);
 		lookfrom = Point3(13, 2, 3);
 		lookat = Point3(0, 0, 0);
-		vfov = 20.0;
-		aperture = 0.1;
 		break;
 	case 3:
-		scene=HittableList(make_shared<BVH_Node>(two_perlin_scene(), 0, 1));
+		scene = HittableList(make_shared<BVH_Node>(two_perlin_scene(), 0, 1));
+		background = Color(0.7, 0.8, 1);
 		lookfrom = Point3(13, 2, 3);
 		lookat = Point3(0, 0, 0);
-		vfov = 20.0;
-		aperture = 0.1;
+		break;
 	case 4:
 		scene = HittableList(make_shared<BVH_Node>(earth_scene(), 0, 1));
+		background = Color(0.7, 0.8, 1);
 		lookfrom = Point3(13, 2, 3);
 		lookat = Point3(0, 0, 0);
-		vfov = 20.0;
+		break;
+	case 5:
+		//scene = simple_light_scene();
+		scene = HittableList(make_shared<BVH_Node>(simple_light_scene(), 0, 1));
+		background = Color(0, 0, 0);
+		lookfrom = Point3(26, 3, 6);
+		lookat = Point3(0, 2, 0);
+		break;
 	default:
+		background = Color(0, 0, 0);
 		break;
 	}
 
@@ -71,7 +84,7 @@ int run_RayTracer() {
 	Camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, dist_to_focus, aperture, 0.0, 1.0);
 
 	// 测试输出, 保存在图片"test.ppm"中
-	renderImage(image_width, image_height, cam, scene, sample_times, max_depth);
+	renderImage(image_width, image_height, cam, scene, background, sample_times, max_depth);
 
 	// 结束帧计时, 输出渲染本帧所用的毫秒数
 	auto endTime = std::chrono::system_clock::now();
@@ -81,7 +94,7 @@ int run_RayTracer() {
 	return 0;
 }
 
-int renderImage(int image_width, int image_height, Camera cam, HittableList scene, int sampleTimes = 1, int max_depth = 2) {
+int renderImage(int image_width, int image_height, Camera cam, HittableList scene, Color background, int sampleTimes = 1, int max_depth = 2) {
 	// 输出流重定向到图片文件
 	freopen("result.ppm", "w", stdout);
 	// 头信息
@@ -103,7 +116,7 @@ int renderImage(int image_width, int image_height, Camera cam, HittableList scen
 				// 利用这个比例计算对应到视平面的位置, 与相机原点相减就得到对应像素的视角射线向量
 				Ray r = cam.getRay(u, v);
 				// 累加这个像素着色的颜色
-				pixel += ray_color(r, scene, max_depth);
+				pixel += ray_color(r, scene, background, max_depth);
 			}
 			// 写入颜色到图片的像素, 内部对像素值进行了裁剪
 			write_color(std::cout, pixel, sampleTimes);
@@ -118,34 +131,32 @@ int renderImage(int image_width, int image_height, Camera cam, HittableList scen
 	return 0;
 }
 
-Color ray_color(const Ray& r, const HittableList& scene, int depth) {
+Color ray_color(const Ray& r, const HittableList& scene, const Color& background, int depth) {
 	if (depth <= 0) {
-		// 如果直到递归层数极限也还没有命中背景(天空), 则理解为无法反射, 返回黑色
+		// 太远距离时返回无
 		return Color(0, 0, 0);
 	}
 
 	HitRecord rec;
 	// 命中球的时候会随机进行反射, 最小距离设置为0.001, 防止精度误差导致的误反射
-	if (scene.hit(r, 0.001, infinity, rec)) {
-		// 暂存反射向量
-		Ray scattered;
-		// 暂存衰减值, 也就是能量被吸收的比例
-		Color attenuation;
-		// 调用物体表面的材质散射计算, 得到反射向量和亮度
-		if (rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-			// 进行递归, 每层返回都会衰减
-			return attenuation * ray_color(scattered, scene, depth - 1);
-		}
-		// 没有材质的表面不需要颜色
-		return Color(0, 0, 0);
+	// 太远而没有命中返回无
+	if (!scene.hit(r, 0.001, infinity, rec)) {
+		return background;
 	}
 
-	// 没有命中的时候背景(光源)就被用来给全局着色了
-	Vec3 unit_direction = unit_vector(r.direction());
-	// 在白色和浅蓝色之间利用向量的y方向进行加权平均, 由于向量被归一化了
-	// 因此y的变化并不是均匀的, 而是会表现出弧线的性质. 权重从0.5到1
-	auto s = 0.5 * (unit_direction.y() + 1.0);
-	return (1.0 - s) * Color(1.0, 1.0, 1.0) + s * Color(0.5, 0.7, 1.0);
+	// 暂存反射向量
+	Ray scattered;
+	// 暂存衰减值, 也就是能量被吸收的比例
+	Color attenuation;
+	Color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+	// 遇到发光材质时不继续递归而是返回光源颜色
+	if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+		// 进行递归, 每层返回都会衰减
+		return emitted;
+	}
+
+	// 材质发光值+衰减值*递归值
+	return emitted + attenuation * ray_color(scattered, scene, background, depth - 1);
 }
 
 HittableList test_scene() {
@@ -171,7 +182,7 @@ HittableList random_scene() {
 	HittableList scene;
 
 	// 地面使用棋盘格实体纹理
-	auto ground_mat = make_shared<CheckerTexture>(Color(0.5, 0.5, 0.5), Color(0.9,0.9,0.9));
+	auto ground_mat = make_shared<CheckerTexture>(Color(0.5, 0.5, 0.5), Color(0.9, 0.9, 0.9));
 	scene.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, make_shared<Lambertian>(ground_mat)));
 
 	for (int a = -11; a < 11; a++) {
@@ -227,7 +238,7 @@ HittableList two_perlin_scene()
 	auto perlin_texture = make_shared<PerlinNoiseTexture>(4);
 	auto ground_mat = make_shared<CheckerTexture>(Color(0.5, 0.5, 0.5), Color(0.9, 0.9, 0.9));
 	// 这里Perlin噪声作为漫反射纹理应用
-	scene.add(make_shared<Sphere>(Point3(0, -1000, 0),1000,make_shared<Lambertian>(ground_mat)));
+	scene.add(make_shared<Sphere>(Point3(0, -1000, 0), 1000, make_shared<Lambertian>(ground_mat)));
 	scene.add(make_shared<Sphere>(Point3(0, 2, 0), 2, make_shared<Lambertian>(perlin_texture)));
 	return scene;
 }
@@ -238,6 +249,19 @@ HittableList earth_scene()
 	// 暂时使用了绝对路径
 	auto earth_texture = make_shared<ImageTexture>("C:/Work/AmbiRenderer/src/Resources/earthmap.jpg");
 	scene.add(make_shared<Sphere>(Point3(0, 0, 0), 2, make_shared<Lambertian>(earth_texture)));
+	return scene;
+}
+
+HittableList simple_light_scene()
+{
+	HittableList scene;
+	auto perlinTex = make_shared<PerlinNoiseTexture>(4);
+	// 场景两个球
+	scene.add(make_shared<Sphere>(Point3(0, -1000, 0),1000, make_shared<Lambertian>(perlinTex)));
+	scene.add(make_shared<Sphere>(Point3(0, 2, 0), 2, make_shared<Lambertian>(perlinTex)));
+
+	// 光源材质传递给矩形, k是轴向距离, 注意光源设置的值比较大(比1大)为了让其经受住更多次反弹的削减
+	scene.add(make_shared<XY_Rect>(3, 5, 1, 3, -2, make_shared<DiffuseLight>(Color(4, 4, 4))));
 	return scene;
 }
 

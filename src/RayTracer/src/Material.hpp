@@ -12,6 +12,10 @@ struct HitRecord;
 class Material
 {
 public:
+	// 默认不设置的时侯材质的发光属性是黑色(无)
+	virtual Color emitted(double u, double v, Point3& p) {
+		return Color(0, 0, 0);
+	}
 	virtual bool scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const = 0;
 };
 
@@ -59,4 +63,24 @@ public:
 private:
 	// Schlick近似, 模拟在大角度观察折射物体时会在边缘发生的反射现象
 	static double reflectance(double cosine, double ref_idx);
+};
+
+// 发光材质
+class DiffuseLight : public Material {
+public:
+	DiffuseLight(shared_ptr<Texture> a): emit(a){}
+	DiffuseLight(Color c) : emit(make_shared<SolidColor>(c)) {}
+
+	// 发光材质不进行折射/反射
+	virtual bool scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const override {
+		return false;
+	}
+
+	// 获取点对应的发光颜色
+	virtual Color emitted(double u, double v, Point3& p) {
+		return emit->value(u, v, p);
+	}
+
+public:
+	shared_ptr<Texture> emit;
 };
