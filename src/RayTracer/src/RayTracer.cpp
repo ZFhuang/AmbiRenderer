@@ -10,6 +10,7 @@
 #include "Texture.hpp"
 #include "AArect.hpp"
 #include "Box.hpp"
+#include "ConstantMedium.hpp"
 
 int run_RayTracer() {
 	// 设置场景对象
@@ -19,19 +20,19 @@ int run_RayTracer() {
 	// 设置相机垂直fov
 	double vfov = 20.0;
 	// 光圈大小
-	double aperture = 0.1;
+	double aperture = 0;
 	// 背景色
 	Color background(0, 0, 0);
 	// 图像宽高
 	double aspect_ratio = 16.0 / 9.0;
 	// 设置图像大小
-	int image_width = 400;
+	int image_width = 600;
 	// 反走样的超采样次数
-	int sample_times = 200;
+	int sample_times = 50;
 	// 光线的反弹次数
-	int max_depth = 50;
+	int max_depth = 10;
 
-	int scene_choose = 6;
+	int scene_choose = 7;
 	switch (scene_choose)
 	{
 	case 1:
@@ -67,8 +68,15 @@ int run_RayTracer() {
 		lookat = Point3(0, 2, 0);
 		break;
 	case 6:
-		//scene = cornell_box_scene();
 		scene = HittableList(make_shared<BVH_Node>(cornell_box_scene(), 0, 1));
+		aspect_ratio = 1, 0;
+		background = Color(0, 0, 0);
+		lookfrom = Point3(278, 278, -800);
+		lookat = Point3(278, 278, 0);
+		vfov = 40.0;
+		break;
+	case 7:
+		scene = HittableList(make_shared<BVH_Node>(cornell_smoke_scene(), 0, 1));
 		aspect_ratio = 1, 0;
 		background = Color(0, 0, 0);
 		lookfrom = Point3(278, 278, -800);
@@ -301,6 +309,34 @@ HittableList cornell_box_scene()
 	box2 = make_shared<RotateY>(box2, -18);
 	box2 = make_shared<Translate>(box2, Vec3(130, 0, 65));
 	scene.add(box2);
+	return scene;
+}
+
+HittableList cornell_smoke_scene()
+{
+	HittableList scene;
+	auto red = make_shared<Lambertian>(Color(0.65, 0.05, 0.05));
+	auto white = make_shared<Lambertian>(Color(0.73, 0.73, 0.73));
+	auto green = make_shared<Lambertian>(Color(0.12, 0.45, 0.15));
+	auto light = make_shared<DiffuseLight>(Color(7, 7, 7));
+	// 构造墙壁
+	scene.add(make_shared<YZ_Rect>(0, 555, 0, 555, 555, green));
+	scene.add(make_shared<YZ_Rect>(0, 555, 0, 555, 0, red));
+	scene.add(make_shared<XZ_Rect>(113, 443, 127, 432, 554, light));
+	scene.add(make_shared<XZ_Rect>(0, 555, 0, 555, 0, white));
+	scene.add(make_shared<XZ_Rect>(0, 555, 0, 555, 555, white));
+	scene.add(make_shared<XY_Rect>(0, 555, 0, 555, 555, white));
+	// 初始化两个盒子
+	shared_ptr<Hittable> box1 = make_shared<Box>(Point3(0, 0, 0), Point3(165, 330, 165), white);
+	shared_ptr<Hittable> box2 = make_shared<Box>(Point3(0, 0, 0), Point3(165, 165, 165), white);
+	// 改变位置并放入
+	box1 = make_shared<RotateY>(box1, 15);
+	box1 = make_shared<Translate>(box1, Vec3(265, 0, 295));
+	// 将盒子转为雾属性
+	scene.add(make_shared<ConstantMedium>(box1, 0.01, Color(0, 0, 0)));
+	box2 = make_shared<RotateY>(box2, -18);
+	box2 = make_shared<Translate>(box2, Vec3(130, 0, 65));
+	scene.add(make_shared<ConstantMedium>(box2, 0.01, Color(1, 1, 1)));
 	return scene;
 }
 

@@ -63,3 +63,11 @@ double Dielectric::reflectance(double cosine, double ref_idx) {
 	r0 = r0 * r0;
 	return r0 + (1 - r0) * pow((1 - cosine), 5);
 }
+
+bool Isotropic::scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const
+{
+	// 随机在球面采样方向和大小来模拟折射(散射)的发生
+	scattered = Ray(rec.p, random_in_unit_sphere(), in.time());
+	attenuation = albedo->value(rec.u, rec.v, rec.p);
+	return true;
+}

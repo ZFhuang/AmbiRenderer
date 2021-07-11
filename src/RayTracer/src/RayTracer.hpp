@@ -25,5 +25,7 @@ HittableList earth_scene();
 HittableList simple_light_scene();
 // 最关键的场景: cornell盒
 HittableList cornell_box_scene();
+// 体积雾版本的cornell盒
+HittableList cornell_smoke_scene();
 // 测试输出颜色到图片
 int testImage(int image_width, int image_height);

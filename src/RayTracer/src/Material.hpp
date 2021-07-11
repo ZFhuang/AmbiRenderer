@@ -24,7 +24,7 @@ class Lambertian : public Material
 {
 public:
 	Lambertian(const Color& a) :albedo(make_shared<SolidColor>(a)) {}
-	Lambertian(shared_ptr<Texture> a):albedo(a){}
+	Lambertian(shared_ptr<Texture> a) :albedo(a) {}
 
 	// 控制射线在对象上的散射效果
 	virtual bool scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const override;
@@ -68,7 +68,7 @@ private:
 // 发光材质
 class DiffuseLight : public Material {
 public:
-	DiffuseLight(shared_ptr<Texture> a): emit(a){}
+	DiffuseLight(shared_ptr<Texture> a) : emit(a) {}
 	DiffuseLight(Color c) : emit(make_shared<SolidColor>(c)) {}
 
 	// 发光材质不进行折射/反射
@@ -83,4 +83,15 @@ public:
 
 public:
 	shared_ptr<Texture> emit;
+};
+
+// 各向异性材质(例如雾)
+class Isotropic : public Material {
+public:
+	Isotropic(Color c) :albedo(make_shared<SolidColor>(c)) {}
+	Isotropic(shared_ptr<Texture> a) :albedo(a) {}
+
+	virtual bool scatter(const Ray& in, const HitRecord& rec, Color& attenuation, Ray& scattered) const override;
+public:
+	shared_ptr<Texture> albedo;
 };
