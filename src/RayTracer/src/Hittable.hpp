@@ -48,3 +48,28 @@ public:
 	// 有time参数得以处理动态模糊效果, 部分物体返回false代表无需包围盒
 	virtual bool bounding_box(double time0, double time1, AABB& output_box) const = 0;
 };
+
+class Translate :public Hittable {
+public:
+	Translate(shared_ptr<Hittable> p, const Vec3& displacement) :ptr(p), offset(displacement) {}
+	virtual bool hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const override;
+	virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;
+
+public:
+	shared_ptr<Hittable> ptr;
+	Vec3 offset;
+};
+
+class RotateY :public Hittable {
+public:
+	RotateY(shared_ptr<Hittable> p, double angle);
+	virtual bool hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const override;
+	virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;
+
+public:
+	shared_ptr<Hittable> ptr;
+	double sin_theta;
+	double cos_theta;
+	bool hasbox;
+	AABB bbox;
+};

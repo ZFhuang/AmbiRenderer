@@ -15,15 +15,15 @@
 - [x] **Chapter5** Perlin噪声
 - [x] **Chapter6** 图片纹理映射
 - [x] **Chapter7** 矩形与光照
-- [ ] **Chapter8** 实例
-- [ ] **Chapter9** 体积雾
+- [x] **Chapter8** 实例
+- [ ] **Chapter9** 体积(雾)
 - [ ] **Chapter10** 最终场景渲染
-- [ ] BVH似乎处理双层玻璃时有问题, 无厚度的面会引发BVH问题, 方法是制造厚度
+- [ ] BVH似乎处理双层玻璃时有问题, 可能是包围盒的计算出了问题
 - [ ] 材质图片的路径有问题
 
 **现状:**
 
-![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter7.jpg)
+![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter8.jpg)
 
 ## Notes
 

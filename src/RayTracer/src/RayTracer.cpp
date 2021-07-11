@@ -9,6 +9,7 @@
 #include "BVH.hpp"
 #include "Texture.hpp"
 #include "AArect.hpp"
+#include "Box.hpp"
 
 int run_RayTracer() {
 	// 设置场景对象
@@ -24,7 +25,7 @@ int run_RayTracer() {
 	// 图像宽高
 	double aspect_ratio = 16.0 / 9.0;
 	// 设置图像大小
-	int image_width = 800;
+	int image_width = 400;
 	// 反走样的超采样次数
 	int sample_times = 200;
 	// 光线的反弹次数
@@ -66,7 +67,8 @@ int run_RayTracer() {
 		lookat = Point3(0, 2, 0);
 		break;
 	case 6:
-		scene = HittableList(make_shared<BVH_Node>(comell_box_scene(), 0, 1));
+		//scene = cornell_box_scene();
+		scene = HittableList(make_shared<BVH_Node>(cornell_box_scene(), 0, 1));
 		aspect_ratio = 1, 0;
 		background = Color(0, 0, 0);
 		lookfrom = Point3(278, 278, -800);
@@ -275,20 +277,30 @@ HittableList simple_light_scene()
 	return scene;
 }
 
-HittableList comell_box_scene()
+HittableList cornell_box_scene()
 {
 	HittableList scene;
 	auto red = make_shared<Lambertian>(Color(0.65, 0.05, 0.05));
 	auto white = make_shared<Lambertian>(Color(0.73, 0.73, 0.73));
 	auto green = make_shared<Lambertian>(Color(0.12, 0.45, 0.15));
 	auto light = make_shared<DiffuseLight>(Color(15, 15, 15));
-	// 构造盒子
+	// 构造墙壁
 	scene.add(make_shared<YZ_Rect>(0, 555, 0, 555, 555, green));
 	scene.add(make_shared<YZ_Rect>(0, 555, 0, 555, 0, red));
 	scene.add(make_shared<XZ_Rect>(213, 343, 227, 332, 554, light));
 	scene.add(make_shared<XZ_Rect>(0, 555, 0, 555, 0, white));
 	scene.add(make_shared<XZ_Rect>(0, 555, 0, 555, 555, white));
 	scene.add(make_shared<XY_Rect>(0, 555, 0, 555, 555, white));
+	// 初始化两个盒子
+	shared_ptr<Hittable> box1 = make_shared<Box>(Point3(0, 0, 0), Point3(165, 330, 165), white);
+	shared_ptr<Hittable> box2 = make_shared<Box>(Point3(0, 0, 0), Point3(165, 165, 165), white);
+	// 改变位置并放入
+	box1 = make_shared<RotateY>(box1, 15);
+	box1 = make_shared<Translate>(box1, Vec3(265, 0, 295));
+	scene.add(box1);
+	box2 = make_shared<RotateY>(box2, -18);
+	box2 = make_shared<Translate>(box2, Vec3(130, 0, 65));
+	scene.add(box2);
 	return scene;
 }
 
