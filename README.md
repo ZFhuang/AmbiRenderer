@@ -17,13 +17,13 @@
 - [x] **Chapter7** 矩形与光照
 - [x] **Chapter8** 实例
 - [x] **Chapter9** 体积(雾)
-- [ ] **Chapter10** 最终场景渲染
+- [x] **Chapter10** 最终场景渲染
 - [ ] BVH似乎处理双层玻璃时有问题, 可能是包围盒的计算出了问题
 - [ ] 材质图片的路径有问题
 
 **现状:**
 
-![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter9.jpg)
+![Result](./doc/Results/Ray_Tracing_The_Next_Week/Chapter10.jpg)
 
 ## Notes
 

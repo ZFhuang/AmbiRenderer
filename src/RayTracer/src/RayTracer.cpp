@@ -26,13 +26,13 @@ int run_RayTracer() {
 	// 图像宽高
 	double aspect_ratio = 16.0 / 9.0;
 	// 设置图像大小
-	int image_width = 600;
+	int image_width = 1500;
 	// 反走样的超采样次数
-	int sample_times = 50;
+	int sample_times = 1000;
 	// 光线的反弹次数
-	int max_depth = 10;
+	int max_depth = 50;
 
-	int scene_choose = 7;
+	int scene_choose = 8;
 	switch (scene_choose)
 	{
 	case 1:
@@ -80,6 +80,14 @@ int run_RayTracer() {
 		aspect_ratio = 1, 0;
 		background = Color(0, 0, 0);
 		lookfrom = Point3(278, 278, -800);
+		lookat = Point3(278, 278, 0);
+		vfov = 40.0;
+		break;
+	case 8:
+		scene = HittableList(make_shared<BVH_Node>(final_scene(), 0, 1));
+		aspect_ratio = 1, 0;
+		background = Color(0, 0, 0);
+		lookfrom = Point3(478, 278, -600);
 		lookat = Point3(278, 278, 0);
 		vfov = 40.0;
 		break;
@@ -337,6 +345,75 @@ HittableList cornell_smoke_scene()
 	box2 = make_shared<RotateY>(box2, -18);
 	box2 = make_shared<Translate>(box2, Vec3(130, 0, 65));
 	scene.add(make_shared<ConstantMedium>(box2, 0.01, Color(1, 1, 1)));
+	return scene;
+}
+
+HittableList final_scene()
+{
+	HittableList scene;
+	auto ground = make_shared<Lambertian>(Color(0.48, 0.83, 0.53));
+
+	// 生成y随机波动的盒子作为地板
+	HittableList boxes1;
+	const int boxes_per_side = 20;
+	for (int i = 0; i < boxes_per_side; i++) {
+		for (int j = 0; j < boxes_per_side; j++) {
+			// 每个盒子100宽度
+			double w = 100.0;
+			// xy是均匀分布的
+			double x0 = -1000.0 + i * w;
+			double z0 = -1000.0 + j * w;
+			double y0 = 0.0;
+			double x1 = x0 + w;
+			// 随机高度
+			double y1 = random_double(1, 101);
+			double z1 = z0 + w;
+			boxes1.add(make_shared<Box>(Point3(x0, y0, z0), Point3(x1, y1, z1), ground));
+		}
+	}
+	scene.add(make_shared<BVH_Node>(boxes1, 0, 1));
+
+	// 布置光源
+	auto light = make_shared<DiffuseLight>(Color(7, 7, 7));
+	scene.add(make_shared<XZ_Rect>(123,423,147,412,554,light));
+
+	// 长曝光的移动球
+	auto center1 = Point3(400, 400, 200);
+	auto center2 = center1 + Vec3(30, 0, 0);
+	auto moving_sphere_mat = make_shared<Lambertian>(Color(0.7, 0.3, 0.1));
+	scene.add(make_shared<MovingSphere>(center1, center2, 0, 1, 50, moving_sphere_mat));
+
+	// 玻璃球
+	scene.add(make_shared<Sphere>(Point3(260, 150, 45), 50, make_shared<Dielectric>(1.5)));
+
+	// 金属球
+	scene.add(make_shared<Sphere>(Point3(0, 150, 145), 50, make_shared<Metal>(Color(0.8, 0.8, 0.9), 1.0)));
+
+	// 有雾的玻璃球
+	auto boundary = make_shared<Sphere>(Point3(360,150,145), 70, make_shared<Dielectric>(1.5));
+	scene.add(boundary);
+	scene.add(make_shared<ConstantMedium>(boundary, 0.2, Color(0.2, 0.4, 0.9)));
+	// 覆盖场景的雾
+	boundary = make_shared<Sphere>(Point3(0, 0, 0), 5000, make_shared<Dielectric>(1.5));
+	scene.add(make_shared<ConstantMedium>(boundary, 0.0001, Color(1,1,1)));
+
+	// 地球
+	auto earth_mat = make_shared<Lambertian>(make_shared<ImageTexture>("C:/Work/AmbiRenderer/src/Resources/earthmap.jpg"));
+	scene.add(make_shared<Sphere>(Point3(400, 200, 400), 100, earth_mat));
+
+	// 噪声球
+	auto perlin_mat = make_shared<PerlinNoiseTexture>(0.1);
+	scene.add(make_shared<Sphere>(Point3(220, 280, 300), 80, make_shared<Lambertian>(perlin_mat)));
+
+	// 随机白球填充一个盒子区域
+	HittableList boxes2;
+	auto white = make_shared<Lambertian>(Color(0.73, 0.73, 0.73));
+	int ns = 1000;
+	for (int j = 0; j < ns; j++) {
+		boxes2.add(make_shared<Sphere>(Point3::random(0, 165), 10, white));
+	}
+	scene.add(make_shared<Translate>(make_shared<RotateY>(make_shared<BVH_Node>(boxes2, 0.0, 1.0), 15), Vec3(-100, 270, 395)));
+
 	return scene;
 }
 

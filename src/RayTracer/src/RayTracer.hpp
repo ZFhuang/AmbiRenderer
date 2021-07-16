@@ -27,5 +27,7 @@ HittableList simple_light_scene();
 HittableList cornell_box_scene();
 // 体积雾版本的cornell盒
 HittableList cornell_smoke_scene();
+// RT2的最终场景
+HittableList final_scene();
 // 测试输出颜色到图片
 int testImage(int image_width, int image_height);
