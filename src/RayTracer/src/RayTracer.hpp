@@ -13,8 +13,6 @@ int run_RayTracer();
 int renderImage(int image_width, int image_height, Camera cam, HittableList scene, Color background, int sampleTimes, int max_depth);
 // 根据输入的射线返回着色
 Color ray_color(const Ray& r, const HittableList& scene, const Color& background, int depth);
-// 生成少量随机球测试场景
-HittableList test_scene();
 // 生成大量随机球场景
 HittableList random_scene();
 // 生成大小球的柏林噪声场景

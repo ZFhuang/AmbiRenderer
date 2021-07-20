@@ -1,6 +1,5 @@
 ﻿#include <chrono>
 #include <iostream>
-
 #include "RayTracer.hpp"
 #include "Sphere.hpp"
 #include "MovingSphere.hpp"
@@ -11,6 +10,7 @@
 #include "AArect.hpp"
 #include "Box.hpp"
 #include "ConstantMedium.hpp"
+#include "SceneManager.hpp"
 
 int run_RayTracer() {
 	// 设置场景对象
@@ -33,6 +33,7 @@ int run_RayTracer() {
 	int max_depth = 50;
 
 	int scene_choose = 1;
+	SceneManager sceneManager;
 	switch (scene_choose)
 	{
 	case 1:
@@ -44,7 +45,9 @@ int run_RayTracer() {
 		lookat = Point3(0, 0, 0);
 		break;
 	case 2:
-		scene = HittableList(make_shared<BVH_Node>(test_scene(), 0, 1));
+		sceneManager.loadScene(SceneEnum::TEST_SCENE);
+		scene = sceneManager.getBvhScene();
+		//scene = HittableList(make_shared<BVH_Node>(test_scene(), 0, 1));
 		background = Color(0.7, 0.8, 1);
 		lookfrom = Point3(13, 2, 3);
 		lookat = Point3(0, 0, 0);
@@ -375,7 +378,7 @@ HittableList final_scene()
 
 	// 布置光源
 	auto light = make_shared<DiffuseLight>(Color(7, 7, 7));
-	scene.add(make_shared<XZ_Rect>(123,423,147,412,554,light));
+	scene.add(make_shared<XZ_Rect>(123, 423, 147, 412, 554, light));
 
 	// 长曝光的移动球
 	auto center1 = Point3(400, 400, 200);
@@ -390,12 +393,12 @@ HittableList final_scene()
 	scene.add(make_shared<Sphere>(Point3(0, 150, 145), 50, make_shared<Metal>(Color(0.8, 0.8, 0.9), 1.0)));
 
 	// 有雾的玻璃球
-	auto boundary = make_shared<Sphere>(Point3(360,150,145), 70, make_shared<Dielectric>(1.5));
+	auto boundary = make_shared<Sphere>(Point3(360, 150, 145), 70, make_shared<Dielectric>(1.5));
 	scene.add(boundary);
 	scene.add(make_shared<ConstantMedium>(boundary, 0.2, Color(0.2, 0.4, 0.9)));
 	// 覆盖场景的雾
 	boundary = make_shared<Sphere>(Point3(0, 0, 0), 5000, make_shared<Dielectric>(1.5));
-	scene.add(make_shared<ConstantMedium>(boundary, 0.0001, Color(1,1,1)));
+	scene.add(make_shared<ConstantMedium>(boundary, 0.0001, Color(1, 1, 1)));
 
 	// 地球
 	auto earth_mat = make_shared<Lambertian>(make_shared<ImageTexture>("C:/Work/AmbiRenderer/src/Resources/earthmap.jpg"));
