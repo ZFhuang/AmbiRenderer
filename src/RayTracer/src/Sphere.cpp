@@ -49,9 +49,19 @@ bool Sphere::hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const
 
 // 球的包围盒, 盒的对角顶点就是以圆心为重心, 半径为距离的点
 bool Sphere::bounding_box(double time0, double time1, AABB& output_box) const {
-	output_box = AABB(
-		center - Vec3(radius, radius, radius),
-		center + Vec3(radius, radius, radius)
-	);
+	// 修复嵌套球产生的错误AABB盒
+	if (radius > 0) {
+		output_box = AABB(
+			center - Vec3(radius, radius, radius),
+			center + Vec3(radius, radius, radius)
+		);
+	}
+	else
+	{
+		output_box = AABB(
+			center + Vec3(radius, radius, radius),
+			center - Vec3(radius, radius, radius)
+		);
+	}
 	return true;
 }

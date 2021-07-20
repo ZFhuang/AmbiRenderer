@@ -26,13 +26,13 @@ int run_RayTracer() {
 	// 图像宽高
 	double aspect_ratio = 16.0 / 9.0;
 	// 设置图像大小
-	int image_width = 1500;
+	int image_width = 400;
 	// 反走样的超采样次数
-	int sample_times = 1000;
+	int sample_times = 50;
 	// 光线的反弹次数
 	int max_depth = 50;
 
-	int scene_choose = 8;
+	int scene_choose = 1;
 	switch (scene_choose)
 	{
 	case 1:
@@ -253,7 +253,7 @@ HittableList random_scene() {
 
 	scene.add(make_shared<Sphere>(Point3(0.0, 1.0, 0), 1, material_center));
 	scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), 1, material_right));
-	//scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), -0.9, material_right));
+	scene.add(make_shared<Sphere>(Point3(4.0, 1.0, 0), -0.9, material_right));
 	scene.add(make_shared<Sphere>(Point3(-4.0, 1.0, 0), 1, material_left));
 
 	return scene;
