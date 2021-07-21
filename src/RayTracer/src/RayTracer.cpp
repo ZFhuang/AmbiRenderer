@@ -17,7 +17,7 @@ bool RayTracer::render() {
 	auto startTime = std::chrono::system_clock::now();
 
 	// 测试输出, 保存在图片"test.ppm"中
-	renderImage(Vec3(0.73, 0.73, 0.73), 10, 10);
+	renderImage(Vec3(0, 0, 0), 50, 10);
 
 	// 结束帧计时, 输出渲染本帧所用的毫秒数
 	auto endTime = std::chrono::system_clock::now();

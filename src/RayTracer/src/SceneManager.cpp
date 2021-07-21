@@ -5,7 +5,7 @@
 
 SceneManager::SceneManager()
 {
-	;
+	// 空构造, 直到loadScene
 }
 
 SceneManager::SceneManager(SceneEnum sceneEnum)
@@ -58,7 +58,7 @@ bool SceneManager::loadScene(SceneEnum sceneEnum)
 		_default_lookat = Point3(278, 278, 0);
 		break;
 	default:
-		assert(true&&"Load undefined scene");
+		assert(true && "Load undefined scene");
 		break;
 	}
 	return true;
@@ -78,7 +78,7 @@ HittableList SceneManager::getBvhScene()
 
 Point3 SceneManager::getLookfrom()
 {
-	assert(_scene != nullptr&&"Get cam 'lookfrom' before scene load");
+	assert(_scene != nullptr && "Get cam 'lookfrom' before scene load");
 	return _default_lookfrom;
 }
 

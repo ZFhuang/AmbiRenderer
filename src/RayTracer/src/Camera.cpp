@@ -1,9 +1,8 @@
 ﻿#include "Camera.hpp"
 
-Camera::Camera()
+Camera::Camera() :Camera(Point3(1, 0, 0), Point3(0, 0, 0), Point3(0, 1, 0))
 {
-	// 包装了Camera变量构造
-	Camera(Point3(0, 0, 0), Point3(1, 0, 0), Vec3(0, 0, 1));
+	// C11的委托构造
 }
 
 Camera::Camera(

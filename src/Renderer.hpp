@@ -2,10 +2,11 @@
 
 #include <memory>
 #include "Config.hpp"
-#include "RayTracer/src/SceneManager.hpp"
 
 using std::shared_ptr;
 using std::make_shared;
+
+enum class SceneEnum;
 
 class BaseRenderer {
 public:

@@ -4,10 +4,12 @@
 #include "HittableList.hpp"
 #include "Sphere.hpp"
 #include "../../Renderer.hpp"
-#include "SceneManager.hpp"
 
 using std::shared_ptr;
 using std::make_shared;
+
+enum class SceneEnum;
+class SceneManager;
 
 class RayTracer : public BaseRenderer {
 public:
