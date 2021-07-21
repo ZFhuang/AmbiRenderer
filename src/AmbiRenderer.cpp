@@ -3,8 +3,14 @@
 int main(int argc, char* argv[])
 {
 	std::cout << "Start..." << std::endl;
-	// 调用光追渲染器
-	run_RayTracer();
+
+	shared_ptr<BaseRenderer> renderer = make_shared<RayTracer>();
+	shared_ptr<Config> config = make_shared<Config>();
+
+	renderer->init_renderer(config);
+	renderer->load_scene(SceneEnum::TEST_SCENE);
+	renderer->render();
+
 	std::cout << "Exit!" << std::endl;
 	return 0;
 }

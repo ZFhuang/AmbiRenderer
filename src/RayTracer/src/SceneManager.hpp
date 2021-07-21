@@ -2,6 +2,7 @@
 
 #include "RayTracer.hpp"
 #include "Scenes.hpp"
+#include "Vec3.hpp"
 #include <memory>
 
 enum class SceneEnum
@@ -19,10 +20,16 @@ enum class SceneEnum
 class SceneManager {
 public:
 	SceneManager();
+	SceneManager(SceneEnum sceneEnum);
 	bool loadScene(SceneEnum sceneEnum);
 	HittableList getRawScene();
 	HittableList getBvhScene();
+	Point3 getLookfrom();
+	Point3 getLookat();
 
 private:
+	// 默认构造是nullptr, 放心用
 	std::shared_ptr<Scene> _scene;
+	Point3 _default_lookfrom;
+	Point3 _default_lookat;
 };
