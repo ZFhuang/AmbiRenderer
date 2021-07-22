@@ -39,6 +39,11 @@ ImageTexture::ImageTexture(const char* filename) {
 	bytes_per_scanline = bytes_per_pixel * width;
 }
 
+ImageTexture::ImageTexture(std::string filename):ImageTexture::ImageTexture(filename.c_str())
+{
+	// 委托
+}
+
 Color ImageTexture::value(double u, double v, const Point3& p) const {
 	// 没有图片时返回固定值
 	if (data == nullptr) {

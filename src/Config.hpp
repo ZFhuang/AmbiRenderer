@@ -1,4 +1,10 @@
 ﻿#pragma once
+#include <string>
+
+namespace PATH
+{
+	const std::string RESOURCES = "C:/Work/AmbiRenderer/src/Resources/";
+}
 
 class Config {
 public:

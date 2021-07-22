@@ -5,6 +5,7 @@
 #include "Box.hpp"
 #include "ConstantMedium.hpp"
 #include "BVH.hpp"
+#include "../../Config.hpp"
 
 TestScene::TestScene()
 {
@@ -116,7 +117,7 @@ HittableList PerlinScene::get_HittableList() const
 EarthScene::EarthScene()
 {
 	// 暂时使用了绝对路径
-	auto earth_texture = make_shared<ImageTexture>("C:/Work/AmbiRenderer/src/Resources/earthmap.jpg");
+	auto earth_texture = make_shared<ImageTexture>(PATH::RESOURCES+"earthmap.jpg");
 	_hitlist.add(make_shared<Sphere>(Point3(0, 0, 0), 2, make_shared<Lambertian>(earth_texture)));
 }
 
@@ -272,7 +273,7 @@ FinalScene::FinalScene()
 	_hitlist.add(make_shared<ConstantMedium>(boundary, 0.0001, Color(1, 1, 1)));
 
 	// 地球
-	auto earth_mat = make_shared<Lambertian>(make_shared<ImageTexture>("C:/Work/AmbiRenderer/src/Resources/earthmap.jpg"));
+	auto earth_mat = make_shared<Lambertian>(make_shared<ImageTexture>(PATH::RESOURCES + "earthmap.jpg"));
 	_hitlist.add(make_shared<Sphere>(Point3(400, 200, 400), 100, earth_mat));
 
 	// 噪声球

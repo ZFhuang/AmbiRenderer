@@ -7,20 +7,16 @@
 
 ### [2021/01/17] Ray Tracing in One Weekend学习结束
 
-### Ray Tracing The Next Week学习
+### [2021/07/22] Ray Tracing The Next Week学习结束
 
-- [x] **Chapter2** 动态模糊效果
-- [x] **Chapter3** 层次包围盒
-- [x] **Chapter4** 实体纹理
-- [x] **Chapter5** Perlin噪声
-- [x] **Chapter6** 图片纹理映射
-- [x] **Chapter7** 矩形与光照
-- [x] **Chapter8** 实例
-- [x] **Chapter9** 体积(雾)
-- [x] **Chapter10** 最终场景渲染
-- [x] BVH似乎处理双层玻璃时有问题, 可能是包围盒的计算出了问题
-- [x] 重构了场景载入和摄像机
-- [ ] 材质图片的路径有问题
+### 完善光追渲染器
+
+- [x] 简单重构驱动代码
+- [ ] 加入图形界面
+- [ ] 实现层次超采样
+- [ ] 实现三角网格模型的读取和渲染
+- [ ] 实现多线程处理
+- [ ] 实现透明材质吸收率的设置
 
 **现状:**
 

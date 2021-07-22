@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
 
 	renderer->init_renderer(config);
 	renderer->load_scene(SceneEnum::FINAL_SCENE);
+
 	renderer->render();
 
 	std::cout << "Exit!" << std::endl;

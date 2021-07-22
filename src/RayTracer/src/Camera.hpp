@@ -42,9 +42,7 @@ private:
 	void _refleshGlobalAxis();
 
 private:
-	/// <summary>
 	/// 成员变量, 都可以用set设置, 部分可以用get读取
-	/// </summary>
 	Point3 m_lookfrom;
 	Point3 m_lookat;
 	// 相机朝上方向
@@ -64,9 +62,7 @@ private:
 	double m_shutter_time = 0;
 
 private:
-	/// <summary>
 	/// 内部变量, 由函数内部自动维护
-	/// </summary>
 	Vec3 _horizontal;
 	Vec3 _vertical;
 	Point3 _lower_left_corner;

@@ -59,6 +59,8 @@ public:
 	ImageTexture() :data(nullptr), width(0), height(0), bytes_per_scanline(0) {}
 	// ÓÐÍ¼Æ¬Ê±
 	ImageTexture(const char* filename);
+	// Î¯ÍÐconst char*
+	ImageTexture(std::string filename);
 
 	~ImageTexture() {
 		delete data;
