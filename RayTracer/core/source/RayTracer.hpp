@@ -3,7 +3,8 @@
 #include "Camera.hpp"
 #include "HittableList.hpp"
 #include "Sphere.hpp"
-#include "../../Renderer.hpp"
+#include "../../../AmbiRenderer/core/Renderer.hpp"
+#include "../include/Config.hpp"
 
 using std::shared_ptr;
 using std::make_shared;

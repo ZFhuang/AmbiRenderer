@@ -23,7 +23,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\AmbiRenderer.hpp" />
-    <ClInclude Include="core\Config.hpp" />
     <ClInclude Include="core\Renderer.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

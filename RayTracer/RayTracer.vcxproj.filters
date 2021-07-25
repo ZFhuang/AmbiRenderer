@@ -57,6 +57,9 @@
     <ClCompile Include="core\source\Texture.cpp">
       <Filter>Core\source</Filter>
     </ClCompile>
+    <ClCompile Include="core\source\StartUp.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\source\AABB.hpp">

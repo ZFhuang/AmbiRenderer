@@ -15,6 +15,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{52DCF3BF-CE68-49FC-A6CD-873B4F1E4F99}"
+	ProjectSection(SolutionItems) = preProject
+		Resources\earthmap.jpg = Resources\earthmap.jpg
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Notes", "Notes", "{ECAC9D94-B822-4615-82B6-F108A3A9D7A0}"
 EndProject

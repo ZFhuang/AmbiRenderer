@@ -1,13 +1,13 @@
 ﻿#include "AmbiRenderer.hpp"
 #include <iostream>
 #include "Renderer.hpp"
-#include "RayTracer/include/RayTracer.hpp"
-#include "Config.hpp"
-#include "RayTracer/include/SceneManager.hpp"
+#include "../../RayTracer/core/source/RayTracer.hpp"
+#include "../../RayTracer/core/source/SceneManager.hpp"
 #include <memory>
 
 using std::make_shared;
 using std::shared_ptr;
+class Config;
 
 int main(int argc, char* argv[])
 {

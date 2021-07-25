@@ -5,7 +5,7 @@
 #include "Box.hpp"
 #include "ConstantMedium.hpp"
 #include "BVH.hpp"
-#include "../../Config.hpp"
+#include "../include/Config.hpp"
 
 TestScene::TestScene()
 {
@@ -117,7 +117,7 @@ HittableList PerlinScene::get_HittableList() const
 EarthScene::EarthScene()
 {
 	// 暂时使用了绝对路径
-	auto earth_texture = make_shared<ImageTexture>(PATH::RESOURCES+"earthmap.jpg");
+	auto earth_texture = make_shared<ImageTexture>(PATH::RESOURCES + "earthmap.jpg");
 	_hitlist.add(make_shared<Sphere>(Point3(0, 0, 0), 2, make_shared<Lambertian>(earth_texture)));
 }
 

@@ -12,9 +12,6 @@
     <ClInclude Include="core\AmbiRenderer.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="core\Config.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="core\Renderer.hpp">
       <Filter>include</Filter>
     </ClInclude>

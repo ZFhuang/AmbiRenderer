@@ -3,7 +3,7 @@
 
 namespace PATH
 {
-	const std::string RESOURCES = "C:/Work/AmbiRenderer/src/Resources/";
+	const std::string RESOURCES = "C:/Work/AmbiRenderer/Resources/";
 }
 
 class Config {

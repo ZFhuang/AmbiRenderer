@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include <memory>
-#include "Config.hpp"
 
 using std::shared_ptr;
 using std::make_shared;
 
 enum class SceneEnum;
+class Config;
 
 class BaseRenderer {
 public:
