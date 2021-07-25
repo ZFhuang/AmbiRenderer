@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{e9a83229-f7fa-4dd9-b250-060b6ca13f3c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\source">
+      <UniqueIdentifier>{f1c46456-4cd1-408e-a681-fc1ba4f8d3be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\include">
+      <UniqueIdentifier>{38f5d49b-436d-4a9a-b41c-6fadd072cb54}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="core\source\AABB.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\AArect.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\Box.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\BVH.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\Camera.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\ConstantMedium.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\Hittable.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\HittableList.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\Material.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\MovingShpere.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\RayTracer.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\SceneManager.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\Scenes.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\Sphere.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\Texture.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\source\AABB.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\AArect.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Box.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\BVH.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Camera.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Color.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\ConstantMedium.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Hittable.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\HittableList.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Material.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\MovingSphere.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Perlin.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Ray.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\RayTracer.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\rtw_stb_image.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\RTweekend.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\SceneManager.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Scenes.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Sphere.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Texture.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Vec3.hpp">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\Camera.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\Color.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\Hittable.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\HittableList.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\Material.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\Ray.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\RayTracer.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\RTweekend.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\SceneManager.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\Sphere.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\Vec3.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
