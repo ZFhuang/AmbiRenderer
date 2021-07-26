@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{6dc3b1a7-511c-4faf-b140-dacd8086b57c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\include">
+      <UniqueIdentifier>{471a5f5e-7730-4aff-9018-8de46a5b1ffc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\source">
+      <UniqueIdentifier>{4a11b858-8ae2-45d9-8c08-cd549920454c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\include\tgaimage.h">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\source\Rasterizer.h">
+      <Filter>Core\source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="core\include\tgaimage.cpp">
+      <Filter>Core\include</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\StartUp.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\source\Rasterizer.cpp">
+      <Filter>Core\source</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

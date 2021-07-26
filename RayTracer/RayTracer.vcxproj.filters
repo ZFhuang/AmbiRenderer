@@ -158,5 +158,11 @@
     <ClInclude Include="core\include\Vec3.hpp">
       <Filter>Core\include</Filter>
     </ClInclude>
+    <ClInclude Include="core\include\RayTracerConfig.hpp">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\stb_image.h">
+      <Filter>Core\include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

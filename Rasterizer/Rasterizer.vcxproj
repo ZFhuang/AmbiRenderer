@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{88a6242b-d4bc-4959-bad6-49e7fadccc44}</ProjectGuid>
-    <RootNamespace>RayTracer</RootNamespace>
+    <ProjectGuid>{8ef7d644-a867-4633-947c-d74f71f441a0}</ProjectGuid>
+    <RootNamespace>Rasterizer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -128,7 +128,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
@@ -139,58 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="core\source\AABB.cpp" />
-    <ClCompile Include="core\source\AArect.cpp" />
-    <ClCompile Include="core\source\Box.cpp" />
-    <ClCompile Include="core\source\BVH.cpp" />
-    <ClCompile Include="core\source\Camera.cpp" />
-    <ClCompile Include="core\source\ConstantMedium.cpp" />
-    <ClCompile Include="core\source\Hittable.cpp" />
-    <ClCompile Include="core\source\HittableList.cpp" />
-    <ClCompile Include="core\source\Material.cpp" />
-    <ClCompile Include="core\source\MovingShpere.cpp" />
-    <ClCompile Include="core\source\RayTracer.cpp" />
-    <ClCompile Include="core\source\SceneManager.cpp" />
-    <ClCompile Include="core\source\Scenes.cpp" />
-    <ClCompile Include="core\source\Sphere.cpp" />
-    <ClCompile Include="core\source\StartUp.cpp" />
-    <ClCompile Include="core\source\Texture.cpp" />
+    <ClInclude Include="core\include\tgaimage.h" />
+    <ClInclude Include="core\source\Rasterizer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\include\Camera.hpp" />
-    <ClInclude Include="core\include\Color.hpp" />
-    <ClInclude Include="core\include\RayTracerConfig.hpp" />
-    <ClInclude Include="core\include\Hittable.hpp" />
-    <ClInclude Include="core\include\HittableList.hpp" />
-    <ClInclude Include="core\include\Material.hpp" />
-    <ClInclude Include="core\include\Ray.hpp" />
-    <ClInclude Include="core\include\RayTracer.hpp" />
-    <ClInclude Include="core\include\RTweekend.hpp" />
-    <ClInclude Include="core\include\SceneManager.hpp" />
-    <ClInclude Include="core\include\Sphere.hpp" />
-    <ClInclude Include="core\include\stb_image.h" />
-    <ClInclude Include="core\include\Vec3.hpp" />
-    <ClInclude Include="core\source\AABB.hpp" />
-    <ClInclude Include="core\source\AArect.hpp" />
-    <ClInclude Include="core\source\Box.hpp" />
-    <ClInclude Include="core\source\BVH.hpp" />
-    <ClInclude Include="core\source\Camera.hpp" />
-    <ClInclude Include="core\source\Color.hpp" />
-    <ClInclude Include="core\source\ConstantMedium.hpp" />
-    <ClInclude Include="core\source\Hittable.hpp" />
-    <ClInclude Include="core\source\HittableList.hpp" />
-    <ClInclude Include="core\source\Material.hpp" />
-    <ClInclude Include="core\source\MovingSphere.hpp" />
-    <ClInclude Include="core\source\Perlin.hpp" />
-    <ClInclude Include="core\source\Ray.hpp" />
-    <ClInclude Include="core\source\RayTracer.hpp" />
-    <ClInclude Include="core\source\RTweekend.hpp" />
-    <ClInclude Include="core\source\rtw_stb_image.hpp" />
-    <ClInclude Include="core\source\SceneManager.hpp" />
-    <ClInclude Include="core\source\Scenes.hpp" />
-    <ClInclude Include="core\source\Sphere.hpp" />
-    <ClInclude Include="core\source\Texture.hpp" />
-    <ClInclude Include="core\source\Vec3.hpp" />
+    <ClCompile Include="core\include\tgaimage.cpp" />
+    <ClCompile Include="core\source\Rasterizer.cpp" />
+    <ClCompile Include="core\source\StartUp.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
