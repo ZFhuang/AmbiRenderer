@@ -14,7 +14,7 @@
 https://github.com/ssloy/tinyrenderer
 
 - [x] Lesson 1: Bresenham’s Line Drawing Algorithm
-- [ ] Lesson 2: Triangle rasterization and back face culling
+- [x] Lesson 2: Triangle rasterization and back face culling
 - [ ] Lesson 3: Hidden faces removal (z buffer)
 - [ ] Lesson 4: Perspective projection
 - [ ] Lesson 5: Moving the camera
@@ -23,10 +23,11 @@ https://github.com/ssloy/tinyrenderer
 - [ ] Lesson 7: Shadow mapping
 - [ ] Lesson 8: Ambient occlusion
 - [ ] Lesson 9: Real OpenGL (GLSL) application
+- [ ] Lesson2的画三角形需要修改为重心坐标包围盒法
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/)
+![Result](./Documents/Results/tinyrenderer/Lesson1.jpg)
 
 ## Notes
 

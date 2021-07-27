@@ -11,8 +11,14 @@ namespace PATH
 
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red = TGAColor(255, 0, 0, 255);
+const TGAColor green = TGAColor(0, 255, 0, 255);
+const TGAColor blue = TGAColor(0, 0, 255, 255);
 
-void line(int x0, int y0, int x1, int y1, TGAImage& image, TGAColor color) {
+void line(Vec2i t0, Vec2i t1, TGAImage& image, TGAColor color) {
+	int x0 = t0.x;
+	int y0 = t0.y;
+	int x1 = t1.x;
+	int y1 = t1.y;
 	// 按照长边遍历
 	bool isSteep = false;
 	if (std::abs(x0 - x1) < std::abs(y0 - y1)) {
@@ -48,7 +54,30 @@ void line(int x0, int y0, int x1, int y1, TGAImage& image, TGAColor color) {
 	}
 }
 
-void drawWireFrame(Model* model, TGAImage& image) {
+void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage& image, TGAColor color) {
+	// 扫描线法绘制三角形
+	if (t0.y > t1.y) std::swap(t0, t1);
+	if (t0.y > t2.y) std::swap(t0, t2);
+	if (t1.y > t2.y) std::swap(t1, t2);
+	// 使用扫描算法来对三角形进行着色
+	int total_height = t2.y - t0.y;
+	// 按照y进行从下到上扫描
+	for (int i = 0; i < total_height; i++) {
+		// 用bool标记当前是上段还是下段
+		bool second_half = i > t1.y - t0.y || t1.y == t0.y;
+		int segment_height = second_half ? t2.y - t1.y : t1.y - t0.y;
+		float alpha = (float)i / total_height;
+		float beta = (float)(i - (second_half ? t1.y - t0.y : 0)) / segment_height;
+		Vec2i A = t0 + (t2 - t0) * alpha;
+		Vec2i B = second_half ? t1 + (t2 - t1) * beta : t0 + (t1 - t0) * beta;
+		if (A.x > B.x) std::swap(A, B);
+		for (int j = A.x; j <= B.x; j++) {
+			image.set(j, t0.y + i, color);
+		}
+	}
+}
+
+void drawWireFrame(TGAImage& image, Model* model) {
 	// 绘制线框模型
 	int width = image.get_width();
 	int height = image.get_height();
@@ -66,7 +95,47 @@ void drawWireFrame(Model* model, TGAImage& image) {
 			int x1 = (v1.x + 1.) * width / 2.;
 			int y1 = (v1.y + 1.) * height / 2.;
 			// 绘制线
-			line(x0, y0, x1, y1, image, white);
+			line(Vec2i(x0, y0), Vec2i(x1, y1), image, white);
+		}
+	}
+}
+
+void drawRandomColorModel(TGAImage& image, Model* model) {
+	int width = image.get_width();
+	int height = image.get_height();
+	for (int i = 0; i < model->nfaces(); i++) {
+		std::vector<int> face = model->face(i);
+		Vec2i screen_coords[3];
+		for (int j = 0; j < 3; j++) {
+			Vec3f world_coords = model->vert(face[j]);
+			// 这里将世界坐标中的模型缩放到屏幕中
+			screen_coords[j] = Vec2i((world_coords.x + 1.) * width / 2., (world_coords.y + 1.) * height / 2.);
+		}
+		// 用随机颜色来绘制三角形
+		triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(rand() % 255, rand() % 255, rand() % 255, 255));
+	}
+}
+
+void drawSimpleLightModel(TGAImage& image, Model* model, Vec3f light_dir) {
+	int width = image.get_width();
+	int height = image.get_height();
+	for (int i = 0; i < model->nfaces(); i++) {
+		std::vector<int> face = model->face(i);
+		Vec2i screen_coords[3];
+		Vec3f world_coords[3];
+		for (int j = 0; j < 3; j++) {
+			Vec3f v = model->vert(face[j]);
+			screen_coords[j] = Vec2i((v.x + 1.) * width / 2., (v.y + 1.) * height / 2.);
+			world_coords[j] = v;
+		}
+		// 重载^运算符实现外积, 从而计算得到三角面片的法线
+		Vec3f n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
+		// 单位化法线
+		n.normalize();
+		// 法线与光照方向的内积(向量积)得到标量光照强度
+		float intensity = n * light_dir;
+		if (intensity > 0) {
+			triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(intensity * 255, intensity * 255, intensity * 255, 255));
 		}
 	}
 }
@@ -74,8 +143,9 @@ void drawWireFrame(Model* model, TGAImage& image) {
 int main(int argc, char** argv) {
 	TGAImage image(1000, 1000, TGAImage::RGB);
 	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
+	Vec3f light_dir(0, 0, -1);
 
-	drawWireFrame(model, image);
+	drawSimpleLightModel(image, model, light_dir);
 
 	image.flip_vertically();
 	image.write_tga_file("output.tga");
