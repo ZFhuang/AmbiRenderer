@@ -22,6 +22,12 @@
     <ClInclude Include="core\source\Rasterizer.h">
       <Filter>Core\source</Filter>
     </ClInclude>
+    <ClInclude Include="core\include\geometry.h">
+      <Filter>Core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\include\model.h">
+      <Filter>Core\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\include\tgaimage.cpp">
@@ -32,6 +38,9 @@
     </ClCompile>
     <ClCompile Include="core\source\Rasterizer.cpp">
       <Filter>Core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\include\model.cpp">
+      <Filter>Core\include</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

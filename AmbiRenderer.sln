@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{52DCF3BF-CE68-49FC-A6CD-873B4F1E4F99}"
 	ProjectSection(SolutionItems) = preProject
+		Resources\african_head.obj = Resources\african_head.obj
 		Resources\earthmap.jpg = Resources\earthmap.jpg
 	EndProjectSection
 EndProject
@@ -73,6 +74,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ray_Tracing_The_Next_Week",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Rasterizer", "Rasterizer\Rasterizer.vcxproj", "{8EF7D644-A867-4633-947C-D74F71F441A0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tinyrenderer", "tinyrenderer", "{2A91CEF3-0D30-4D63-8673-07781152F804}"
+	ProjectSection(SolutionItems) = preProject
+		Documents\Notes\tinyrenderer\README.md = Documents\Notes\tinyrenderer\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -119,6 +125,7 @@ Global
 		{7F581C53-DDC3-4980-A9EA-8F3966A886D2} = {46FE5766-63FD-46C9-ACC9-8F813A553790}
 		{91449389-8398-4395-90FF-619EA01E4FEB} = {46FE5766-63FD-46C9-ACC9-8F813A553790}
 		{8EF7D644-A867-4633-947C-D74F71F441A0} = {8BF504B9-6168-444F-9494-27BFBB060270}
+		{2A91CEF3-0D30-4D63-8673-07781152F804} = {ECAC9D94-B822-4615-82B6-F108A3A9D7A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D0D3E376-DE68-459B-9C7A-E89E94DCCCF6}

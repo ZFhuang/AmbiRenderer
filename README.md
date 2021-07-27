@@ -9,18 +9,24 @@
 
 ### [2021/07/22] Ray Tracing The Next Week学习结束
 
-### 完善光追渲染器
+### 用C++实现简单的软光栅tinyrenderer
 
-- [x] 简单重构驱动代码
-- [ ] 加入图形界面
-- [ ] 实现层次超采样
-- [ ] 实现三角网格模型的读取和渲染
-- [ ] 实现多线程处理
-- [ ] 实现透明材质吸收率的设置
+https://github.com/ssloy/tinyrenderer
+
+- [x] Lesson 1: Bresenham’s Line Drawing Algorithm
+- [ ] Lesson 2: Triangle rasterization and back face culling
+- [ ] Lesson 3: Hidden faces removal (z buffer)
+- [ ] Lesson 4: Perspective projection
+- [ ] Lesson 5: Moving the camera
+- [ ] Lesson 6: Shaders for the software renderer
+- [ ] Lesson 6bis: tangent space normal mapping
+- [ ] Lesson 7: Shadow mapping
+- [ ] Lesson 8: Ambient occlusion
+- [ ] Lesson 9: Real OpenGL (GLSL) application
 
 **现状:**
 
-![Result](./Documents/Results/Ray_Tracing_The_Next_Week/Chapter10.jpg)
+![Result](./Documents/Results/tinyrenderer/)
 
 ## Notes
 
