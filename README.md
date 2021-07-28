@@ -15,7 +15,7 @@ https://github.com/ssloy/tinyrenderer
 
 - [x] Lesson 1: Bresenham’s Line Drawing Algorithm
 - [x] Lesson 2: Triangle rasterization and back face culling
-- [ ] Lesson 3: Hidden faces removal (z buffer)
+- [x] Lesson 3: Hidden faces removal (z buffer)
 - [ ] Lesson 4: Perspective projection
 - [ ] Lesson 5: Moving the camera
 - [ ] Lesson 6: Shaders for the software renderer
@@ -27,7 +27,7 @@ https://github.com/ssloy/tinyrenderer
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson1.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson3_Light.jpg)
 
 ## Notes
 

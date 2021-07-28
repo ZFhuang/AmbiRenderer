@@ -17,6 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{52DCF3BF-CE68-49FC-A6CD-873B4F1E4F99}"
 	ProjectSection(SolutionItems) = preProject
 		Resources\african_head.obj = Resources\african_head.obj
+		Resources\african_head_diffuse.tga = Resources\african_head_diffuse.tga
 		Resources\earthmap.jpg = Resources\earthmap.jpg
 	EndProjectSection
 EndProject

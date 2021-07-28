@@ -3,6 +3,9 @@
 #include<utility>
 #include<cstdlib>
 #include<string>
+#include <limits>
+#include <vector>
+#include <cmath>
 
 namespace PATH
 {
@@ -13,6 +16,24 @@ const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red = TGAColor(255, 0, 0, 255);
 const TGAColor green = TGAColor(0, 255, 0, 255);
 const TGAColor blue = TGAColor(0, 0, 255, 255);
+const int width = 800;
+const int height = 800;
+
+Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
+	// 计算三角形ABC中点P对应的重心坐标
+	// 任意两边的向量
+	Vec3f s[2];
+	for (int i = 2; i--; ) {
+		s[i][0] = C[i] - A[i];
+		s[i][1] = B[i] - A[i];
+		s[i][2] = A[i] - P[i];
+	}
+	// 叉乘得到的第三轴调整后就是重心坐标
+	Vec3f u = cross(s[0], s[1]);
+	if (std::abs(u[2]) > 1e-2) // dont forget that u[2] is integer. If it is zero then triangle ABC is degenerate
+		return Vec3f(1.f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
+	return Vec3f(-1, 1, 1); // in this case generate negative coordinates, it will be thrown away by the rasterizator
+}
 
 void line(Vec2i t0, Vec2i t1, TGAImage& image, TGAColor color) {
 	int x0 = t0.x;
@@ -54,33 +75,40 @@ void line(Vec2i t0, Vec2i t1, TGAImage& image, TGAColor color) {
 	}
 }
 
-void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage& image, TGAColor color) {
-	// 扫描线法绘制三角形
-	if (t0.y > t1.y) std::swap(t0, t1);
-	if (t0.y > t2.y) std::swap(t0, t2);
-	if (t1.y > t2.y) std::swap(t1, t2);
-	// 使用扫描算法来对三角形进行着色
-	int total_height = t2.y - t0.y;
-	// 按照y进行从下到上扫描
-	for (int i = 0; i < total_height; i++) {
-		// 用bool标记当前是上段还是下段
-		bool second_half = i > t1.y - t0.y || t1.y == t0.y;
-		int segment_height = second_half ? t2.y - t1.y : t1.y - t0.y;
-		float alpha = (float)i / total_height;
-		float beta = (float)(i - (second_half ? t1.y - t0.y : 0)) / segment_height;
-		Vec2i A = t0 + (t2 - t0) * alpha;
-		Vec2i B = second_half ? t1 + (t2 - t1) * beta : t0 + (t1 - t0) * beta;
-		if (A.x > B.x) std::swap(A, B);
-		for (int j = A.x; j <= B.x; j++) {
-			image.set(j, t0.y + i, color);
+void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, TGAColor color) {
+	// 绘制三角形
+	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+	Vec2f clamp(image.get_width() - 1, image.get_height() - 1);
+	// 获取三角形的二维包围盒
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 2; j++) {
+			bboxmin[j] = std::max(0.f, std::min(bboxmin[j], pts[i][j]));
+			bboxmax[j] = std::min(clamp[j], std::max(bboxmax[j], pts[i][j]));
+		}
+	}
+	Vec3f P;
+	for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
+		for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
+			// 通过重心坐标判断当前像素在不在三角形内
+			Vec3f bc_screen = barycentric(pts[0], pts[1], pts[2], P);
+			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) continue;
+			P.z = 0;
+			// 利用重心坐标插值三个顶点的z值得到目标像素的z值
+			for (int i = 0; i < 3; i++) P.z += pts[i][2] * bc_screen[i];
+			if (zbuffer[int(P.x)][int(P.y)] < P.z) {
+				// 在当前的Z缓冲前面时就要进行绘制
+				zbuffer[int(P.x)][int(P.y)] = P.z;
+				// 如果要渲染Z缓冲就使用下面的颜色
+				TGAColor z_color(int((P.z + 1) / 2 * 255), int((P.z + 1) / 2 * 255), int((P.z + 1) / 2 * 255), 255);
+				image.set(P.x, P.y, color);
+			}
 		}
 	}
 }
 
+
 void drawWireFrame(TGAImage& image, Model* model) {
-	// 绘制线框模型
-	int width = image.get_width();
-	int height = image.get_height();
 	// 遍历模型的每一个面
 	for (int i = 0; i < model->nfaces(); i++) {
 		std::vector<int> face = model->face(i);
@@ -100,54 +128,77 @@ void drawWireFrame(TGAImage& image, Model* model) {
 	}
 }
 
-void drawRandomColorModel(TGAImage& image, Model* model) {
-	int width = image.get_width();
-	int height = image.get_height();
-	for (int i = 0; i < model->nfaces(); i++) {
-		std::vector<int> face = model->face(i);
-		Vec2i screen_coords[3];
-		for (int j = 0; j < 3; j++) {
-			Vec3f world_coords = model->vert(face[j]);
-			// 这里将世界坐标中的模型缩放到屏幕中
-			screen_coords[j] = Vec2i((world_coords.x + 1.) * width / 2., (world_coords.y + 1.) * height / 2.);
+void rasterize(Vec2i p0, Vec2i p1, TGAImage& image, TGAColor color, int ybuffer[]) {
+	// 思路和光栅化差不多
+	if (p0.x > p1.x) {
+		std::swap(p0, p1);
+	}
+	for (int x = p0.x; x <= p1.x; x++) {
+		// 线性插值得到y值
+		float t = (x - p0.x) / (float)(p1.x - p0.x);
+		int y = p0.y * (1. - t) + p1.y * t;
+		// 只保留最大的y(离相机最近)
+		if (ybuffer[x] < y) {
+			ybuffer[x] = y;
+			image.set(x, 0, color);
 		}
-		// 用随机颜色来绘制三角形
-		triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(rand() % 255, rand() % 255, rand() % 255, 255));
 	}
 }
 
-void drawSimpleLightModel(TGAImage& image, Model* model, Vec3f light_dir) {
-	int width = image.get_width();
-	int height = image.get_height();
+Vec3f world2screen(Vec3f v) {
+	// 正交投影的转换方法, 此时的裁剪体是[-1, 1], 改变xy但是不改变z, 反之z只是一个相对值
+	return Vec3f(int((v.x + 1.) * width / 2. + .5), int((v.y + 1.) * height / 2. + .5), v.z);
+}
+
+float** initZBuffer() {
+	// 初始化Z缓冲为最大值
+	float** zbuffer = new float* [height];
+	for (int line = 0; line < height; line++) {
+		zbuffer[line] = new float[width];
+	}
+	for (int line = 0; line < height; line++) {
+		for (int item = 0; item < width; item++) {
+			zbuffer[line][item] = -std::numeric_limits<float>::max();
+		}
+	}
+	return zbuffer;
+}
+
+void deleteZBuffer(float** zbuffer) {
+	for (int line = 0; line < height; line++) {
+		delete zbuffer[line];
+	}
+	delete zbuffer;
+}
+
+void render(Model* model, TGAImage& image, Vec3f light_dir, float** zbuffer) {
 	for (int i = 0; i < model->nfaces(); i++) {
 		std::vector<int> face = model->face(i);
-		Vec2i screen_coords[3];
-		Vec3f world_coords[3];
-		for (int j = 0; j < 3; j++) {
-			Vec3f v = model->vert(face[j]);
-			screen_coords[j] = Vec2i((v.x + 1.) * width / 2., (v.y + 1.) * height / 2.);
-			world_coords[j] = v;
-		}
-		// 重载^运算符实现外积, 从而计算得到三角面片的法线
-		Vec3f n = (world_coords[2] - world_coords[0]) ^ (world_coords[1] - world_coords[0]);
-		// 单位化法线
+		// 计算光照因子
+		Vec3f n = cross(model->vert(face[1]) - model->vert(face[0]), model->vert(face[2]) - model->vert(face[0]));
 		n.normalize();
-		// 法线与光照方向的内积(向量积)得到标量光照强度
-		float intensity = n * light_dir;
+		float intensity = -(n * light_dir);
+		Vec3f pts[3];
+		// 三角形的每个面都需要转到屏幕空间中才能进行Z缓冲渲染
+		for (int i = 0; i < 3; i++) pts[i] = world2screen(model->vert(face[i]));
 		if (intensity > 0) {
-			triangle(screen_coords[0], screen_coords[1], screen_coords[2], image, TGAColor(intensity * 255, intensity * 255, intensity * 255, 255));
+			triangle(pts, zbuffer, image, TGAColor(intensity * 255, intensity * 255, intensity * 255, 255));
 		}
 	}
 }
 
 int main(int argc, char** argv) {
-	TGAImage image(1000, 1000, TGAImage::RGB);
+	TGAImage image(width, height, TGAImage::RGB);
 	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
 	Vec3f light_dir(0, 0, -1);
 
-	drawSimpleLightModel(image, model, light_dir);
+	float** zbuffer = initZBuffer();
+	render(model, image, light_dir, zbuffer);
 
 	image.flip_vertically();
 	image.write_tga_file("output.tga");
+
+	delete model;
+	deleteZBuffer(zbuffer);
 	return 0;
 }

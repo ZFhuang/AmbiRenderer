@@ -1,4 +1,6 @@
-﻿# Prerequisites
+﻿*.tga
+
+# Prerequisites
 *.d
 
 # Compiled Object files

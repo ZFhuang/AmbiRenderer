@@ -20,7 +20,7 @@ Model::Model(const char* filename) : verts_(), faces_() {
 		if (!line.compare(0, 2, "v ")) {
 			iss >> trash;
 			Vec3f v;
-			for (int i = 0; i < 3; i++) iss >> v.raw[i];
+			for (int i = 0; i < 3; i++) iss >> v[i];
 			verts_.push_back(v);
 		}
 		// 当以[f空格]开头, 代表是面, 压入面数组
