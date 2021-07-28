@@ -27,7 +27,7 @@ https://github.com/ssloy/tinyrenderer
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson3_Light.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson3_Texture.jpg)
 
 ## Notes
 

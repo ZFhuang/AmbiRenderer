@@ -35,6 +35,15 @@ Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
 	return Vec3f(-1, 1, 1); // in this case generate negative coordinates, it will be thrown away by the rasterizator
 }
 
+void initTextureCoord(Model* model, TGAImage& texture) {
+	int tex_width = texture.get_width();
+	int tex_height = texture.get_height();
+	for (int i = 0; i < model->ntex(); i++) {
+		model->tex_[i].x *= tex_width;
+		model->tex_[i].y *= tex_height;
+	}
+}
+
 void line(Vec2i t0, Vec2i t1, TGAImage& image, TGAColor color) {
 	int x0 = t0.x;
 	int y0 = t0.y;
@@ -75,7 +84,7 @@ void line(Vec2i t0, Vec2i t1, TGAImage& image, TGAColor color) {
 	}
 }
 
-void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, TGAColor color) {
+void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, float intensity, TGAImage& texture, Vec2f* texPts) {
 	// 绘制三角形
 	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
@@ -88,6 +97,7 @@ void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, TGAColor color) {
 		}
 	}
 	Vec3f P;
+	Vec2f T;
 	for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
 		for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
 			// 通过重心坐标判断当前像素在不在三角形内
@@ -96,34 +106,27 @@ void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, TGAColor color) {
 			P.z = 0;
 			// 利用重心坐标插值三个顶点的z值得到目标像素的z值
 			for (int i = 0; i < 3; i++) P.z += pts[i][2] * bc_screen[i];
+
 			if (zbuffer[int(P.x)][int(P.y)] < P.z) {
 				// 在当前的Z缓冲前面时就要进行绘制
 				zbuffer[int(P.x)][int(P.y)] = P.z;
 				// 如果要渲染Z缓冲就使用下面的颜色
 				TGAColor z_color(int((P.z + 1) / 2 * 255), int((P.z + 1) / 2 * 255), int((P.z + 1) / 2 * 255), 255);
+				// 从材质取值
+				// 利用重心坐标插值三个材质坐标得到目标像素的真实材质坐标
+				T.x = 0;
+				T.y = 0;
+				for (int i = 0; i < 3; i++) {
+					T.x += texPts[i][0] * bc_screen[i];
+					T.y += texPts[i][1] * bc_screen[i];
+				}
+				// 读取对应的材质颜色并与光照加权
+				TGAColor color = texture.get(int(T.x), int(T.y));
+				color.r *= intensity;
+				color.g *= intensity;
+				color.b *= intensity;
 				image.set(P.x, P.y, color);
 			}
-		}
-	}
-}
-
-
-void drawWireFrame(TGAImage& image, Model* model) {
-	// 遍历模型的每一个面
-	for (int i = 0; i < model->nfaces(); i++) {
-		std::vector<int> face = model->face(i);
-		// 遍历面的每一条边
-		for (int j = 0; j < 3; j++) {
-			// 利用面的两个顶点序号从顶点数组中得到具体的顶点坐标
-			Vec3f v0 = model->vert(face[j]);
-			Vec3f v1 = model->vert(face[(j + 1) % 3]);
-			// 样例模型的坐标是归一化过的(-1,1), 因此通过这样的映射令其填充画幅
-			int x0 = (v0.x + 1.) * width / 2.;
-			int y0 = (v0.y + 1.) * height / 2.;
-			int x1 = (v1.x + 1.) * width / 2.;
-			int y1 = (v1.y + 1.) * height / 2.;
-			// 绘制线
-			line(Vec2i(x0, y0), Vec2i(x1, y1), image, white);
 		}
 	}
 }
@@ -171,29 +174,38 @@ void deleteZBuffer(float** zbuffer) {
 	delete zbuffer;
 }
 
-void render(Model* model, TGAImage& image, Vec3f light_dir, float** zbuffer) {
+void render(Model* model, TGAImage& image, Vec3f light_dir, float** zbuffer, TGAImage& texture) {
 	for (int i = 0; i < model->nfaces(); i++) {
 		std::vector<int> face = model->face(i);
 		// 计算光照因子
-		Vec3f n = cross(model->vert(face[1]) - model->vert(face[0]), model->vert(face[2]) - model->vert(face[0]));
+		Vec3f n = cross(model->vert(face[1 * 2]) - model->vert(face[0 * 2]), model->vert(face[2 * 2]) - model->vert(face[0 * 2]));
 		n.normalize();
 		float intensity = -(n * light_dir);
 		Vec3f pts[3];
 		// 三角形的每个面都需要转到屏幕空间中才能进行Z缓冲渲染
-		for (int i = 0; i < 3; i++) pts[i] = world2screen(model->vert(face[i]));
+		for (int i = 0; i < 3; i++) pts[i] = world2screen(model->vert(face[i * 2]));
+		// 获得顶点材质坐标
+		Vec2f texPts[3];
+		for (int i = 0; i < 3; i++) texPts[i] = model->tex_[face[i * 2 + 1]];
 		if (intensity > 0) {
-			triangle(pts, zbuffer, image, TGAColor(intensity * 255, intensity * 255, intensity * 255, 255));
+			triangle(pts, zbuffer, image, intensity, texture, texPts);
 		}
 	}
 }
 
 int main(int argc, char** argv) {
 	TGAImage image(width, height, TGAImage::RGB);
+	TGAImage texture;
+	bool tex_success = texture.read_tga_file((PATH::RESOURCES + "african_head_diffuse.tga").c_str());
+	assert(tex_success);
+	texture.flip_vertically();
 	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
+	initTextureCoord(model, texture);
+
 	Vec3f light_dir(0, 0, -1);
 
 	float** zbuffer = initZBuffer();
-	render(model, image, light_dir, zbuffer);
+	render(model, image, light_dir, zbuffer, texture);
 
 	image.flip_vertically();
 	image.write_tga_file("output.tga");
