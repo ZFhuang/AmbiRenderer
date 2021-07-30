@@ -9,25 +9,25 @@
 
 ### [2021/07/22] Ray Tracing The Next Week学习结束
 
-### 用C++实现简单的软光栅tinyrenderer
+### C++简单软光栅tinyrenderer
 
 https://github.com/ssloy/tinyrenderer
 
 - [x] Lesson 1: Bresenham’s Line Drawing Algorithm
 - [x] Lesson 2: Triangle rasterization and back face culling
 - [x] Lesson 3: Hidden faces removal (z buffer)
-- [ ] Lesson 4: Perspective projection
+- [x] Lesson 4: Perspective projection
 - [ ] Lesson 5: Moving the camera
 - [ ] Lesson 6: Shaders for the software renderer
 - [ ] Lesson 6bis: tangent space normal mapping
 - [ ] Lesson 7: Shadow mapping
 - [ ] Lesson 8: Ambient occlusion
 - [ ] Lesson 9: Real OpenGL (GLSL) application
-- [ ] Lesson2的画三角形需要修改为重心坐标包围盒法
+- [ ] 用四元数来进行旋转
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson3_Texture.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson4.jpg)
 
 ## Notes
 

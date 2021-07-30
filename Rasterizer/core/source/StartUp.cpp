@@ -174,7 +174,7 @@ void deleteZBuffer(float** zbuffer) {
 	delete zbuffer;
 }
 
-void render(Model* model, TGAImage& image, Vec3f light_dir, float** zbuffer, TGAImage& texture) {
+void render(Model* model, TGAImage& image, Vec3f light_dir, float** zbuffer, TGAImage& texture, Matrix viewProjMat) {
 	for (int i = 0; i < model->nfaces(); i++) {
 		std::vector<int> face = model->face(i);
 		// 计算光照因子
@@ -183,13 +183,78 @@ void render(Model* model, TGAImage& image, Vec3f light_dir, float** zbuffer, TGA
 		float intensity = -(n * light_dir);
 		Vec3f pts[3];
 		// 三角形的每个面都需要转到屏幕空间中才能进行Z缓冲渲染
-		for (int i = 0; i < 3; i++) pts[i] = world2screen(model->vert(face[i * 2]));
+		for (int i = 0; i < 3; i++) {
+			Vec4f v = viewProjMat * Vec4f(model->vert(face[i * 2]).x, model->vert(face[i * 2]).y, model->vert(face[i * 2]).z, 1.0f);
+			pts[i] = world2screen(Vec3f(v.x / v.w, v.y / v.w, v.z / v.w));
+		}
+
 		// 获得顶点材质坐标
 		Vec2f texPts[3];
 		for (int i = 0; i < 3; i++) texPts[i] = model->tex_[face[i * 2 + 1]];
 		if (intensity > 0) {
 			triangle(pts, zbuffer, image, intensity, texture, texPts);
 		}
+	}
+}
+
+Matrix makeModelRotationMat(Vec3f xyz) {
+	Matrix matX = Matrix::identity();
+	matX.set_col(1, Vec4f(0.0f, cos(xyz.x), sin(xyz.x), 0.0f));
+	matX.set_col(2, Vec4f(0.0f, -sin(xyz.x), cos(xyz.x), 0.0f));
+	Matrix matY = Matrix::identity();
+	matY.set_col(0, Vec4f(cos(xyz.y), 0.0f, -sin(xyz.y), 0.0f));
+	matY.set_col(2, Vec4f(sin(xyz.y), 0.0f, cos(xyz.y), 0.0f));
+	Matrix matZ = Matrix::identity();
+	matZ.set_col(0, Vec4f(cos(xyz.z), sin(xyz.z), 0.0f, 0.0f));
+	matZ.set_col(1, Vec4f(-sin(xyz.z), cos(xyz.z), 0.0f, 0.0f));
+	return matZ * matY * matX;
+}
+
+Matrix makeModelTranslationMat(Vec3f xyz) {
+	Matrix mat = Matrix::identity();
+	mat.set_col(3, Vec4f(xyz.x, xyz.y, xyz.z, 1.0f));
+	return mat;
+}
+
+Matrix makeModelScalingMat(Vec3f xyz) {
+	Matrix mat = Matrix::identity();
+	mat[0][0] = xyz.x;
+	mat[1][1] = xyz.y;
+	mat[2][2] = xyz.z;
+	return mat;
+}
+
+Matrix makeViewProjMat(Vec3f xyz) {
+	Matrix mat = Matrix::identity();
+	if (xyz.x != 0)
+		mat[3][0] = -1 / xyz.x;
+	if (xyz.y != 0)
+		mat[3][1] = -1 / xyz.y;
+	if (xyz.z != 0)
+		mat[3][2] = -1 / xyz.z;
+	return mat;
+}
+
+Vec3f calModelCenter(Model* model) {
+	Vec3f c = Vec3f(0.0f, 0.0f, 0.0f);
+	for (int i = 0; i < model->nverts(); i++) {
+		c = c + model->vert(i);
+	}
+	c = c / model->nverts();
+	return c;
+}
+
+void applyModelMats(Matrix& mat, Model* model) {
+	for (int i = 0; i < model->nverts(); i++) {
+		Vec4f v = mat * Vec4f(model->vert(i).x, model->vert(i).y, model->vert(i).z, 1.0f);
+		model->verts_[i] = Vec3f(v.x, v.y, v.z);
+	}
+}
+
+void applyViewMats(Matrix& mat, Model* model) {
+	for (int i = 0; i < model->nverts(); i++) {
+		Vec4f v = mat * Vec4f(model->vert(i).x, model->vert(i).y, model->vert(i).z, 1.0f);
+		model->verts_[i] = Vec3f(v.x / v.w, v.y / v.w, v.z / v.w);
 	}
 }
 
@@ -201,11 +266,23 @@ int main(int argc, char** argv) {
 	texture.flip_vertically();
 	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
 	initTextureCoord(model, texture);
-
 	Vec3f light_dir(0, 0, -1);
 
+	// 模型变换矩阵
+	//Matrix transMat = makeModelTranslationMat(calModelCenter(model));
+	//Matrix scaleMat = makeModelScalingMat(Vec3f(2, 1, 1));
+	//Matrix rotateMat = makeModelRotationMat(Vec3f(1, 1, 1));
+	//Matrix neg_transMat = transMat.invert();
+	//Matrix transformMat = transMat * rotateMat * scaleMat * neg_transMat;
+	Matrix transMat = makeModelTranslationMat(Vec3f(0, 0, -0.5));
+	Matrix transformMat = transMat;
+	applyModelMats(transformMat, model);
+
+	// 视图变换矩阵
+	Matrix projMat = makeViewProjMat(Vec3f(0, 0, 2));
+
 	float** zbuffer = initZBuffer();
-	render(model, image, light_dir, zbuffer, texture);
+	render(model, image, light_dir, zbuffer, texture, projMat);
 
 	image.flip_vertically();
 	image.write_tga_file("output.tga");
