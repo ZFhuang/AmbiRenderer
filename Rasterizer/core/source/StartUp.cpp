@@ -18,16 +18,23 @@ const TGAColor green = TGAColor(0, 255, 0, 255);
 const TGAColor blue = TGAColor(0, 0, 255, 255);
 const int width = 800;
 const int height = 800;
+const int depth = 255;
 const Vec3f light_dir = Vec3f(1, -1, 1).normalize();
+Matrix viewMat = Matrix::identity();
+Matrix projMat = Matrix::identity();
+Matrix viewportMat = Matrix::identity();
+Matrix transformMat = Matrix::identity();
+Vec3f eye(1, 1, 3);
+Vec3f center(0, 0, 0);
 
 Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
 	// 计算三角形ABC中点P对应的重心坐标
 	// 任意两边的向量
 	Vec3f s[2];
 	for (int i = 2; i--; ) {
-		s[i][0] = C[i] - A[i];
-		s[i][1] = B[i] - A[i];
-		s[i][2] = A[i] - P[i];
+		s[i][0] = int(C[i]) - int(A[i]);
+		s[i][1] = int(B[i]) - int(A[i]);
+		s[i][2] = int(A[i]) - int(P[i]);
 	}
 	// 叉乘得到的第三轴调整后就是重心坐标
 	Vec3f u = cross(s[0], s[1]);
@@ -85,7 +92,7 @@ void line(Vec2i t0, Vec2i t1, TGAImage& image, TGAColor color) {
 	}
 }
 
-void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, Vec3f* norms, TGAImage* texture = nullptr, Vec2f* texPts = nullptr) {
+void triangle(Vec3f* pts, int** zbuffer, TGAImage& image, Vec3f* norms, TGAImage* texture = nullptr, Vec2f* texPts = nullptr) {
 	// 绘制三角形
 	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
@@ -142,74 +149,63 @@ void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, Vec3f* norms, TGAIma
 				color.r *= intensity;
 				color.g *= intensity;
 				color.b *= intensity;
-
+				//TGAColor z_color(int((P.z + 1) / 2 * 255), int((P.z + 1) / 2 * 255), int((P.z + 1) / 2 * 255), 255);
 				image.set(P.x, P.y, color);
 			}
 		}
 	}
 }
 
-void rasterize(Vec2i p0, Vec2i p1, TGAImage& image, TGAColor color, int ybuffer[]) {
-	// 思路和光栅化差不多
-	if (p0.x > p1.x) {
-		std::swap(p0, p1);
-	}
-	for (int x = p0.x; x <= p1.x; x++) {
-		// 线性插值得到y值
-		float t = (x - p0.x) / (float)(p1.x - p0.x);
-		int y = p0.y * (1. - t) + p1.y * t;
-		// 只保留最大的y(离相机最近)
-		if (ybuffer[x] < y) {
-			ybuffer[x] = y;
-			image.set(x, 0, color);
-		}
-	}
-}
-
-Vec3f world2screen(Vec3f v) {
-	// 正交投影的转换方法, 此时的裁剪体是[-1, 1], 改变xy但是不改变z, 反之z只是一个相对值
-	return Vec3f(int((v.x + 1.) * width / 2. + .5), int((v.y + 1.) * height / 2. + .5), v.z);
-}
-
-float** initZBuffer() {
+int** initZBuffer() {
 	// 初始化Z缓冲为最大值
-	float** zbuffer = new float* [height];
+	int** zbuffer = new int* [height];
 	for (int line = 0; line < height; line++) {
-		zbuffer[line] = new float[width];
+		zbuffer[line] = new int[width];
 	}
 	for (int line = 0; line < height; line++) {
 		for (int item = 0; item < width; item++) {
-			zbuffer[line][item] = -std::numeric_limits<float>::max();
+			zbuffer[line][item] = std::numeric_limits<int>::min();
 		}
 	}
 	return zbuffer;
 }
 
-void deleteZBuffer(float** zbuffer) {
+void deleteZBuffer(int** zbuffer) {
 	for (int line = 0; line < height; line++) {
 		delete zbuffer[line];
 	}
 	delete zbuffer;
 }
 
-void render(Model* model, TGAImage& image, Matrix viewProjMat, float** zbuffer, TGAImage* texture = nullptr) {
+void applyModelMats(Matrix& mat, Model* model) {
+	for (int i = 0; i < model->nverts(); i++) {
+		Vec4f v = mat * Vec4f(model->vert(i).x, model->vert(i).y, model->vert(i).z, 1.0f);
+		Vec4f n = mat * Vec4f(model->norm(i).x, model->norm(i).y, model->norm(i).z, 0.0f);
+		model->verts_[i] = Vec3f(v.x, v.y, v.z);
+		model->norms_[i] = Vec3f(n.x, n.y, n.z);
+	}
+}
+
+void render(Model* model, TGAImage& image, int** zbuffer, TGAImage* texture = nullptr) {
+	Matrix all_mat = viewportMat * projMat * viewMat;
+
 	for (int i = 0; i < model->nfaces(); i++) {
 		std::vector<int> face = model->face(i);
 
 		Vec3f n = cross(model->vert(face[1 * 2]) - model->vert(face[0 * 2]), model->vert(face[2 * 2]) - model->vert(face[0 * 2]));
 
-		// 透视除法得到顶点坐标
+		// 矩阵连乘得到屏幕空间的顶点
 		Vec3f pts[3];
 		for (int i = 0; i < 3; i++) {
-			Vec4f v = viewProjMat * Vec4f(model->vert(face[i * 2]).x, model->vert(face[i * 2]).y, model->vert(face[i * 2]).z, 1.0f);
-			pts[i] = world2screen(Vec3f(v.x / v.w, v.y / v.w, v.z / v.w));
+			Vec4f v = all_mat * Vec4f(model->vert(face[i * 2]).x, model->vert(face[i * 2]).y, model->vert(face[i * 2]).z, 1.0f);
+			pts[i] = Vec3f(v.x / v.w, v.y / v.w, v.z / v.w);
 		}
 
 		// 顶点法线值
 		Vec3f norms[3];
 		if (model->nnorm() != 0) {
 			for (int i = 0; i < 3; i++) {
-				norms[i] = model->norm(face[i * 2]);
+				norms[i] = model->norm(face[i * 2]).normalize();
 			}
 		}
 		else {
@@ -259,7 +255,7 @@ Matrix makeModelScalingMat(Vec3f xyz) {
 	return mat;
 }
 
-Matrix makeViewProjMat(Vec3f xyz) {
+Matrix makeProjMat(Vec3f xyz) {
 	Matrix mat = Matrix::identity();
 	if (xyz.x != 0)
 		mat[3][0] = -1 / xyz.x;
@@ -270,6 +266,38 @@ Matrix makeViewProjMat(Vec3f xyz) {
 	return mat;
 }
 
+Matrix makeViewMat(Vec3f eye, Vec3f center, Vec3f up) {
+	// 先构建目标坐标系的三个轴
+	Vec3f z = (eye - center).normalize();
+	Vec3f x = cross(up, z).normalize();
+	Vec3f y = cross(z, x).normalize();
+	// 构造方向矩阵和移动矩阵 
+	Matrix Minv = Matrix::identity();
+	Matrix Tr = Matrix::identity();
+	for (int i = 0; i < 3; i++) {
+		// 方向矩阵部分
+		Minv[0][i] = x[i];
+		Minv[1][i] = y[i];
+		Minv[2][i] = z[i];
+		// 视点移动矩阵部分
+		Tr[i][3] = -center[i];
+	}
+	// 相乘得到相机变换矩阵
+	return Minv * Tr;
+}
+
+Matrix makeViewportMat(int x, int y, int w, int h) {
+	Matrix mat = Matrix::identity();
+	mat[0][3] = x + w / 2.f;
+	mat[1][3] = y + h / 2.f;
+	mat[2][3] = depth / 2.f;
+
+	mat[0][0] = w / 2.f;
+	mat[1][1] = h / 2.f;
+	mat[2][2] = depth / 2.f;
+	return mat;
+}
+
 Vec3f calModelCenter(Model* model) {
 	Vec3f c = Vec3f(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < model->nverts(); i++) {
@@ -277,22 +305,6 @@ Vec3f calModelCenter(Model* model) {
 	}
 	c = c / model->nverts();
 	return c;
-}
-
-void applyModelMats(Matrix& mat, Model* model) {
-	for (int i = 0; i < model->nverts(); i++) {
-		Vec4f v = mat * Vec4f(model->vert(i).x, model->vert(i).y, model->vert(i).z, 1.0f);
-		Vec4f n = mat * Vec4f(model->norm(i).x, model->norm(i).y, model->norm(i).z, 0.0f);
-		model->verts_[i] = Vec3f(v.x, v.y, v.z);
-		model->norms_[i] = Vec3f(n.x, n.y, n.z).normalize();
-	}
-}
-
-void applyViewMats(Matrix& mat, Model* model) {
-	for (int i = 0; i < model->nverts(); i++) {
-		Vec4f v = mat * Vec4f(model->vert(i).x, model->vert(i).y, model->vert(i).z, 1.0f);
-		model->verts_[i] = Vec3f(v.x / v.w, v.y / v.w, v.z / v.w);
-	}
 }
 
 int main(int argc, char** argv) {
@@ -306,19 +318,20 @@ int main(int argc, char** argv) {
 
 	// 模型变换矩阵
 	//Matrix transMat = makeModelTranslationMat(calModelCenter(model));
-	//Matrix scaleMat = makeModelScalingMat(Vec3f(2, 1, 1));
-	Matrix rotateMat = makeModelRotationMat(Vec3f(1, 1, 1));
+	Matrix scaleMat = makeModelScalingMat(Vec3f(1, 1, 1));
+	Matrix rotateMat = makeModelRotationMat(Vec3f(0, 0, 0));
 	//Matrix neg_transMat = transMat.invert();
-	//Matrix transformMat = transMat * rotateMat * scaleMat * neg_transMat;
-	Matrix transMat = makeModelTranslationMat(Vec3f(0, 0, -0.5));
-	Matrix transformMat = transMat * rotateMat;
+	Matrix transMat = makeModelTranslationMat(Vec3f(0, 0, 0));
+	transformMat = transMat * rotateMat * scaleMat;
 	applyModelMats(transformMat, model);
 
-	// 视图变换矩阵
-	Matrix projMat = makeViewProjMat(Vec3f(0, 0, 2));
+	viewMat = makeViewMat(eye, center, Vec3f(0, 1, 0));
+	viewportMat = makeViewportMat(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
+	projMat = Matrix::identity();
+	projMat[3][2] = -1.f / (eye - center).norm();
 
-	float** zbuffer = initZBuffer();
-	render(model, image, projMat, zbuffer, nullptr);
+	int** zbuffer = initZBuffer();
+	render(model, image, zbuffer, &texture);
 
 	image.flip_vertically();
 	image.write_tga_file("output.tga");

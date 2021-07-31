@@ -17,7 +17,7 @@ https://github.com/ssloy/tinyrenderer
 - [x] Lesson 2: Triangle rasterization and back face culling
 - [x] Lesson 3: Hidden faces removal (z buffer)
 - [x] Lesson 4: Perspective projection
-- [ ] Lesson 5: Moving the camera
+- [x] Lesson 5: Moving the camera
 - [ ] Lesson 6: Shaders for the software renderer
 - [ ] Lesson 6bis: tangent space normal mapping
 - [ ] Lesson 7: Shadow mapping
@@ -27,7 +27,7 @@ https://github.com/ssloy/tinyrenderer
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson4.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson5.jpg)
 
 ## Notes
 
