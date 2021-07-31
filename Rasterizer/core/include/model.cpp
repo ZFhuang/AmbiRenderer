@@ -5,7 +5,7 @@
 #include <vector>
 #include "model.h"
 
-Model::Model(const char* filename) : verts_(), faces_(), tex_() {
+Model::Model(const char* filename) : verts_(), faces_(), tex_(), norms_() {
 	// 分析Obj文件
 	std::ifstream in;
 	in.open(filename, std::ifstream::in);
@@ -45,6 +45,12 @@ Model::Model(const char* filename) : verts_(), faces_(), tex_() {
 			for (int i = 0; i < 2; i++) iss >> vt[i];
 			tex_.push_back(vt);
 		}
+		else if (!line.compare(0, 4, "vn  ")) {
+			iss >> trash >> trash;
+			Vec3f vn;
+			for (int i = 0; i < 3; i++) iss >> vn[i];
+			norms_.push_back(vn);
+		}
 	}
 	std::cerr << "# v# " << verts_.size() << " f# " << faces_.size() << std::endl;
 }
@@ -65,10 +71,20 @@ int Model::ntex()
 	return (int)tex_.size();
 }
 
+int Model::nnorm()
+{
+	return (int)norms_.size();
+}
+
 std::vector<int> Model::face(int idx) {
 	return faces_[idx];
 }
 
 Vec3f Model::vert(int i) {
 	return verts_[i];
+}
+
+Vec3f Model::norm(int i)
+{
+	return norms_[i];
 }

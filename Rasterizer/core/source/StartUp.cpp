@@ -18,6 +18,7 @@ const TGAColor green = TGAColor(0, 255, 0, 255);
 const TGAColor blue = TGAColor(0, 0, 255, 255);
 const int width = 800;
 const int height = 800;
+const Vec3f light_dir = Vec3f(1, -1, 1).normalize();
 
 Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
 	// 计算三角形ABC中点P对应的重心坐标
@@ -84,7 +85,7 @@ void line(Vec2i t0, Vec2i t1, TGAImage& image, TGAColor color) {
 	}
 }
 
-void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, float intensity, TGAImage& texture, Vec2f* texPts) {
+void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, Vec3f* norms, TGAImage* texture = nullptr, Vec2f* texPts = nullptr) {
 	// 绘制三角形
 	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
@@ -97,34 +98,51 @@ void triangle(Vec3f* pts, float** zbuffer, TGAImage& image, float intensity, TGA
 		}
 	}
 	Vec3f P;
-	Vec2f T;
 	for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
 		for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
-			// 通过重心坐标判断当前像素在不在三角形内
+			// 只绘制三角形内的像素
 			Vec3f bc_screen = barycentric(pts[0], pts[1], pts[2], P);
-			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) continue;
-			P.z = 0;
+			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) {
+				continue;
+			}
+
 			// 利用重心坐标插值三个顶点的z值得到目标像素的z值
+			P.z = 0;
 			for (int i = 0; i < 3; i++) P.z += pts[i][2] * bc_screen[i];
 
-			if (zbuffer[int(P.x)][int(P.y)] < P.z) {
-				// 在当前的Z缓冲前面时就要进行绘制
-				zbuffer[int(P.x)][int(P.y)] = P.z;
-				// 如果要渲染Z缓冲就使用下面的颜色
-				TGAColor z_color(int((P.z + 1) / 2 * 255), int((P.z + 1) / 2 * 255), int((P.z + 1) / 2 * 255), 255);
-				// 从材质取值
-				// 利用重心坐标插值三个材质坐标得到目标像素的真实材质坐标
-				T.x = 0;
-				T.y = 0;
+			// 只绘制靠前的像素
+			if (zbuffer[int(P.x)][int(P.y)] > P.z) {
+				continue;
+			}
+			zbuffer[int(P.x)][int(P.y)] = P.z;
+			TGAColor color = white;
+
+			if (texture != nullptr) {
+				// 利用重心坐标插值材质坐标
+				Vec2f T(0, 0);
 				for (int i = 0; i < 3; i++) {
-					T.x += texPts[i][0] * bc_screen[i];
-					T.y += texPts[i][1] * bc_screen[i];
+					T.x += texPts[i].x * bc_screen[i];
+					T.y += texPts[i].y * bc_screen[i];
 				}
 				// 读取对应的材质颜色并与光照加权
-				TGAColor color = texture.get(int(T.x), int(T.y));
+				color = texture->get(int(T.x), int(T.y));
+			}
+
+			// 利用重心坐标插值三个顶点的法线值
+			Vec3f N(0, 0, 0);
+			for (int i = 0; i < 3; i++) {
+				N.x += norms[i].x * bc_screen[i];
+				N.y += norms[i].y * bc_screen[i];
+				N.z += norms[i].z * bc_screen[i];
+			}
+
+			N.normalize();
+			float intensity = N * light_dir;
+			if (intensity > 0) {
 				color.r *= intensity;
 				color.g *= intensity;
 				color.b *= intensity;
+
 				image.set(P.x, P.y, color);
 			}
 		}
@@ -174,26 +192,43 @@ void deleteZBuffer(float** zbuffer) {
 	delete zbuffer;
 }
 
-void render(Model* model, TGAImage& image, Vec3f light_dir, float** zbuffer, TGAImage& texture, Matrix viewProjMat) {
+void render(Model* model, TGAImage& image, Matrix viewProjMat, float** zbuffer, TGAImage* texture = nullptr) {
 	for (int i = 0; i < model->nfaces(); i++) {
 		std::vector<int> face = model->face(i);
-		// 计算光照因子
+
 		Vec3f n = cross(model->vert(face[1 * 2]) - model->vert(face[0 * 2]), model->vert(face[2 * 2]) - model->vert(face[0 * 2]));
-		n.normalize();
-		float intensity = -(n * light_dir);
+
+		// 透视除法得到顶点坐标
 		Vec3f pts[3];
-		// 三角形的每个面都需要转到屏幕空间中才能进行Z缓冲渲染
 		for (int i = 0; i < 3; i++) {
 			Vec4f v = viewProjMat * Vec4f(model->vert(face[i * 2]).x, model->vert(face[i * 2]).y, model->vert(face[i * 2]).z, 1.0f);
 			pts[i] = world2screen(Vec3f(v.x / v.w, v.y / v.w, v.z / v.w));
 		}
 
-		// 获得顶点材质坐标
-		Vec2f texPts[3];
-		for (int i = 0; i < 3; i++) texPts[i] = model->tex_[face[i * 2 + 1]];
-		if (intensity > 0) {
-			triangle(pts, zbuffer, image, intensity, texture, texPts);
+		// 顶点法线值
+		Vec3f norms[3];
+		if (model->nnorm() != 0) {
+			for (int i = 0; i < 3; i++) {
+				norms[i] = model->norm(face[i * 2]);
+			}
 		}
+		else {
+			n.normalize();
+			for (int i = 0; i < 3; i++) {
+				norms[i] = n;
+			}
+		}
+
+		// 顶点材质坐标
+		Vec2f texPts[3];
+		if (texture != nullptr) {
+			for (int i = 0; i < 3; i++) {
+				texPts[i] = model->tex_[face[i * 2 + 1]];
+			}
+		}
+
+		// 绘制三角形
+		triangle(pts, zbuffer, image, norms, texture, texPts);
 	}
 }
 
@@ -247,7 +282,9 @@ Vec3f calModelCenter(Model* model) {
 void applyModelMats(Matrix& mat, Model* model) {
 	for (int i = 0; i < model->nverts(); i++) {
 		Vec4f v = mat * Vec4f(model->vert(i).x, model->vert(i).y, model->vert(i).z, 1.0f);
+		Vec4f n = mat * Vec4f(model->norm(i).x, model->norm(i).y, model->norm(i).z, 0.0f);
 		model->verts_[i] = Vec3f(v.x, v.y, v.z);
+		model->norms_[i] = Vec3f(n.x, n.y, n.z).normalize();
 	}
 }
 
@@ -266,23 +303,22 @@ int main(int argc, char** argv) {
 	texture.flip_vertically();
 	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
 	initTextureCoord(model, texture);
-	Vec3f light_dir(0, 0, -1);
 
 	// 模型变换矩阵
 	//Matrix transMat = makeModelTranslationMat(calModelCenter(model));
 	//Matrix scaleMat = makeModelScalingMat(Vec3f(2, 1, 1));
-	//Matrix rotateMat = makeModelRotationMat(Vec3f(1, 1, 1));
+	Matrix rotateMat = makeModelRotationMat(Vec3f(1, 1, 1));
 	//Matrix neg_transMat = transMat.invert();
 	//Matrix transformMat = transMat * rotateMat * scaleMat * neg_transMat;
 	Matrix transMat = makeModelTranslationMat(Vec3f(0, 0, -0.5));
-	Matrix transformMat = transMat;
+	Matrix transformMat = transMat * rotateMat;
 	applyModelMats(transformMat, model);
 
 	// 视图变换矩阵
 	Matrix projMat = makeViewProjMat(Vec3f(0, 0, 2));
 
 	float** zbuffer = initZBuffer();
-	render(model, image, light_dir, zbuffer, texture, projMat);
+	render(model, image, projMat, zbuffer, nullptr);
 
 	image.flip_vertically();
 	image.write_tga_file("output.tga");

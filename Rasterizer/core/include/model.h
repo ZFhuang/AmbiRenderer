@@ -13,10 +13,13 @@ public:
 	int nverts();
 	int nfaces();
 	int ntex();
+	int nnorm();
 	Vec3f vert(int i);
+	Vec3f norm(int i);
 	std::vector<int> face(int idx);
 	std::vector<Vec2f> tex_;
 	std::vector<Vec3f> verts_;
+	std::vector<Vec3f> norms_;
 };
 
 #endif //__MODEL_H__
