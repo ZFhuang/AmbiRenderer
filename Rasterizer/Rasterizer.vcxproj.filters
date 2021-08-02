@@ -28,6 +28,9 @@
     <ClInclude Include="core\include\model.h">
       <Filter>Core\include</Filter>
     </ClInclude>
+    <ClInclude Include="core\include\gl_soft.h">
+      <Filter>Core\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\include\tgaimage.cpp">
@@ -40,6 +43,9 @@
       <Filter>Core\source</Filter>
     </ClCompile>
     <ClCompile Include="core\include\model.cpp">
+      <Filter>Core\include</Filter>
+    </ClCompile>
+    <ClCompile Include="core\include\gl_soft.cpp">
       <Filter>Core\include</Filter>
     </ClCompile>
   </ItemGroup>

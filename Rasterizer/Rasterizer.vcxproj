@@ -141,10 +141,12 @@
   <ItemGroup>
     <ClInclude Include="core\include\geometry.h" />
     <ClInclude Include="core\include\model.h" />
+    <ClInclude Include="core\include\gl_soft.h" />
     <ClInclude Include="core\include\tgaimage.h" />
     <ClInclude Include="core\source\Rasterizer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="core\include\gl_soft.cpp" />
     <ClCompile Include="core\include\model.cpp" />
     <ClCompile Include="core\include\tgaimage.cpp" />
     <ClCompile Include="core\source\Rasterizer.cpp" />
