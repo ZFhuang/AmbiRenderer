@@ -14,6 +14,9 @@
     <Filter Include="Core\source">
       <UniqueIdentifier>{4a11b858-8ae2-45d9-8c08-cd549920454c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{c5f02cc3-68d5-443d-8f28-e03bcda60d37}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\include\tgaimage.h">
@@ -47,6 +50,12 @@
     </ClCompile>
     <ClCompile Include="core\include\gl_soft.cpp">
       <Filter>Core\include</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\v_Basic.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="shaders\f_Gouraud.cpp">
+      <Filter>Shaders</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

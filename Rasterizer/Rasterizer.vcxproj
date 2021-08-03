@@ -151,6 +151,8 @@
     <ClCompile Include="core\include\tgaimage.cpp" />
     <ClCompile Include="core\source\Rasterizer.cpp" />
     <ClCompile Include="core\source\StartUp.cpp" />
+    <ClCompile Include="shaders\f_Gouraud.cpp" />
+    <ClCompile Include="shaders\v_Basic.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

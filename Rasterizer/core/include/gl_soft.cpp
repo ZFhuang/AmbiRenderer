@@ -1,13 +1,13 @@
 ﻿#include "gl_soft.h"
 
-Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
+Vec3f barycentric(Vec3i A, Vec3i B, Vec3i C, Vec3i P) {
 	// 计算三角形ABC中点P对应的重心坐标
 	// 任意两边的向量
 	Vec3f s[2];
 	for (int i = 2; i--; ) {
-		s[i][0] = int(C[i]) - int(A[i]);
-		s[i][1] = int(B[i]) - int(A[i]);
-		s[i][2] = int(A[i]) - int(P[i]);
+		s[i][0] = C[i] - A[i];
+		s[i][1] = B[i] - A[i];
+		s[i][2] = A[i] - P[i];
 	}
 	// 叉乘得到的第三轴调整后就是重心坐标
 	Vec3f u = cross(s[0], s[1]);
@@ -82,7 +82,7 @@ Matrix makeViewportMat(int x, int y, int w, int h) {
 	return mat;
 }
 
-int** makeZBuffer() {
+int** makeZBuffer(int height, int width) {
 	// 初始化Z缓冲为最大值
 	int** zbuffer = new int* [height];
 	for (int line = 0; line < height; line++) {
@@ -96,7 +96,7 @@ int** makeZBuffer() {
 	return zbuffer;
 }
 
-void deleteZBuffer(int** zbuffer) {
+void deleteZBuffer(int** zbuffer, int height) {
 	for (int line = 0; line < height; line++) {
 		delete zbuffer[line];
 	}
