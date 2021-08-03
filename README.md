@@ -18,16 +18,19 @@ https://github.com/ssloy/tinyrenderer
 - [x] Lesson 3: Hidden faces removal (z buffer)
 - [x] Lesson 4: Perspective projection
 - [x] Lesson 5: Moving the camera
-- [ ] Lesson 6: Shaders for the software renderer
+- [x] Lesson 6: Shaders for the software renderer
 - [ ] Lesson 6bis: tangent space normal mapping
 - [ ] Lesson 7: Shadow mapping
 - [ ] Lesson 8: Ambient occlusion
 - [ ] Lesson 9: Real OpenGL (GLSL) application
 - [ ] 用四元数来进行旋转
+- [ ] 完善渲染管线的组成
+- [ ] 优化光栅化效率
+- [ ] 视体裁剪和提前深度测试
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson5.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson6_Specular.jpg)
 
 ## Notes
 

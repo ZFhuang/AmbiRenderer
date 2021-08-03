@@ -9,7 +9,7 @@
 #include "../include/model.h"
 #include "../include/gl_soft.h"
 #include "../../shaders/v_Basic.cpp"
-#include "../../shaders/f_Gouraud.cpp"
+#include "../../shaders/f_Phong.cpp"
 
 namespace PATH
 {
@@ -32,6 +32,22 @@ Vec3f light_dir(1, 1, 1);
 Vec3f eye(1, 1, 3);
 Vec3f center(0, 0, 0);
 Vec3f up(0, 1, 0);
+
+Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
+	// 计算三角形ABC中点P对应的重心坐标
+	// 任意两边的向量
+	Vec3f s[2];
+	for (int i = 2; i--; ) {
+		s[i][0] = int(C[i]) - int(A[i]);
+		s[i][1] = int(B[i]) - int(A[i]);
+		s[i][2] = int(A[i]) - int(P[i]);
+	}
+	// 叉乘得到的第三轴调整后就是重心坐标
+	Vec3f u = cross(s[0], s[1]);
+	if (std::abs(u[2]) > 1e-2) // dont forget that u[2] is integer. If it is zero then triangle ABC is degenerate
+		return Vec3f(1.f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
+	return Vec3f(-1, 1, 1); // in this case generate negative coordinates, it will be thrown away by the rasterizator
+}
 
 std::vector<std::vector<float>> triangleTraversal(TGAImage& frameBuffer, std::vector<std::vector<float>>& v_out) {
 	std::vector<std::vector<float>> f_in;
@@ -135,34 +151,40 @@ void render(TGAImage& frameBuffer, Model* model, v_Shader* v_shader, f_Shader* f
 
 int main(int argc, char** argv) {
 	TGAImage frameBuffer(width, height, TGAImage::RGB);
-	TGAImage texture;
-	bool tex_success = texture.read_tga_file((PATH::RESOURCES + "african_head_diffuse.tga").c_str());
+	TGAImage diffuse;
+	TGAImage specular;
+	bool tex_success = diffuse.read_tga_file((PATH::RESOURCES + "african_head_diffuse.tga").c_str());
 	assert(tex_success);
-	texture.flip_vertically();
+	tex_success = specular.read_tga_file((PATH::RESOURCES + "african_head_spec.tga").c_str());
+	assert(tex_success);
+	diffuse.flip_vertically();
+	specular.flip_vertically();
 	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
-	model->initTextureCoord(texture);
+	model->initTextureCoord(diffuse);
 
 	modelViewMat = makeViewMat(eye, center, Vec3f(0, 1, 0));
 	viewportMat = makeViewportMat(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
 	projMat = makeProjMat((eye - center).norm());
 	Matrix all_mat = viewportMat * projMat * modelViewMat;
 
-	v_Basic* v_basic = new v_Basic();
-	v_basic->mat = &all_mat;
-	v_basic->model = model;
+	v_Basic* v_shaer = new v_Basic();
+	v_shaer->mat = &all_mat;
+	v_shaer->model = model;
 
-	f_Gouraud* f_gouraud = new f_Gouraud();
-	f_gouraud->lightDir = light_dir;
-	f_gouraud->model = model;
-	f_gouraud->texture = &texture;
+	f_Phong* f_shader = new f_Phong();
+	f_shader->lightDir = light_dir;
+	f_shader->viewDir = eye - center;
+	f_shader->model = model;
+	f_shader->diffuse = &diffuse;
+	f_shader->specular = &specular;
 
-	render(frameBuffer, model, v_basic, f_gouraud);
+	render(frameBuffer, model, v_shaer, f_shader);
 
 	frameBuffer.flip_vertically();
 	frameBuffer.write_tga_file("output.tga");
 
 	delete model;
-	delete v_basic;
-	delete f_gouraud;
+	delete v_shaer;
+	delete f_shader;
 	return 0;
 }
