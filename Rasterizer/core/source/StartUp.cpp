@@ -25,37 +25,35 @@ Matrix modelViewMat;
 Matrix projMat;
 Matrix viewportMat;
 
-int width = 80;
-int height = 80;
+int width = 800;
+int height = 800;
 int depth = 255;
 Vec3f light_dir(1, 1, 1);
 Vec3f eye(1, 1, 3);
 Vec3f center(0, 0, 0);
 Vec3f up(0, 1, 0);
 
-std::vector<std::vector<float>> triangle_traversal(TGAImage& frameBuffer, std::vector<std::vector<float>>& v_out) {
+std::vector<std::vector<float>> triangleTraversal(TGAImage& frameBuffer, std::vector<std::vector<float>>& v_out) {
 	std::vector<std::vector<float>> f_in;
 
 	// 生成三角形的二维包围盒
-	Vec2i bboxmin(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-	Vec2i bboxmax(-std::numeric_limits<int>::max(), -std::numeric_limits<int>::max());
-	Vec2i clamp(frameBuffer.get_width() - 1, frameBuffer.get_height() - 1);
-
+	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+	Vec2f clamp(frameBuffer.get_width() - 1, frameBuffer.get_height() - 1);
+	Vec3f pts[3];
 	int n_faces = v_out.size() / 3;
 
 	for (int i = 0; i < n_faces; i++) {
-		Vec3i pts[3];
-
 		for (int j = 0; j < 3; j++) {
-			pts[j] = Vec3i(v_out[i * 3 + j][0], v_out[i * 3 + j][1], v_out[i * 3 + j][2]);
+			pts[j] = Vec3f(v_out[i * 3 + j][0], v_out[i * 3 + j][1], v_out[i * 3 + j][2]);
 			for (int k = 0; k < 2; k++) {
-				bboxmin[k] = std::max(0, std::min(bboxmin[k], pts[j][k]));
+				bboxmin[k] = std::max(0.0f, std::min(bboxmin[k], pts[j][k]));
 				bboxmax[k] = std::min(clamp[k], std::max(bboxmax[k], pts[j][k]));
 			}
 		}
 
 		// 光栅化
-		Vec3i P;
+		Vec3f P;
 		for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
 			for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
 				// 得到包围盒内像素的重心坐标判断是否在三角形内
@@ -114,12 +112,25 @@ void depthTestAndBlend(TGAImage& frameBuffer, std::vector<std::vector<float>> f_
 		int z = f[2];
 
 		if (zBuffer[x][y] < z) {
-			frameBuffer.set(x, y, TGAColor(f[3], f[4], f[5], f[6]));
+			// BGRA
+			frameBuffer.set(x, y, TGAColor(f[5], f[4], f[3], f[6]));
 			zBuffer[x][y] = z;
 		}
 	}
 
 	deleteZBuffer(zBuffer, frameBuffer.get_height());
+}
+
+void render(TGAImage& frameBuffer, Model* model, v_Shader* v_shader, f_Shader* f_shader) {
+	std::cout << "vertexShading..." << std::endl;
+	std::vector<std::vector<float>> v_out = std::move(vertexShading(model, v_shader));
+	std::cout << "triangle_traversal..." << std::endl;
+	std::vector<std::vector<float>> f_in = std::move(triangleTraversal(frameBuffer, v_out));
+	std::cout << "fragmentShading..." << std::endl;
+	std::vector<std::vector<float>> f_out = std::move(fragmentShading(f_in, f_shader));
+	std::cout << "depthTestAndBlend..." << std::endl;
+	depthTestAndBlend(frameBuffer, f_out);
+	std::cout << "ok." << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -136,26 +147,22 @@ int main(int argc, char** argv) {
 	projMat = makeProjMat((eye - center).norm());
 	Matrix all_mat = viewportMat * projMat * modelViewMat;
 
-
 	v_Basic* v_basic = new v_Basic();
 	v_basic->mat = &all_mat;
 	v_basic->model = model;
 
 	f_Gouraud* f_gouraud = new f_Gouraud();
+	f_gouraud->lightDir = light_dir;
+	f_gouraud->model = model;
+	f_gouraud->texture = &texture;
 
-	std::cout << "init" << std::endl;
-	std::vector<std::vector<float>> v_out = std::move(vertexShading(model, v_basic));
-	std::cout << "vertexShading" << std::endl;
-	std::vector<std::vector<float>> f_in = std::move(triangle_traversal(frameBuffer, v_out));
-	std::cout << "triangle_traversal" << std::endl;
-	std::vector<std::vector<float>> f_out = std::move(fragmentShading(f_in, f_gouraud));
-	std::cout << "fragmentShading" << std::endl;
-	depthTestAndBlend(frameBuffer, f_out);
-	std::cout << "depthTestAndBlend" << std::endl;
+	render(frameBuffer, model, v_basic, f_gouraud);
 
 	frameBuffer.flip_vertically();
 	frameBuffer.write_tga_file("output.tga");
 
 	delete model;
+	delete v_basic;
+	delete f_gouraud;
 	return 0;
 }
