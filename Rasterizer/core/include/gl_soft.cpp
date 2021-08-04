@@ -1,6 +1,20 @@
 ﻿#include "gl_soft.h"
 
-
+Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
+	// 计算三角形ABC中点P对应的重心坐标
+	// 任意两边的向量
+	Vec3f s[2];
+	for (int i = 2; i--; ) {
+		s[i][0] = int(C[i]) - int(A[i]);
+		s[i][1] = int(B[i]) - int(A[i]);
+		s[i][2] = int(A[i]) - int(P[i]);
+	}
+	// 叉乘得到的第三轴调整后就是重心坐标
+	Vec3f u = cross(s[0], s[1]);
+	if (std::abs(u[2]) > 1e-2) // dont forget that u[2] is integer. If it is zero then triangle ABC is degenerate
+		return Vec3f(1.f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
+	return Vec3f(-1, 1, 1); // in this case generate negative coordinates, it will be thrown away by the rasterizator
+}
 
 Matrix makeModelRotationMat(Vec3f xyz) {
 	Matrix matX = Matrix::identity();

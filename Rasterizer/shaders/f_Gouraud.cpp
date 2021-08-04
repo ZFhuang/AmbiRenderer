@@ -7,7 +7,7 @@ public:
 
 	Vec3f lightDir;
 	Model* model;
-	TGAImage* texture;
+	TGAImage* diffuse;
 
 	virtual std::vector<float> fragment(std::vector<float> f_in) override {
 		Vec3f N(0, 0, 0);
@@ -28,13 +28,13 @@ public:
 			return out;
 		}
 
-		if (texture != nullptr) {
+		if (diffuse != nullptr) {
 			Vec2f T(0, 0);
 			for (int i = 0; i < 3; i++) {
 				T.x += model->tex_[model->face(int(f_in[0]))[i * 2 + 1]].x * f_in[i + 4];
 				T.y += model->tex_[model->face(int(f_in[0]))[i * 2 + 1]].y * f_in[i + 4];
 			}
-			color = texture->get(int(T.x), int(T.y));
+			color = diffuse->get(int(T.x), int(T.y));
 		}
 
 		color = color * intensity;
