@@ -60,5 +60,6 @@
     <ClCompile Include="shaders\f_ZBuffer.cpp" />
     <ClCompile Include="shaders\f_Stylized.cpp" />
     <ClCompile Include="shaders\f_Phong.cpp" />
+    <ClCompile Include="shaders\f_Phong_WorldNormal.cpp" />
   </ItemGroup>
 </Project>

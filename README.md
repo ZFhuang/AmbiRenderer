@@ -30,7 +30,7 @@ https://github.com/ssloy/tinyrenderer
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson6_Specular.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson6_WorldNormal.jpg)
 
 ## Notes
 
