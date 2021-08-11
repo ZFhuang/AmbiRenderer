@@ -4,7 +4,7 @@
 class f_Normal :public f_Shader {
 public:
 	f_Normal() {}
-
+	Matrix* mat_invert_transpose;
 	Model* model;
 	TGAImage* normalMap = nullptr;
 
@@ -43,9 +43,12 @@ public:
 			Vec3f normal_load = Vec3f(normalMap->get(int(T.x), int(T.y))[2] / 255.f * 2.0 - 1.0, normalMap->get(int(T.x), int(T.y))[1] / 255.f * 2.0 - 1.0, normalMap->get(int(T.x), int(T.y))[0] / 255.f * 2.0 - 1.0).normalize();
 			normal = B * Vec3f(normal_load.x, normal_load.y, normal_load.z);
 		}
+
+		Vec4f normal_4 = *mat_invert_transpose * Vec4f(normal.x, normal.y, normal.z, 0.0f);
+		normal = Vec3f(normal_4.x, normal_4.y, normal_4.z);
 		normal.normalize();
 
-		std::vector<float> out = { f_in[1] ,f_in[2] ,f_in[3], float((normal.x + 1.0) / 2.0) ,float((normal.y + 1.0) / 2.0) ,float((normal.z + 1.0) / 2.0) , 1 };
+		std::vector<float> out = { f_in[1] ,f_in[2] ,f_in[3], float((normal.x + 1.0) / 2.0 * 255.0) ,float((normal.y + 1.0) / 2.0 * 255.0) ,float((normal.z + 1.0) / 2.0 * 255.0) , 1 };
 		return out;
 	}
 };

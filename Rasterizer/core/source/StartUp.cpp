@@ -170,13 +170,13 @@ int main(int argc, char** argv) {
 	v_shaer->mat = &all_mat_vertex;
 	v_shaer->model = model;
 
-	f_Phong* f_shader = new f_Phong();
+	f_Normal* f_shader = new f_Normal();
 	f_shader->mat_invert_transpose = &all_mat_invert_transpose;
-	f_shader->lightDir = light_dir.normalize();
-	f_shader->viewDir = (eye - center).normalize();
+	//f_shader->lightDir = light_dir.normalize();
+	//f_shader->viewDir = (eye - center).normalize();
 	f_shader->model = model;
-	f_shader->diffuse = &diffuse;
-	f_shader->specular = &specular;
+	//f_shader->diffuse = &diffuse;
+	//f_shader->specular = &specular;
 	f_shader->normalMap = &normalMap;
 
 	render(frameBuffer, model, v_shaer, f_shader);
