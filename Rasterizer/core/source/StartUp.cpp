@@ -13,6 +13,7 @@
 #include "../../shaders/f_Gouraud.cpp"
 #include "../../shaders/f_Stylized.cpp"
 #include "../../shaders/f_ZBuffer.cpp"
+#include "../../shaders/f_Normal.cpp"
 
 namespace PATH
 {
@@ -67,9 +68,9 @@ std::vector<std::vector<float>> triangleTraversal(TGAImage& frameBuffer, std::ve
 
 				// 插值目标像素的z值
 				P.z = 0;
-				for (int i = 0; i < 3; i++) P.z += pts[i][2] * bc_screen[i];
+				for (int j = 0; j < 3; j++) P.z += pts[j][2] * bc_screen[j];
 
-				std::vector<float> fragment = { float(i),float(P.x), float(P.y), float(P.z), bc_screen.x, bc_screen.y, bc_screen.z };
+				std::vector<float> fragment = { float(i), float(P.x), float(P.y), float(P.z), bc_screen.x, bc_screen.y, bc_screen.z };
 
 				f_in.push_back(fragment);
 			}
@@ -146,7 +147,7 @@ int main(int argc, char** argv) {
 	assert(tex_success);
 	tex_success = specular.read_tga_file((PATH::RESOURCES + "african_head_spec.tga").c_str());
 	assert(tex_success);
-	tex_success = normalMap.read_tga_file((PATH::RESOURCES + "african_head_nm.tga").c_str());
+	tex_success = normalMap.read_tga_file((PATH::RESOURCES + "african_head_nm_tangent.tga").c_str());
 	assert(tex_success);
 	diffuse.flip_vertically();
 	specular.flip_vertically();

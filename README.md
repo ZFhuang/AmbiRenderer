@@ -19,18 +19,21 @@ https://github.com/ssloy/tinyrenderer
 - [x] Lesson 4: Perspective projection
 - [x] Lesson 5: Moving the camera
 - [x] Lesson 6: Shaders for the software renderer
-- [ ] Lesson 6bis: tangent space normal mapping
+- [x] Lesson 6bis: tangent space normal mapping
 - [ ] Lesson 7: Shadow mapping
 - [ ] Lesson 8: Ambient occlusion
 - [ ] Lesson 9: Real OpenGL (GLSL) application
-- [ ] 用四元数来进行旋转
 - [ ] 完善渲染管线的组成
+- [ ] 优化片元着色器, 将顶点插值改写为固定管线
+- [ ] 提前深度测试
+- [ ] 透视矫正
 - [ ] 优化光栅化效率
-- [ ] 视体裁剪和提前深度测试
+- [ ] 视体裁剪, 背面裁剪
+- [ ] 用四元数来进行旋转
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson6_WorldNormal.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson6bis_TangentNormal.jpg)
 
 ## Notes
 
