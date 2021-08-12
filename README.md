@@ -20,7 +20,7 @@ https://github.com/ssloy/tinyrenderer
 - [x] Lesson 5: Moving the camera
 - [x] Lesson 6: Shaders for the software renderer
 - [x] Lesson 6bis: tangent space normal mapping
-- [ ] Lesson 7: Shadow mapping
+- [x] Lesson 7: Shadow mapping
 - [ ] Lesson 8: Ambient occlusion
 - [ ] Lesson 9: Real OpenGL (GLSL) application
 - [ ] 完善渲染管线的组成
@@ -29,11 +29,12 @@ https://github.com/ssloy/tinyrenderer
 - [ ] 透视矫正
 - [ ] 优化光栅化效率: https://zhuanlan.zhihu.com/p/140926917
 - [ ] 视体裁剪, 背面裁剪
+- [ ] 多pass管线, 完成gloom效果
 - [ ] 用四元数来进行旋转
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson6bis_TangentNormal.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson7.jpg)
 
 ## Notes
 

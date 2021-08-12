@@ -6,12 +6,14 @@ public:
 	f_Phong() {}
 
 	Matrix* mat_invert_transpose;
+	Matrix* shadowMat;
 	Vec3f* lightDir;
 	Vec3f* viewDir;
 	Model* model;
 	TGAImage* diffuse = nullptr;
 	TGAImage* specular = nullptr;
 	TGAImage* normalMap = nullptr;
+	TGAImage* shadowMap = nullptr;
 
 	virtual std::vector<float> fragment(std::vector<float> f_in) override {
 		Vec2f T(0, 0);
@@ -53,7 +55,7 @@ public:
 			normal = B * Vec3f(normal_load.x, normal_load.y, normal_load.z);
 		}
 
-		Vec4f normal_4 = *mat_invert_transpose * Vec4f(normal.x, normal.y, normal.z, 0.0f);
+		Vec4f normal_4 = (*mat_invert_transpose) * Vec4f(normal.x, normal.y, normal.z, 0.0f);
 		normal = Vec3f(normal_4.x, normal_4.y, normal_4.z);
 		normal.normalize();
 
@@ -63,6 +65,8 @@ public:
 		float spec = 0;
 		Vec3f reflect = (normal * (normal * (*lightDir) * 2.f) - (*lightDir)).normalize();
 
+		float shadow = 1;
+
 		if (diffuse != nullptr) {
 			color = diffuse->get(int(T.x), int(T.y));
 		}
@@ -71,9 +75,16 @@ public:
 			spec = pow(std::max((*viewDir) * reflect, 0.0f), specular->get(int(T.x), int(T.y))[0]);
 		}
 
+		if (shadowMap != nullptr) {
+			Vec4f ori = Vec4f(f_in[7], f_in[8], f_in[9], 1.0f);
+			Vec4f p_in_shadow = (*shadowMat) * ori;
+			p_in_shadow = p_in_shadow / p_in_shadow[3];
+			shadow = .3 + .7 * (float(shadowMap->get(int(p_in_shadow[0]), int(p_in_shadow[1]))[0]) < p_in_shadow[2] + 43.34);
+		}
+
 		for (int i = 0; i < 3; i++) {
 			// ambient + diffuse + sepcular
-			color[i] = std::min<float>(5 + color[i] * (diff + 0.6 * spec), 255);
+			color[i] = std::min<float>(5 + color[i] * shadow * (1.2 * diff + .6 * spec), 255);
 		}
 
 		std::vector<float> out = { f_in[1] ,f_in[2] ,f_in[3], float(color[0]) ,float(color[1]) ,float(color[2]) ,float(color[3]) };

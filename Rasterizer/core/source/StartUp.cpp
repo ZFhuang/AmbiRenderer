@@ -52,6 +52,7 @@ struct RenderArgs
 	Model* model;
 	v_Shader* v_shader;
 	f_Shader* f_shader;
+	Matrix* mat;
 };
 
 std::vector<std::vector<float>> triangleTraversal(TGAImage* frameBuffer, std::vector<std::vector<float>>& v_out) {
@@ -87,8 +88,14 @@ std::vector<std::vector<float>> triangleTraversal(TGAImage* frameBuffer, std::ve
 				P.z = 0;
 				for (int j = 0; j < 3; j++) P.z += pts[j][2] * bc_screen[j];
 
-				std::vector<float> fragment = { float(i), float(P.x), float(P.y), float(P.z), bc_screen.x, bc_screen.y, bc_screen.z };
-
+				// 插值模视变换之前的片元顶点位置传递到后面
+				Vec3f ori_P;
+				for (int j = 0; j < 3; j++) {
+					ori_P.x += v_out[i * 3 + j][3] * bc_screen[j];
+					ori_P.y += v_out[i * 3 + j][4] * bc_screen[j];
+					ori_P.z += v_out[i * 3 + j][5] * bc_screen[j];
+				}
+				std::vector<float> fragment = { float(i), float(P.x), float(P.y), float(P.z), bc_screen.x, bc_screen.y, bc_screen.z ,ori_P.x, ori_P.y ,ori_P.z };
 				f_in.push_back(fragment);
 			}
 		}
@@ -143,8 +150,8 @@ void depthTestAndBlend(TGAImage* frameBuffer, std::vector<std::vector<float>> f_
 }
 
 RenderArgs* makeShadowArgs(Model* model) {
-	int shadow_width = width / 2;
-	int shadow_height = height / 2;
+	int shadow_width = width / 5;
+	int shadow_height = height / 5;
 
 	TGAImage* shadow_buffer = new TGAImage(shadow_width, shadow_height, TGAImage::RGB);
 	modelViewMat = makeViewMat(light_dir, center, Vec3f(0, 1, 0));
@@ -154,16 +161,17 @@ RenderArgs* makeShadowArgs(Model* model) {
 	Matrix* all_mat_vertex = new Matrix(viewportMat * projMat * modelViewMat);
 
 	v_Basic* v_shader = new v_Basic();
-	v_shader->mat = all_mat_vertex;
+	v_shader->vpm_mat = all_mat_vertex;
 	v_shader->model = model;
 
 	f_Depth* f_shader = new f_Depth();
 
 	RenderArgs* shadowArgs = new RenderArgs(shadow_buffer, model, v_shader, f_shader);
+	shadowArgs->mat = all_mat_vertex;
 	return shadowArgs;
 }
 
-RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TGAImage* normalMap, TGAImage* shadowBuffer) {
+RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TGAImage* normalMap, RenderArgs* shadowArgs) {
 	TGAImage* frameBuffer = new TGAImage(width, height, TGAImage::RGB);
 
 	modelViewMat = makeViewMat(eye, center, Vec3f(0, 1, 0));
@@ -177,7 +185,7 @@ RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TG
 	light_dir = Vec3f(lightDir_4.x, lightDir_4.y, lightDir_4.z);
 
 	v_Basic* v_shader = new v_Basic();
-	v_shader->mat = all_mat_vertex;
+	v_shader->vpm_mat = all_mat_vertex;
 	v_shader->model = model;
 
 	f_Phong* f_shader = new f_Phong();
@@ -188,6 +196,8 @@ RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TG
 	f_shader->diffuse = diffuse;
 	f_shader->specular = specular;
 	f_shader->normalMap = normalMap;
+	f_shader->shadowMap = shadowArgs->frameBuffer;
+	f_shader->shadowMat = shadowArgs->mat;
 
 	RenderArgs* mainArgs = new RenderArgs(frameBuffer, model, v_shader, f_shader);
 	return mainArgs;
@@ -198,16 +208,16 @@ void render(RenderArgs* args) {
 	std::vector<std::vector<float>> f_in = std::move(triangleTraversal(args->frameBuffer, v_out));
 	std::vector<std::vector<float>> f_out = std::move(fragmentShading(f_in, args->f_shader));
 	depthTestAndBlend(args->frameBuffer, f_out);
-	args->frameBuffer->flip_vertically();
 }
 
 void multipassRender(Model* model, TGAImage* diffuse = nullptr, TGAImage* specular = nullptr, TGAImage* normalMap = nullptr) {
 	RenderArgs* shadowArgs = makeShadowArgs(model);
 	render(shadowArgs);
-	shadowArgs->frameBuffer->write_tga_file("shadow.tga");
+	//shadowArgs->frameBuffer->write_tga_file("shadow.tga");
 
-	RenderArgs* mainArgs = makeMainArgs(model, diffuse, specular, normalMap, shadowArgs->frameBuffer);
+	RenderArgs* mainArgs = makeMainArgs(model, diffuse, specular, normalMap, shadowArgs);
 	render(mainArgs);
+	mainArgs->frameBuffer->flip_vertically();
 	mainArgs->frameBuffer->write_tga_file("framebuffer.tga");
 
 	delete shadowArgs;
