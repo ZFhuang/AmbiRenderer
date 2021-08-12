@@ -150,7 +150,7 @@
     <ClCompile Include="shaders\f_Phong_WorldNormal.cpp" />
     <ClCompile Include="shaders\f_Phong.cpp" />
     <ClCompile Include="shaders\f_Stylized.cpp" />
-    <ClCompile Include="shaders\f_ZBuffer.cpp" />
+    <ClCompile Include="shaders\f_Depth.cpp" />
     <ClCompile Include="core\include\gl_soft.cpp" />
     <ClCompile Include="core\include\model.cpp" />
     <ClCompile Include="core\include\tgaimage.cpp" />

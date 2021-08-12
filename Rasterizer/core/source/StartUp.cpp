@@ -12,7 +12,7 @@
 #include "../../shaders/f_Phong.cpp"
 #include "../../shaders/f_Gouraud.cpp"
 #include "../../shaders/f_Stylized.cpp"
-#include "../../shaders/f_ZBuffer.cpp"
+#include "../../shaders/f_Depth.cpp"
 #include "../../shaders/f_Normal.cpp"
 
 namespace PATH
@@ -32,18 +32,35 @@ Matrix viewportMat;
 int width = 800;
 int height = 800;
 int depth = 255;
-Vec3f light_dir(1, 1, 1);
+Vec3f light_dir(1, 1, 0);
 Vec3f eye(1, 1, 3);
 Vec3f center(0, 0, 0);
 Vec3f up(0, 1, 0);
 
-std::vector<std::vector<float>> triangleTraversal(TGAImage& frameBuffer, std::vector<std::vector<float>>& v_out) {
+struct RenderArgs
+{
+	RenderArgs(TGAImage* f_Buffer, Model* m, v_Shader* v_s, f_Shader* f_s) :
+		frameBuffer(f_Buffer), model(m), v_shader(v_s), f_shader(f_s) {}
+
+	~RenderArgs() {
+		delete frameBuffer;
+		delete f_shader;
+		delete v_shader;
+	}
+
+	TGAImage* frameBuffer;
+	Model* model;
+	v_Shader* v_shader;
+	f_Shader* f_shader;
+};
+
+std::vector<std::vector<float>> triangleTraversal(TGAImage* frameBuffer, std::vector<std::vector<float>>& v_out) {
 	std::vector<std::vector<float>> f_in;
 
 	// 生成三角形的二维包围盒
 	Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 	Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
-	Vec2f clamp(frameBuffer.get_width() - 1, frameBuffer.get_height() - 1);
+	Vec2f clamp(frameBuffer->get_width() - 1, frameBuffer->get_height() - 1);
 	Vec3f pts[3];
 	int n_faces = v_out.size() / 3;
 
@@ -104,8 +121,8 @@ std::vector<std::vector<float>> fragmentShading(std::vector<std::vector<float>> 
 	return f_out;
 }
 
-void depthTestAndBlend(TGAImage& frameBuffer, std::vector<std::vector<float>> f_out) {
-	int** zBuffer = makeZBuffer(frameBuffer.get_height(), frameBuffer.get_width());
+void depthTestAndBlend(TGAImage* frameBuffer, std::vector<std::vector<float>> f_out) {
+	int** zBuffer = makeZBuffer(frameBuffer->get_height(), frameBuffer->get_width());
 	int n_fragments = f_out.size();
 
 	for (int i = 0; i < n_fragments; i++) {
@@ -117,75 +134,108 @@ void depthTestAndBlend(TGAImage& frameBuffer, std::vector<std::vector<float>> f_
 
 		if (zBuffer[x][y] < z) {
 			// BGRA
-			frameBuffer.set(x, y, TGAColor(f[5], f[4], f[3], f[6]));
+			frameBuffer->set(x, y, TGAColor(f[5], f[4], f[3], f[6]));
 			zBuffer[x][y] = z;
 		}
 	}
 
-	deleteZBuffer(zBuffer, frameBuffer.get_height());
+	deleteZBuffer(zBuffer, frameBuffer->get_height());
 }
 
-void render(TGAImage& frameBuffer, Model* model, v_Shader* v_shader, f_Shader* f_shader) {
-	std::cout << "vertexShading..." << std::endl;
-	std::vector<std::vector<float>> v_out = std::move(vertexShading(model, v_shader));
-	std::cout << "triangle_traversal..." << std::endl;
-	std::vector<std::vector<float>> f_in = std::move(triangleTraversal(frameBuffer, v_out));
-	std::cout << "fragmentShading..." << std::endl;
-	std::vector<std::vector<float>> f_out = std::move(fragmentShading(f_in, f_shader));
-	std::cout << "depthTestAndBlend..." << std::endl;
-	depthTestAndBlend(frameBuffer, f_out);
-	std::cout << "ok." << std::endl;
+RenderArgs* makeShadowArgs(Model* model) {
+	int shadow_width = width / 2;
+	int shadow_height = height / 2;
+
+	TGAImage* shadow_buffer = new TGAImage(shadow_width, shadow_height, TGAImage::RGB);
+	modelViewMat = makeViewMat(light_dir, center, Vec3f(0, 1, 0));
+	viewportMat = makeViewportMat(shadow_width / 8, shadow_height / 8, shadow_width * 3 / 4, shadow_height * 3 / 4);
+	projMat = makeProjMat(0);
+
+	Matrix* all_mat_vertex = new Matrix(viewportMat * projMat * modelViewMat);
+
+	v_Basic* v_shader = new v_Basic();
+	v_shader->mat = all_mat_vertex;
+	v_shader->model = model;
+
+	f_Depth* f_shader = new f_Depth();
+
+	RenderArgs* shadowArgs = new RenderArgs(shadow_buffer, model, v_shader, f_shader);
+	return shadowArgs;
 }
 
-int main(int argc, char** argv) {
-	TGAImage frameBuffer(width, height, TGAImage::RGB);
-	TGAImage diffuse;
-	TGAImage specular;
-	TGAImage normalMap;
-	bool tex_success = diffuse.read_tga_file((PATH::RESOURCES + "african_head_diffuse.tga").c_str());
-	//bool tex_success = diffuse.read_tga_file((PATH::RESOURCES + "grid.tga").c_str());
-	assert(tex_success);
-	tex_success = specular.read_tga_file((PATH::RESOURCES + "african_head_spec.tga").c_str());
-	assert(tex_success);
-	tex_success = normalMap.read_tga_file((PATH::RESOURCES + "african_head_nm_tangent.tga").c_str());
-	assert(tex_success);
-	diffuse.flip_vertically();
-	specular.flip_vertically();
-	normalMap.flip_vertically();
-
-	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
-	model->initTextureCoord(diffuse);
+RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TGAImage* normalMap, TGAImage* shadowBuffer) {
+	TGAImage* frameBuffer = new TGAImage(width, height, TGAImage::RGB);
 
 	modelViewMat = makeViewMat(eye, center, Vec3f(0, 1, 0));
 	viewportMat = makeViewportMat(width / 8, height / 8, width * 3 / 4, height * 3 / 4);
 	projMat = makeProjMat((eye - center).norm());
 
-	Matrix all_mat_vertex = viewportMat * projMat * modelViewMat;
+	Matrix* all_mat_vertex = new Matrix(viewportMat * projMat * modelViewMat);
 	Matrix all_mat = projMat * modelViewMat;
-	Matrix all_mat_invert_transpose = all_mat.invert_transpose();
+	Matrix* all_mat_invert_transpose = new Matrix(all_mat.invert_transpose());
 	Vec4f lightDir_4 = all_mat * Vec4f(light_dir.x, light_dir.y, light_dir.z, 0.0f);
 	light_dir = Vec3f(lightDir_4.x, lightDir_4.y, lightDir_4.z);
 
-	v_Basic* v_shaer = new v_Basic();
-	v_shaer->mat = &all_mat_vertex;
-	v_shaer->model = model;
+	v_Basic* v_shader = new v_Basic();
+	v_shader->mat = all_mat_vertex;
+	v_shader->model = model;
 
-	f_Normal* f_shader = new f_Normal();
-	f_shader->mat_invert_transpose = &all_mat_invert_transpose;
-	//f_shader->lightDir = light_dir.normalize();
-	//f_shader->viewDir = (eye - center).normalize();
+	f_Phong* f_shader = new f_Phong();
+	f_shader->mat_invert_transpose = all_mat_invert_transpose;
+	f_shader->lightDir = new Vec3f(light_dir.normalize());
+	f_shader->viewDir = new Vec3f((eye - center).normalize());
 	f_shader->model = model;
-	//f_shader->diffuse = &diffuse;
-	//f_shader->specular = &specular;
-	f_shader->normalMap = &normalMap;
+	f_shader->diffuse = diffuse;
+	f_shader->specular = specular;
+	f_shader->normalMap = normalMap;
 
-	render(frameBuffer, model, v_shaer, f_shader);
+	RenderArgs* mainArgs = new RenderArgs(frameBuffer, model, v_shader, f_shader);
+	return mainArgs;
+}
 
-	frameBuffer.flip_vertically();
-	frameBuffer.write_tga_file("frameBuffer.tga");
+void render(RenderArgs* args) {
+	std::vector<std::vector<float>> v_out = std::move(vertexShading(args->model, args->v_shader));
+	std::vector<std::vector<float>> f_in = std::move(triangleTraversal(args->frameBuffer, v_out));
+	std::vector<std::vector<float>> f_out = std::move(fragmentShading(f_in, args->f_shader));
+	depthTestAndBlend(args->frameBuffer, f_out);
+	args->frameBuffer->flip_vertically();
+}
 
+void multipassRender(Model* model, TGAImage* diffuse = nullptr, TGAImage* specular = nullptr, TGAImage* normalMap = nullptr) {
+	RenderArgs* shadowArgs = makeShadowArgs(model);
+	render(shadowArgs);
+	shadowArgs->frameBuffer->write_tga_file("shadow.tga");
+
+	RenderArgs* mainArgs = makeMainArgs(model, diffuse, specular, normalMap, shadowArgs->frameBuffer);
+	render(mainArgs);
+	mainArgs->frameBuffer->write_tga_file("framebuffer.tga");
+
+	delete shadowArgs;
+	delete mainArgs;
+}
+
+int main(int argc, char** argv) {
+	TGAImage* diffuse = new TGAImage();
+	TGAImage* specular = new TGAImage();
+	TGAImage* normalMap = new TGAImage();
+	bool tex_success = diffuse->read_tga_file((PATH::RESOURCES + "african_head_diffuse.tga").c_str());
+	assert(tex_success);
+	tex_success = specular->read_tga_file((PATH::RESOURCES + "african_head_spec.tga").c_str());
+	assert(tex_success);
+	tex_success = normalMap->read_tga_file((PATH::RESOURCES + "african_head_nm_tangent.tga").c_str());
+	assert(tex_success);
+	diffuse->flip_vertically();
+	specular->flip_vertically();
+	normalMap->flip_vertically();
+
+	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
+	model->initTextureCoord(*diffuse);
+
+	multipassRender(model, diffuse, specular, normalMap);
+
+	delete diffuse;
+	delete specular;
+	delete normalMap;
 	delete model;
-	delete v_shaer;
-	delete f_shader;
 	return 0;
 }

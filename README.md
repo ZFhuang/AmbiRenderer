@@ -27,7 +27,7 @@ https://github.com/ssloy/tinyrenderer
 - [ ] 优化片元着色器, 将顶点插值改写为固定管线
 - [ ] 提前深度测试
 - [ ] 透视矫正
-- [ ] 优化光栅化效率
+- [ ] 优化光栅化效率: https://zhuanlan.zhihu.com/p/140926917
 - [ ] 视体裁剪, 背面裁剪
 - [ ] 用四元数来进行旋转
 

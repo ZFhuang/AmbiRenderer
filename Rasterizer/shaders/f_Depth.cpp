@@ -1,8 +1,8 @@
 ﻿#include "../core/include/gl_soft.h"
 
-class f_ZBuffer :public f_Shader {
+class f_Depth :public f_Shader {
 public:
-	f_ZBuffer() {}
+	f_Depth() {}
 
 	virtual std::vector<float> fragment(std::vector<float> f_in) override {
 		TGAColor color = TGAColor(f_in[3], f_in[3], f_in[3], 255);

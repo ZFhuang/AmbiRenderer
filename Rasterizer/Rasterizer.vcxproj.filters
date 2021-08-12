@@ -57,7 +57,7 @@
     <ClCompile Include="shaders\f_Gouraud.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
-    <ClCompile Include="shaders\f_ZBuffer.cpp" />
+    <ClCompile Include="shaders\f_Depth.cpp" />
     <ClCompile Include="shaders\f_Stylized.cpp" />
     <ClCompile Include="shaders\f_Phong.cpp" />
     <ClCompile Include="shaders\f_Phong_WorldNormal.cpp" />

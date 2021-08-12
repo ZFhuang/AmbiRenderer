@@ -6,8 +6,8 @@ public:
 	f_Phong() {}
 
 	Matrix* mat_invert_transpose;
-	Vec3f lightDir;
-	Vec3f viewDir;
+	Vec3f* lightDir;
+	Vec3f* viewDir;
 	Model* model;
 	TGAImage* diffuse = nullptr;
 	TGAImage* specular = nullptr;
@@ -57,18 +57,18 @@ public:
 		normal = Vec3f(normal_4.x, normal_4.y, normal_4.z);
 		normal.normalize();
 
-		float diff = std::max(0.f, normal * lightDir);
+		float diff = std::max(0.f, normal * (*lightDir));
 		TGAColor color = TGAColor(255, 255, 255);
 
 		float spec = 0;
-		Vec3f reflect = (normal * (normal * lightDir * 2.f) - lightDir).normalize();
+		Vec3f reflect = (normal * (normal * (*lightDir) * 2.f) - (*lightDir)).normalize();
 
 		if (diffuse != nullptr) {
 			color = diffuse->get(int(T.x), int(T.y));
 		}
 
 		if (specular != nullptr) {
-			spec = pow(std::max(viewDir * reflect, 0.0f), specular->get(int(T.x), int(T.y))[0]);
+			spec = pow(std::max((*viewDir) * reflect, 0.0f), specular->get(int(T.x), int(T.y))[0]);
 		}
 
 		for (int i = 0; i < 3; i++) {
