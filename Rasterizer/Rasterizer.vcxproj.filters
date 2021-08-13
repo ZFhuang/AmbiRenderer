@@ -62,5 +62,6 @@
     <ClCompile Include="shaders\f_Phong.cpp" />
     <ClCompile Include="shaders\f_Phong_WorldNormal.cpp" />
     <ClCompile Include="shaders\f_Normal.cpp" />
+    <ClCompile Include="shaders\f_AO.cpp" />
   </ItemGroup>
 </Project>

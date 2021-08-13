@@ -1,5 +1,7 @@
 ﻿#include "gl_soft.h"
 
+#define M_PI 3.1415926
+
 Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
 	// 计算三角形ABC中点P对应的重心坐标
 	// 任意两边的向量
@@ -101,4 +103,13 @@ void deleteZBuffer(int** zbuffer, int height) {
 		delete zbuffer[line];
 	}
 	delete zbuffer;
+	zbuffer = nullptr;
+}
+
+Vec3f rand_point_on_unit_sphere() {
+	float u = (float)rand() / (float)RAND_MAX;
+	float v = (float)rand() / (float)RAND_MAX;
+	float theta = 2.f * M_PI * u;
+	float phi = acos(2.f * v - 1.f);
+	return Vec3f(sin(phi) * cos(theta), sin(phi) * sin(theta), cos(phi));
 }

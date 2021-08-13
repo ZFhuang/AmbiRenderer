@@ -14,6 +14,7 @@
 #include "../../shaders/f_Stylized.cpp"
 #include "../../shaders/f_Depth.cpp"
 #include "../../shaders/f_Normal.cpp"
+#include "../../shaders/f_AO.cpp"
 
 namespace PATH
 {
@@ -44,8 +45,11 @@ struct RenderArgs
 
 	~RenderArgs() {
 		delete frameBuffer;
+		frameBuffer = nullptr;
 		delete f_shader;
+		f_shader = nullptr;
 		delete v_shader;
+		v_shader = nullptr;
 	}
 
 	TGAImage* frameBuffer;
@@ -221,7 +225,62 @@ void multipassRender(Model* model, TGAImage* diffuse = nullptr, TGAImage* specul
 	mainArgs->frameBuffer->write_tga_file("framebuffer.tga");
 
 	delete shadowArgs;
+	shadowArgs = nullptr;
 	delete mainArgs;
+	mainArgs = nullptr;
+}
+
+void makeAOMap(Model* model, TGAImage* diffuse, int sampleTimes = 100) {
+	int shadow_width = width / 1;
+	int shadow_height = height / 1;
+
+	TGAImage* AOBuffer = new TGAImage(diffuse->get_width(), diffuse->get_height(), TGAImage::RGB);
+	TGAImage* shadow_buffer = new TGAImage(shadow_width, shadow_height, TGAImage::RGB);
+
+	v_Basic* v_shader = new v_Basic();
+	v_shader->model = model;
+
+	f_Depth* f_depth = new f_Depth();
+	RenderArgs* args = new RenderArgs(shadow_buffer, model, v_shader, f_depth);
+
+	f_AO* f_ao = new f_AO();
+	f_ao->model = model;
+	f_ao->shadowMap = shadow_buffer;
+	f_ao->AOMap = new TGAImage(diffuse->get_width(), diffuse->get_height(), TGAImage::RGB);
+
+	viewportMat = makeViewportMat(shadow_width / 8, shadow_height / 8, shadow_width * 3 / 4, shadow_height * 3 / 4);
+	projMat = makeProjMat(0);
+
+	for (int i = 1; i <= sampleTimes; i++) {
+		std::cout << "Sampling: " << i << "/" << sampleTimes << std::endl;
+		eye = rand_point_on_unit_sphere();
+		eye.y = std::abs(eye.y);
+		shadow_buffer->clear();
+		modelViewMat = makeViewMat(eye, center, Vec3f(0, 1, 0));
+		Matrix* all_mat_vertex = new Matrix(viewportMat * projMat * modelViewMat);
+		v_shader->vpm_mat = all_mat_vertex;
+		args->mat = all_mat_vertex;
+		args->f_shader = f_depth;
+
+		render(args);
+
+		args->f_shader = f_ao;
+		f_ao->AOMap->clear();
+
+		render(args);
+
+		for (int y = 0; y < diffuse->get_height(); y++) {
+			for (int x = 0; x < diffuse->get_width(); x++) {
+				float old = AOBuffer->get(y, x)[0];
+				float now = f_ao->AOMap->get(y, x)[0];
+				float color = (old * (i - 1) + now) / (float(i) + 0.5f);
+				AOBuffer->set(y, x, TGAColor(color, color, color, 1));
+			}
+		}
+	}
+	delete args;
+	args = nullptr;
+	AOBuffer->write_tga_file("AO.tga");
 }
 
 int main(int argc, char** argv) {
@@ -241,7 +300,8 @@ int main(int argc, char** argv) {
 	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
 	model->initTextureCoord(*diffuse);
 
-	multipassRender(model, diffuse, specular, normalMap);
+	makeAOMap(model, diffuse);
+	//multipassRender(model, diffuse, specular, normalMap);
 
 	delete diffuse;
 	delete specular;

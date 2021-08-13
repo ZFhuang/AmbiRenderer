@@ -43,3 +43,5 @@ Matrix makeViewportMat(int x, int y, int w, int h);
 int** makeZBuffer(int height, int width);
 
 void deleteZBuffer(int** zbuffer, int height);
+
+Vec3f rand_point_on_unit_sphere();
