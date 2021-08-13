@@ -34,7 +34,7 @@ https://github.com/ssloy/tinyrenderer
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson7.jpg)
+![Result](./Documents/Results/tinyrenderer/Lesson8_Offline.jpg)
 
 ## Notes
 

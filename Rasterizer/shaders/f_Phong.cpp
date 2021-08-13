@@ -14,6 +14,7 @@ public:
 	TGAImage* specular = nullptr;
 	TGAImage* normalMap = nullptr;
 	TGAImage* shadowMap = nullptr;
+	TGAImage* ambientMap = nullptr;
 
 	virtual std::vector<float> fragment(std::vector<float> f_in) override {
 		Vec2f T(0, 0);
@@ -67,6 +68,8 @@ public:
 
 		float shadow = 1;
 
+		float ambient = 10;
+
 		if (diffuse != nullptr) {
 			color = diffuse->get(int(T.x), int(T.y));
 		}
@@ -82,9 +85,13 @@ public:
 			shadow = .3 + .7 * (float(shadowMap->get(int(p_in_shadow[0]), int(p_in_shadow[1]))[0]) < p_in_shadow[2] + 43.34);
 		}
 
+		if (ambientMap != nullptr) {
+			ambient = ambient * 2 * ambientMap->get(int(T.x), int(T.y))[0] / 255;
+		}
+
 		for (int i = 0; i < 3; i++) {
 			// ambient + diffuse + sepcular
-			color[i] = std::min<float>(5 + color[i] * shadow * (1.2 * diff + .6 * spec), 255);
+			color[i] = std::min<float>(ambient + color[i] * shadow * (1.2 * diff + .6 * spec), 255);
 		}
 
 		std::vector<float> out = { f_in[1] ,f_in[2] ,f_in[3], float(color[0]) ,float(color[1]) ,float(color[2]) ,float(color[3]) };

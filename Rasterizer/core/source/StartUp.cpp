@@ -175,7 +175,7 @@ RenderArgs* makeShadowArgs(Model* model) {
 	return shadowArgs;
 }
 
-RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TGAImage* normalMap, RenderArgs* shadowArgs) {
+RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TGAImage* normalMap, TGAImage* AOMap, RenderArgs* shadowArgs) {
 	TGAImage* frameBuffer = new TGAImage(width, height, TGAImage::RGB);
 
 	modelViewMat = makeViewMat(eye, center, Vec3f(0, 1, 0));
@@ -202,6 +202,7 @@ RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TG
 	f_shader->normalMap = normalMap;
 	f_shader->shadowMap = shadowArgs->frameBuffer;
 	f_shader->shadowMat = shadowArgs->mat;
+	f_shader->ambientMap = AOMap;
 
 	RenderArgs* mainArgs = new RenderArgs(frameBuffer, model, v_shader, f_shader);
 	return mainArgs;
@@ -214,12 +215,12 @@ void render(RenderArgs* args) {
 	depthTestAndBlend(args->frameBuffer, f_out);
 }
 
-void multipassRender(Model* model, TGAImage* diffuse = nullptr, TGAImage* specular = nullptr, TGAImage* normalMap = nullptr) {
+void multipassRender(Model* model, TGAImage* diffuse = nullptr, TGAImage* specular = nullptr, TGAImage* normalMap = nullptr, TGAImage* AOMap = nullptr) {
 	RenderArgs* shadowArgs = makeShadowArgs(model);
 	render(shadowArgs);
 	//shadowArgs->frameBuffer->write_tga_file("shadow.tga");
 
-	RenderArgs* mainArgs = makeMainArgs(model, diffuse, specular, normalMap, shadowArgs);
+	RenderArgs* mainArgs = makeMainArgs(model, diffuse, specular, normalMap, AOMap, shadowArgs);
 	render(mainArgs);
 	mainArgs->frameBuffer->flip_vertically();
 	mainArgs->frameBuffer->write_tga_file("framebuffer.tga");
@@ -248,13 +249,15 @@ void makeAOMap(Model* model, TGAImage* diffuse, int sampleTimes = 100) {
 	f_ao->shadowMap = shadow_buffer;
 	f_ao->AOMap = new TGAImage(diffuse->get_width(), diffuse->get_height(), TGAImage::RGB);
 
-	viewportMat = makeViewportMat(shadow_width / 8, shadow_height / 8, shadow_width * 3 / 4, shadow_height * 3 / 4);
 	projMat = makeProjMat(0);
+	viewportMat = makeViewportMat(shadow_width / 8, shadow_height / 8, shadow_width * 3 / 4, shadow_height * 3 / 4);
 
 	for (int i = 1; i <= sampleTimes; i++) {
 		std::cout << "Sampling: " << i << "/" << sampleTimes << std::endl;
 		eye = rand_point_on_unit_sphere();
 		eye.y = std::abs(eye.y);
+		eye.normalize();
+		eye = eye * 2;
 		shadow_buffer->clear();
 		modelViewMat = makeViewMat(eye, center, Vec3f(0, 1, 0));
 		Matrix* all_mat_vertex = new Matrix(viewportMat * projMat * modelViewMat);
@@ -273,13 +276,14 @@ void makeAOMap(Model* model, TGAImage* diffuse, int sampleTimes = 100) {
 			for (int x = 0; x < diffuse->get_width(); x++) {
 				float old = AOBuffer->get(y, x)[0];
 				float now = f_ao->AOMap->get(y, x)[0];
-				float color = (old * (i - 1) + now) / (float(i) + 0.5f);
+				float color = (old * (i - 1) + now) / float(i) + 0.5f;
 				AOBuffer->set(y, x, TGAColor(color, color, color, 1));
 			}
 		}
 	}
 	delete args;
 	args = nullptr;
+	AOBuffer->flip_vertically();
 	AOBuffer->write_tga_file("AO.tga");
 }
 
@@ -287,21 +291,25 @@ int main(int argc, char** argv) {
 	TGAImage* diffuse = new TGAImage();
 	TGAImage* specular = new TGAImage();
 	TGAImage* normalMap = new TGAImage();
+	TGAImage* AOMap = new TGAImage();
 	bool tex_success = diffuse->read_tga_file((PATH::RESOURCES + "african_head_diffuse.tga").c_str());
 	assert(tex_success);
 	tex_success = specular->read_tga_file((PATH::RESOURCES + "african_head_spec.tga").c_str());
 	assert(tex_success);
 	tex_success = normalMap->read_tga_file((PATH::RESOURCES + "african_head_nm_tangent.tga").c_str());
 	assert(tex_success);
+	tex_success = AOMap->read_tga_file((PATH::RESOURCES + "african_head_ao.tga").c_str());
+	assert(tex_success);
 	diffuse->flip_vertically();
 	specular->flip_vertically();
 	normalMap->flip_vertically();
+	AOMap->flip_vertically();
 
 	Model* model = new Model((PATH::RESOURCES + "african_head.obj").c_str());
 	model->initTextureCoord(*diffuse);
 
-	makeAOMap(model, diffuse);
-	//multipassRender(model, diffuse, specular, normalMap);
+	//makeAOMap(model, diffuse);
+	multipassRender(model, diffuse, specular, normalMap, AOMap);
 
 	delete diffuse;
 	delete specular;

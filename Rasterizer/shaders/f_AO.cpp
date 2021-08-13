@@ -16,7 +16,7 @@ public:
 			T.y += model->tex_[model->face(int(f_in[0]))[i * 2 + 1]].y * f_in[i + 4];
 		}
 
-		if (float(shadowMap->get(int(f_in[1]), int(f_in[2]))[0]) > f_in[3]) {
+		if (float(shadowMap->get(int(f_in[1]), int(f_in[2]))[0]) < f_in[3]) {
 			AOMap->set(int(T.x), int(T.y), TGAColor(255));
 		}
 
