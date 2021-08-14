@@ -142,7 +142,7 @@ float** depthTestAndBlend(TGAImage* frameBuffer, std::vector<std::vector<float>>
 
 		int x = f[0];
 		int y = f[1];
-		int z = f[2];
+		float z = f[2];
 
 		if (zBuffer[x][y] < z) {
 			// BGRA
@@ -193,19 +193,19 @@ RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TG
 	v_shader->vpm_mat = all_mat_vertex;
 	v_shader->model = model;
 
-	//f_Phong* f_shader = new f_Phong();
-	//f_shader->mat_invert_transpose = all_mat_invert_transpose;
-	//f_shader->lightDir = new Vec3f(light_dir.normalize());
-	//f_shader->viewDir = new Vec3f((eye - center).normalize());
-	//f_shader->model = model;
-	//f_shader->diffuse = diffuse;
-	//f_shader->specular = specular;
-	//f_shader->normalMap = normalMap;
-	//f_shader->shadowMap = shadowArgs->frameBuffer;
-	//f_shader->shadowMat = shadowArgs->mat;
-	//f_shader->ambientMap = AOMap;
+	f_Phong* f_shader = new f_Phong();
+	f_shader->mat_invert_transpose = all_mat_invert_transpose;
+	f_shader->lightDir = new Vec3f(light_dir.normalize());
+	f_shader->viewDir = new Vec3f((eye - center).normalize());
+	f_shader->model = model;
+	f_shader->diffuse = diffuse;
+	f_shader->specular = specular;
+	f_shader->normalMap = normalMap;
+	f_shader->shadowMap = shadowArgs->frameBuffer;
+	f_shader->shadowMat = shadowArgs->mat;
+	f_shader->ambientMap = AOMap;
 
-	f_SSAO* f_shader = new f_SSAO();
+	//f_SSAO* f_shader = new f_SSAO();
 
 	RenderArgs* mainArgs = new RenderArgs(frameBuffer, model, v_shader, f_shader);
 	return mainArgs;
@@ -227,15 +227,15 @@ void SSAO(RenderArgs* mainArgs, float** zBuffer) {
 				continue;
 			}
 			float total = 0;
-			// 朝当前点周围随机方向发射射线
+			// 朝当前点周围方向发射射线, 附带随机扰动
 			for (float a = 0; a < M_PI * 2 - 1e-4; a += M_PI / 4) {
 				srand(time(NULL));
 				float bias = 0.1 * ((float)rand() / (float)RAND_MAX);
-				total += max_elevation_angle(zBuffer, Vec2f(x, y), Vec2f(cos(a + bias), sin(a + bias)));
+				total += (M_PI / 2) - max_elevation_angle(zBuffer, Vec2f(x, y), Vec2f(cos(a + bias), sin(a + bias)));
 			}
 			total /= (M_PI / 2) * 8;
-			//total = pow(total, 3.f);
-			TGAColor color = mainArgs->frameBuffer->get(y, x) * (1 - total);
+			//total = pow(total, 10);
+			TGAColor color = mainArgs->frameBuffer->get(y, x) * (total);
 			mainArgs->frameBuffer->set(y, x, color);
 		}
 	}

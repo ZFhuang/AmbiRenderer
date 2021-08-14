@@ -116,14 +116,14 @@ float max_elevation_angle(float** zbuffer, Vec2f p, Vec2f dir) {
 	float maxangle = 0;
 	// 射线检测, 在dir上步进1000次, 注意dir是二维的, 是在深度图上进行的步进
 	// 因此理解为判断能被原处射到的某点的最大角度
-	for (float t = 0.; t < 300.; t += 1.) {
+	for (float t = 0.; t < 100; t += 1.) {
 		Vec2f cur = p + dir * t;
 		if (cur.x >= width || cur.y >= height || cur.x < 0 || cur.y < 0) return maxangle;
 
 		float distance = (p - cur).norm();
 		if (distance < 1.f) continue;
 		// 每次遇到更大的z值时, 利用距离和高度差更新角度
-		float elevation = zbuffer[int(cur.y)][int(cur.x)] - zbuffer[int(p.y)][int(p.x)];
+		float elevation = (zbuffer[int(cur.y)][int(cur.x)] - zbuffer[int(p.y)][int(p.x)]);
 		maxangle = std::max(maxangle, atanf(elevation / distance));
 	}
 	return maxangle;

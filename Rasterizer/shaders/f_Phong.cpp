@@ -68,7 +68,7 @@ public:
 
 		float shadow = 1;
 
-		float ambient = 10;
+		float ambient = 5;
 
 		if (diffuse != nullptr) {
 			color = diffuse->get(int(T.x), int(T.y));
