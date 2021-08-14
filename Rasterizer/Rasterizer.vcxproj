@@ -150,6 +150,7 @@
     <ClCompile Include="shaders\f_Normal.cpp" />
     <ClCompile Include="shaders\f_Phong_WorldNormal.cpp" />
     <ClCompile Include="shaders\f_Phong.cpp" />
+    <ClCompile Include="shaders\f_SSAO.cpp" />
     <ClCompile Include="shaders\f_Stylized.cpp" />
     <ClCompile Include="shaders\f_Depth.cpp" />
     <ClCompile Include="core\include\gl_soft.cpp" />

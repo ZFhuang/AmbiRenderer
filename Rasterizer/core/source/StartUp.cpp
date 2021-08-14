@@ -15,6 +15,7 @@
 #include "../../shaders/f_Depth.cpp"
 #include "../../shaders/f_Normal.cpp"
 #include "../../shaders/f_AO.cpp"
+#include "../../shaders/f_SSAO.cpp"
 
 namespace PATH
 {
@@ -132,8 +133,8 @@ std::vector<std::vector<float>> fragmentShading(std::vector<std::vector<float>> 
 	return f_out;
 }
 
-void depthTestAndBlend(TGAImage* frameBuffer, std::vector<std::vector<float>> f_out) {
-	int** zBuffer = makeZBuffer(frameBuffer->get_height(), frameBuffer->get_width());
+float** depthTestAndBlend(TGAImage* frameBuffer, std::vector<std::vector<float>> f_out) {
+	float** zBuffer = makeZBuffer(frameBuffer->get_height(), frameBuffer->get_width());
 	int n_fragments = f_out.size();
 
 	for (int i = 0; i < n_fragments; i++) {
@@ -150,12 +151,12 @@ void depthTestAndBlend(TGAImage* frameBuffer, std::vector<std::vector<float>> f_
 		}
 	}
 
-	deleteZBuffer(zBuffer, frameBuffer->get_height());
+	return zBuffer;
 }
 
 RenderArgs* makeShadowArgs(Model* model) {
-	int shadow_width = width / 5;
-	int shadow_height = height / 5;
+	int shadow_width = width;
+	int shadow_height = height;
 
 	TGAImage* shadow_buffer = new TGAImage(shadow_width, shadow_height, TGAImage::RGB);
 	modelViewMat = makeViewMat(light_dir, center, Vec3f(0, 1, 0));
@@ -192,46 +193,75 @@ RenderArgs* makeMainArgs(Model* model, TGAImage* diffuse, TGAImage* specular, TG
 	v_shader->vpm_mat = all_mat_vertex;
 	v_shader->model = model;
 
-	f_Phong* f_shader = new f_Phong();
-	f_shader->mat_invert_transpose = all_mat_invert_transpose;
-	f_shader->lightDir = new Vec3f(light_dir.normalize());
-	f_shader->viewDir = new Vec3f((eye - center).normalize());
-	f_shader->model = model;
-	f_shader->diffuse = diffuse;
-	f_shader->specular = specular;
-	f_shader->normalMap = normalMap;
-	f_shader->shadowMap = shadowArgs->frameBuffer;
-	f_shader->shadowMat = shadowArgs->mat;
-	f_shader->ambientMap = AOMap;
+	//f_Phong* f_shader = new f_Phong();
+	//f_shader->mat_invert_transpose = all_mat_invert_transpose;
+	//f_shader->lightDir = new Vec3f(light_dir.normalize());
+	//f_shader->viewDir = new Vec3f((eye - center).normalize());
+	//f_shader->model = model;
+	//f_shader->diffuse = diffuse;
+	//f_shader->specular = specular;
+	//f_shader->normalMap = normalMap;
+	//f_shader->shadowMap = shadowArgs->frameBuffer;
+	//f_shader->shadowMat = shadowArgs->mat;
+	//f_shader->ambientMap = AOMap;
+
+	f_SSAO* f_shader = new f_SSAO();
 
 	RenderArgs* mainArgs = new RenderArgs(frameBuffer, model, v_shader, f_shader);
 	return mainArgs;
 }
 
-void render(RenderArgs* args) {
+float** render(RenderArgs* args) {
 	std::vector<std::vector<float>> v_out = std::move(vertexShading(args->model, args->v_shader));
 	std::vector<std::vector<float>> f_in = std::move(triangleTraversal(args->frameBuffer, v_out));
 	std::vector<std::vector<float>> f_out = std::move(fragmentShading(f_in, args->f_shader));
-	depthTestAndBlend(args->frameBuffer, f_out);
+	return depthTestAndBlend(args->frameBuffer, f_out);
+}
+
+void SSAO(RenderArgs* mainArgs, float** zBuffer) {
+	int h = mainArgs->frameBuffer->get_height();
+	int w = mainArgs->frameBuffer->get_width();
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			if (zBuffer[y][x] < 1) {
+				continue;
+			}
+			float total = 0;
+			// 朝当前点周围随机方向发射射线
+			for (float a = 0; a < M_PI * 2 - 1e-4; a += M_PI / 4) {
+				srand(time(NULL));
+				float bias = 0.1 * ((float)rand() / (float)RAND_MAX);
+				total += max_elevation_angle(zBuffer, Vec2f(x, y), Vec2f(cos(a + bias), sin(a + bias)));
+			}
+			total /= (M_PI / 2) * 8;
+			//total = pow(total, 3.f);
+			TGAColor color = mainArgs->frameBuffer->get(y, x) * (1 - total);
+			mainArgs->frameBuffer->set(y, x, color);
+		}
+	}
 }
 
 void multipassRender(Model* model, TGAImage* diffuse = nullptr, TGAImage* specular = nullptr, TGAImage* normalMap = nullptr, TGAImage* AOMap = nullptr) {
 	RenderArgs* shadowArgs = makeShadowArgs(model);
-	render(shadowArgs);
-	//shadowArgs->frameBuffer->write_tga_file("shadow.tga");
+	float** shadowZBuffer = render(shadowArgs);
+	deleteZBuffer(shadowZBuffer, height);
 
 	RenderArgs* mainArgs = makeMainArgs(model, diffuse, specular, normalMap, AOMap, shadowArgs);
-	render(mainArgs);
+	float** zBuffer = render(mainArgs);
+
+	SSAO(mainArgs, zBuffer);
+
 	mainArgs->frameBuffer->flip_vertically();
 	mainArgs->frameBuffer->write_tga_file("framebuffer.tga");
 
+	deleteZBuffer(zBuffer, height);
 	delete shadowArgs;
 	shadowArgs = nullptr;
 	delete mainArgs;
 	mainArgs = nullptr;
 }
 
-void makeAOMap(Model* model, TGAImage* diffuse, int sampleTimes = 100) {
+void makeAOMap(Model* model, TGAImage* diffuse, int sampleTimes = 5000) {
 	int shadow_width = width / 1;
 	int shadow_height = height / 1;
 
@@ -309,7 +339,7 @@ int main(int argc, char** argv) {
 	model->initTextureCoord(*diffuse);
 
 	//makeAOMap(model, diffuse);
-	multipassRender(model, diffuse, specular, normalMap, AOMap);
+	multipassRender(model, diffuse, specular, normalMap);
 
 	delete diffuse;
 	delete specular;

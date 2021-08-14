@@ -12,6 +12,8 @@ extern int width;
 extern int height;
 extern int depth;
 
+#define M_PI 3.14159265358979323846264338327950288
+
 class v_Shader {
 public:
 	virtual ~v_Shader() {};
@@ -40,8 +42,10 @@ Matrix makeViewMat(Vec3f eye, Vec3f center, Vec3f up);
 
 Matrix makeViewportMat(int x, int y, int w, int h);
 
-int** makeZBuffer(int height, int width);
+float** makeZBuffer(int height, int width);
 
-void deleteZBuffer(int** zbuffer, int height);
+void deleteZBuffer(float** zbuffer, int height);
 
 Vec3f rand_point_on_unit_sphere();
+
+float max_elevation_angle(float** zbuffer, Vec2f p, Vec2f dir);

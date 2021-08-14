@@ -1,7 +1,5 @@
 ﻿#include "gl_soft.h"
 
-#define M_PI 3.1415926
-
 Vec3f barycentric(Vec3f A, Vec3f B, Vec3f C, Vec3f P) {
 	// 计算三角形ABC中点P对应的重心坐标
 	// 任意两边的向量
@@ -84,21 +82,21 @@ Matrix makeViewportMat(int x, int y, int w, int h) {
 	return mat;
 }
 
-int** makeZBuffer(int height, int width) {
+float** makeZBuffer(int height, int width) {
 	// 初始化Z缓冲为最大值
-	int** zbuffer = new int* [height];
+	float** zbuffer = new float* [height];
 	for (int line = 0; line < height; line++) {
-		zbuffer[line] = new int[width];
+		zbuffer[line] = new float[width];
 	}
 	for (int line = 0; line < height; line++) {
 		for (int item = 0; item < width; item++) {
-			zbuffer[line][item] = std::numeric_limits<int>::min();
+			zbuffer[line][item] = std::numeric_limits<unsigned int>::min();
 		}
 	}
 	return zbuffer;
 }
 
-void deleteZBuffer(int** zbuffer, int height) {
+void deleteZBuffer(float** zbuffer, int height) {
 	for (int line = 0; line < height; line++) {
 		delete zbuffer[line];
 	}
@@ -112,4 +110,21 @@ Vec3f rand_point_on_unit_sphere() {
 	float theta = 2.f * M_PI * u;
 	float phi = acos(2.f * v - 1.f);
 	return Vec3f(sin(phi) * cos(theta), sin(phi) * sin(theta), cos(phi));
+}
+
+float max_elevation_angle(float** zbuffer, Vec2f p, Vec2f dir) {
+	float maxangle = 0;
+	// 射线检测, 在dir上步进1000次, 注意dir是二维的, 是在深度图上进行的步进
+	// 因此理解为判断能被原处射到的某点的最大角度
+	for (float t = 0.; t < 300.; t += 1.) {
+		Vec2f cur = p + dir * t;
+		if (cur.x >= width || cur.y >= height || cur.x < 0 || cur.y < 0) return maxangle;
+
+		float distance = (p - cur).norm();
+		if (distance < 1.f) continue;
+		// 每次遇到更大的z值时, 利用距离和高度差更新角度
+		float elevation = zbuffer[int(cur.y)][int(cur.x)] - zbuffer[int(p.y)][int(p.x)];
+		maxangle = std::max(maxangle, atanf(elevation / distance));
+	}
+	return maxangle;
 }
