@@ -7,20 +7,50 @@
     <Filter Include="source">
       <UniqueIdentifier>{aca2e4fb-88a3-4e12-9eab-30fbf226ea17}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{d125f531-f898-41d5-be6b-35d038c8d50d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\include">
+      <UniqueIdentifier>{6f5bbee9-e570-4fe7-badb-c5d291dc2159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\source">
+      <UniqueIdentifier>{c535f6eb-0617-4d72-866a-02c1d7fa1991}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\AmbiRenderer.hpp">
+    <ClInclude Include="core\AmbiRenderer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="core\Renderer.hpp">
+    <ClInclude Include="core\Renderer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="core\Config.hpp">
+    <ClInclude Include="core\Config.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\WindowsRenderer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\DesignPatterns.h">
+      <Filter>Utils\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Macros.h">
+      <Filter>Utils\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Utils.h">
+      <Filter>Utils\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\AmbiRenderer.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\WindowsRenderer.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\DesignPatterns.cpp">
+      <Filter>Utils\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\WinMain.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

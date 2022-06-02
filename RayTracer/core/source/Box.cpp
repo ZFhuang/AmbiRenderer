@@ -1,4 +1,4 @@
-#include "Box.hpp"
+ï»¿#include "Box.hpp"
 
 Box::Box(const Point3& p0, const Point3& p1, shared_ptr<Material> ptr)
 {
@@ -20,7 +20,7 @@ bool Box::hit(const Ray& r, double s_min, double s_max, HitRecord& rec) const
 
 bool Box::bounding_box(double time0, double time1, AABB& output_box) const
 {
-	// ·µ»ØÁ½¸ö½ÇµãµÃµ½µÄ°üÎ§ºÐ
+	// è¿”å›žä¸¤ä¸ªè§’ç‚¹å¾—åˆ°çš„åŒ…å›´ç›’
 	output_box = AABB(box_min, box_max);
 	return true;
 }

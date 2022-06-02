@@ -1,16 +1,16 @@
-#pragma once
+ï»¿#pragma once
 #include "Vec3.hpp"
 #include "Perlin.hpp"
 #include <memory>
 
-// ÎÆÀí»ùÀà
+// çº¹ç†åŸºç±»
 class Texture {
 public:
-	// uvÊÇ¶ÔÓ¦µÄ²ÎÊı±íÃæ, pÊÇÈıÎ¬ÃüÖĞµã
+	// uvæ˜¯å¯¹åº”çš„å‚æ•°è¡¨é¢, pæ˜¯ä¸‰ç»´å‘½ä¸­ç‚¹
 	virtual Color value(double u, double v, const Point3& p) const = 0;
 };
 
-// ÓÉ³ÌĞòÊµÊ±Éú³ÉµÄÊµÌåÎÆÀíÀà, ¼Ì³ĞÎÆÀí»ùÀà, Ò²ÓÃÀ´×÷Îª»ùÀà¸øÆäËûÎÆÀíÀà¼Ì³Ğ
+// ç”±ç¨‹åºå®æ—¶ç”Ÿæˆçš„å®ä½“çº¹ç†ç±», ç»§æ‰¿çº¹ç†åŸºç±», ä¹Ÿç”¨æ¥ä½œä¸ºåŸºç±»ç»™å…¶ä»–çº¹ç†ç±»ç»§æ‰¿
 class SolidColor :public Texture {
 public:
 	SolidColor() {}
@@ -23,11 +23,11 @@ private:
 	Color color_val;
 };
 
-// ÆåÅÌ¸ñÎÆÀí, ÊôÓÚÊµÌåÎÆÀíµÄÒ»ÖÖÒò´Ë¼Ì³ĞÁËSolidColor
+// æ£‹ç›˜æ ¼çº¹ç†, å±äºå®ä½“çº¹ç†çš„ä¸€ç§å› æ­¤ç»§æ‰¿äº†SolidColor
 class CheckerTexture :public SolidColor {
 public:
 	CheckerTexture() {}
-	// ÓÃÆæÅ¼À´¿ØÖÆ·µ»ØµÄÆåÅÌ
+	// ç”¨å¥‡å¶æ¥æ§åˆ¶è¿”å›çš„æ£‹ç›˜
 	CheckerTexture(shared_ptr<Texture> _even, shared_ptr<Texture> _odd) :even(_even), odd(_odd) {}
 	CheckerTexture(Color c1, Color c2) :CheckerTexture(make_shared<SolidColor>(c1), make_shared<SolidColor>(c2)) {}
 
@@ -38,7 +38,7 @@ private:
 	shared_ptr<Texture> even;
 };
 
-// »ÒÉ«µÄ°ØÁÖPerlinÔëÉùÎÆÀí
+// ç°è‰²çš„æŸæ—Perlinå™ªå£°çº¹ç†
 class PerlinNoiseTexture :public SolidColor {
 public:
 	PerlinNoiseTexture() {}
@@ -50,16 +50,16 @@ private:
 	double scale;
 };
 
-// Í¼Æ¬ÎÆÀí, ²»ÊôÓÚÊµÌåÎÆÀíÒò´ËÖ±½Ó´ÓTexture¼Ì³Ğ
+// å›¾ç‰‡çº¹ç†, ä¸å±äºå®ä½“çº¹ç†å› æ­¤ç›´æ¥ä»Textureç»§æ‰¿
 class ImageTexture : public Texture {
 public:
-	// Ã¿ÏñËØÓÃRGB±íÊ¾, ËùÒÔÕ¼Èı¸ö±ÈÌØ
+	// æ¯åƒç´ ç”¨RGBè¡¨ç¤º, æ‰€ä»¥å ä¸‰ä¸ªæ¯”ç‰¹
 	const static int bytes_per_pixel = 3;
-	// Ã»ÓĞÍ¼Æ¬Ê±
+	// æ²¡æœ‰å›¾ç‰‡æ—¶
 	ImageTexture() :data(nullptr), width(0), height(0), bytes_per_scanline(0) {}
-	// ÓĞÍ¼Æ¬Ê±
+	// æœ‰å›¾ç‰‡æ—¶
 	ImageTexture(const char* filename);
-	// Î¯ÍĞconst char*
+	// å§”æ‰˜const char*
 	ImageTexture(std::string filename);
 
 	~ImageTexture() {
@@ -71,6 +71,6 @@ public:
 private:
 	unsigned char* data;
 	int width, height;
-	// Ã¿Ò»ĞĞ¶ÔÓ¦µÄ×Ü±ÈÌØÖµ
+	// æ¯ä¸€è¡Œå¯¹åº”çš„æ€»æ¯”ç‰¹å€¼
 	int bytes_per_scanline;
 };

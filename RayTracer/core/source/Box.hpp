@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "RTweekend.hpp"
 #include "AArect.hpp"
@@ -12,7 +12,7 @@ public:
 	virtual bool bounding_box(double time0, double time1, AABB& output_box) const override;
 
 public:
-	// Ö»±£´æÁ½¸ö½ÇµãºÍ6¸öÃæ
+	// åªä¿å­˜ä¸¤ä¸ªè§’ç‚¹å’Œ6ä¸ªé¢
 	Point3 box_min;
 	Point3 box_max;
 	HittableList sides;

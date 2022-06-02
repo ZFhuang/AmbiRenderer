@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "rtw_stb_image.hpp"
 #include "Texture.hpp"
 
@@ -7,7 +7,7 @@ Color SolidColor::value(double u, double v, const Point3& p) const {
 }
 
 Color CheckerTexture::value(double u, double v, const Point3& p) const {
-	// ÀûÓÃsinµÄÖÜÆÚĞÔÀ´µÃµ½·ûºÅÅĞ¶ÏÊÇ·ñĞèÒª»æÖÆ¸ñ×Ó
+	// åˆ©ç”¨sinçš„å‘¨æœŸæ€§æ¥å¾—åˆ°ç¬¦å·åˆ¤æ–­æ˜¯å¦éœ€è¦ç»˜åˆ¶æ ¼å­
 	auto sines = sin(10 * p.x()) * sin(10 * p.y()) * sin(10 * p.z());
 	if (sines < 0) {
 		return odd->value(u, v, p);
@@ -18,41 +18,41 @@ Color CheckerTexture::value(double u, double v, const Point3& p) const {
 }
 
 Color PerlinNoiseTexture::value(double u, double v, const Point3& p) const {
-	// ÊäÈëÈıÎ¬µã·µ»ØPerlinÔëÉù, Óë°×É«Ïà³ËµÃµ½»ÒÉ«µÄ°ØÁÖÔëÉùÎÆÀí
-	// µÈ±ÈÂÊ¸Ä±äÊäÈë×ø±êµÄÖµ, Ê¹µÃÎ¢Ğ¡µÄ×ø±ê±ä»¯Ò²»á±»Ó³Éäµ½¸ü´óµÄÔëÉù¿Õ¼äÖĞ
-	// Òò´Ë¿ÉÒÔÆğµ½Ôö´óÔëÉùÆµÂÊµÄĞ§¹û
-	// ÕâÀïÓÃµ½ÁËÍÄÁ÷Ğ§¹û, ÔöÇ¿ÁËÔëÉù¼äµÄ²îÒì, µ«ÊÇºÜ¶àÊ±ºòÍÄÁ÷²¢²»»áÖ±½ÓÊ¹ÓÃ
-	// ¶øÊÇ×÷ÎªÔëÉù·Åµ½sinº¯ÊıÖ®ÀàµÄÖÜÆÚº¯ÊıÖĞÀ´¼ä½ÓÓ°ÏìÑÕÉ«, ´ïµ½ÖÜÆÚ±ä»¯µÄĞ§¹û
-	// ÓÉÓÚsinÓĞ¸ºÊı, ¼ÇµÃ¹éÒ»»¯À´Ê¹µÃgammaĞ£Õı²½Öè²»³öÎÊÌâ
+	// è¾“å…¥ä¸‰ç»´ç‚¹è¿”å›Perlinå™ªå£°, ä¸ç™½è‰²ç›¸ä¹˜å¾—åˆ°ç°è‰²çš„æŸæ—å™ªå£°çº¹ç†
+	// ç­‰æ¯”ç‡æ”¹å˜è¾“å…¥åæ ‡çš„å€¼, ä½¿å¾—å¾®å°çš„åæ ‡å˜åŒ–ä¹Ÿä¼šè¢«æ˜ å°„åˆ°æ›´å¤§çš„å™ªå£°ç©ºé—´ä¸­
+	// å› æ­¤å¯ä»¥èµ·åˆ°å¢å¤§å™ªå£°é¢‘ç‡çš„æ•ˆæœ
+	// è¿™é‡Œç”¨åˆ°äº†æ¹æµæ•ˆæœ, å¢å¼ºäº†å™ªå£°é—´çš„å·®å¼‚, ä½†æ˜¯å¾ˆå¤šæ—¶å€™æ¹æµå¹¶ä¸ä¼šç›´æ¥ä½¿ç”¨
+	// è€Œæ˜¯ä½œä¸ºå™ªå£°æ”¾åˆ°sinå‡½æ•°ä¹‹ç±»çš„å‘¨æœŸå‡½æ•°ä¸­æ¥é—´æ¥å½±å“é¢œè‰², è¾¾åˆ°å‘¨æœŸå˜åŒ–çš„æ•ˆæœ
+	// ç”±äºsinæœ‰è´Ÿæ•°, è®°å¾—å½’ä¸€åŒ–æ¥ä½¿å¾—gammaæ ¡æ­£æ­¥éª¤ä¸å‡ºé—®é¢˜
 	return Color(1, 1, 1) * 0.5 * (1.0 + sin(scale * p.z() + 10 * perlin.turbulence(p)));
 }
 
 ImageTexture::ImageTexture(const char* filename) {
 	auto components_per_pixel = bytes_per_pixel;
-	// ¶ÁÈ¡Í¼Æ¬µ½dataÊı×éÖĞ
+	// è¯»å–å›¾ç‰‡åˆ°dataæ•°ç»„ä¸­
 	data = stbi_load(filename, &width, &height, &components_per_pixel, components_per_pixel);
 	if (!data) {
 		std::cerr << "ERROR: Could not load texture image file '" << filename << "'.\n";
 		width = height = 0;
 	}
-	// ¼ÆËãĞĞ±ÈÌØÊı, ÓÃÀ´Ë÷ÒıdataÊı×é
+	// è®¡ç®—è¡Œæ¯”ç‰¹æ•°, ç”¨æ¥ç´¢å¼•dataæ•°ç»„
 	bytes_per_scanline = bytes_per_pixel * width;
 }
 
 ImageTexture::ImageTexture(std::string filename):ImageTexture::ImageTexture(filename.c_str())
 {
-	// Î¯ÍĞ
+	// å§”æ‰˜
 }
 
 Color ImageTexture::value(double u, double v, const Point3& p) const {
-	// Ã»ÓĞÍ¼Æ¬Ê±·µ»Ø¹Ì¶¨Öµ
+	// æ²¡æœ‰å›¾ç‰‡æ—¶è¿”å›å›ºå®šå€¼
 	if (data == nullptr) {
 		return Color(0, 1, 1);
 	}
-	// Ëõ·ÅÄ£ĞÍ×ø±êuvµ½(0,1)
+	// ç¼©æ”¾æ¨¡å‹åæ ‡uvåˆ°(0,1)
 	u = clamp(u, 0.0, 1.0);
 	v = 1.0 - clamp(v, 0.0, 1.0);
-	// ÖØĞÂ½«uvÓ³Éäµ½Í¼Æ¬ÏñËØÉÏ
+	// é‡æ–°å°†uvæ˜ å°„åˆ°å›¾ç‰‡åƒç´ ä¸Š
 	auto i = static_cast<int>(u * width);
 	auto j = static_cast<int>(v * height);
 	if (i >= width) {
@@ -62,7 +62,7 @@ Color ImageTexture::value(double u, double v, const Point3& p) const {
 		j = height - 1;
 	}
 	const auto color_scale = 1.0 / 255.0;
-	// ´ÓÊı×éÖĞË÷ÒıÈ¡Öµ²¢·µ»Ø
+	// ä»æ•°ç»„ä¸­ç´¢å¼•å–å€¼å¹¶è¿”å›
 	auto pixel = data + j * bytes_per_scanline + i * bytes_per_pixel;
 	return Color(color_scale * pixel[0], color_scale * pixel[1], color_scale * pixel[2]);
 }

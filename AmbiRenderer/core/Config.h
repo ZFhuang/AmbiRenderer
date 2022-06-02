@@ -1,0 +1,23 @@
+﻿#pragma once
+#include <string>
+#include "Utils.h"
+
+//namespace CONFIG
+//{
+//	const std::string RESOURCES = "C:/Work/AmbiRenderer/Resources/";
+//}
+
+
+class Config
+{
+public:
+	std::wstring name = L"AmbiRenderer";
+	int screen_width = 800;
+	int screen_height = 600;
+
+	void StartUp() {
+		ABR_DEBUG_OUTPUT("Should loading config file here...");
+	}
+
+	Config() = default;
+};
