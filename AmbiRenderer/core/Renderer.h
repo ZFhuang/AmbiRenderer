@@ -1,16 +1,10 @@
 ﻿#pragma once
+#include "Config.h"
+#include "Utils.h"
 
-#include <memory>
-
-using std::shared_ptr;
-using std::make_shared;
-
-enum class SceneEnum;
-class Config;
-
-class BaseRenderer {
+class Renderer {
 public:
-	virtual bool init_renderer(shared_ptr<Config> config) = 0;
-	virtual bool render() = 0;
-	//virtual bool load_scene(SceneEnum sceneEnum) = 0;
+	Renderer() = default;
+	virtual void StartUp() noexcept = 0;
+	virtual void SwapBuffer() noexcept = 0;
 };

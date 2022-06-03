@@ -1,5 +1,5 @@
-﻿#include "../core/include/gl_soft.h"
-#include "../core/include/model.h"
+﻿#include "../core/gl_soft.h"
+#include "../core/model.h"
 
 class v_Basic :public v_Shader {
 public:

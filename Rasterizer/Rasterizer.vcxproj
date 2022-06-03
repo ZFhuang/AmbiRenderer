@@ -139,13 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="core\include\geometry.h" />
-    <ClInclude Include="core\include\model.h" />
-    <ClInclude Include="core\include\gl_soft.h" />
-    <ClInclude Include="core\include\tgaimage.h" />
-    <ClInclude Include="core\source\Rasterizer.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClCompile Include="core\gl_soft.cpp" />
+    <ClCompile Include="core\model.cpp" />
+    <ClCompile Include="core\Rasterizer.cpp" />
+    <ClCompile Include="core\tgaimage.cpp" />
     <ClCompile Include="shaders\f_AO.cpp" />
     <ClCompile Include="shaders\f_Normal.cpp" />
     <ClCompile Include="shaders\f_Phong_WorldNormal.cpp" />
@@ -153,13 +150,15 @@
     <ClCompile Include="shaders\f_SSAO.cpp" />
     <ClCompile Include="shaders\f_Stylized.cpp" />
     <ClCompile Include="shaders\f_Depth.cpp" />
-    <ClCompile Include="core\include\gl_soft.cpp" />
-    <ClCompile Include="core\include\model.cpp" />
-    <ClCompile Include="core\include\tgaimage.cpp" />
-    <ClCompile Include="core\source\Rasterizer.cpp" />
-    <ClCompile Include="core\source\StartUp.cpp" />
     <ClCompile Include="shaders\f_Gouraud.cpp" />
     <ClCompile Include="shaders\v_Basic.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\geometry.h" />
+    <ClInclude Include="core\gl_soft.h" />
+    <ClInclude Include="core\model.h" />
+    <ClInclude Include="core\Rasterizer.h" />
+    <ClInclude Include="core\tgaimage.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

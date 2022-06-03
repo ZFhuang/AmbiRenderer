@@ -19,38 +19,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\include\tgaimage.h">
-      <Filter>Core\include</Filter>
-    </ClInclude>
-    <ClInclude Include="core\source\Rasterizer.h">
-      <Filter>Core\source</Filter>
-    </ClInclude>
-    <ClInclude Include="core\include\geometry.h">
-      <Filter>Core\include</Filter>
-    </ClInclude>
-    <ClInclude Include="core\include\model.h">
-      <Filter>Core\include</Filter>
-    </ClInclude>
-    <ClInclude Include="core\include\gl_soft.h">
-      <Filter>Core\include</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="core\include\tgaimage.cpp">
-      <Filter>Core\include</Filter>
-    </ClCompile>
-    <ClCompile Include="core\source\StartUp.cpp">
-      <Filter>Core\source</Filter>
-    </ClCompile>
-    <ClCompile Include="core\source\Rasterizer.cpp">
-      <Filter>Core\source</Filter>
-    </ClCompile>
-    <ClCompile Include="core\include\model.cpp">
-      <Filter>Core\include</Filter>
-    </ClCompile>
-    <ClCompile Include="core\include\gl_soft.cpp">
-      <Filter>Core\include</Filter>
-    </ClCompile>
     <ClCompile Include="shaders\v_Basic.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
@@ -64,5 +32,16 @@
     <ClCompile Include="shaders\f_Normal.cpp" />
     <ClCompile Include="shaders\f_AO.cpp" />
     <ClCompile Include="shaders\f_SSAO.cpp" />
+    <ClCompile Include="core\gl_soft.cpp" />
+    <ClCompile Include="core\model.cpp" />
+    <ClCompile Include="core\tgaimage.cpp" />
+    <ClCompile Include="core\Rasterizer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core\geometry.h" />
+    <ClInclude Include="core\gl_soft.h" />
+    <ClInclude Include="core\model.h" />
+    <ClInclude Include="core\Rasterizer.h" />
+    <ClInclude Include="core\tgaimage.h" />
   </ItemGroup>
 </Project>

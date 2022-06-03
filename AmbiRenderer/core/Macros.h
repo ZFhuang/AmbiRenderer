@@ -6,27 +6,29 @@
 #include <sstream>
 #include <Windows.h>
 
-#define ABR_RUN_FUNCTION(function_name) \
-{                             \
+#define ABR_RUN_FUNCTION(function) \
+{ \
     std::wostringstream os_; \
-    os_ << "RUNNING: "<<#function_name<<"\n";\
+    os_ << "RUNNING: "<<#function<<"\n";\
     OutputDebugStringW( os_.str().c_str() );  \
-    function_name;\
+    function;\
 } \
 
 #define ABR_DEBUG_OUTPUT(output_string) \
-{                             \
+{ \
     std::wostringstream os_; \
     os_ <<"["<<__FILE__<<": "<<__func__<<"(). L: "<<__LINE__<<"]: "<<##output_string##<<"\n";\
     OutputDebugStringW( os_.str().c_str() );  \
 } \
 
 #define ABR_RUN_WITH_CLOCK(codes_here)\
+{ \
     std::wostringstream os_; \
     auto startTime = std::chrono::steady_clock::now();\
     sth;\
     os_ <<"Time Elapse: "<<std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime).count()<<" ms\n";\
-    os_ <<  "-------------------------------------------------------\n";\
+    OutputDebugStringW( os_.str().c_str() );  \
+} \
 
 #else
 

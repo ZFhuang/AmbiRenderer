@@ -1,4 +1,4 @@
-﻿#include "../core/include/gl_soft.h"
+﻿#include "../core/gl_soft.h"
 
 class f_Depth :public f_Shader {
 public:
