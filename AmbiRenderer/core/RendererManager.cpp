@@ -1,4 +1,4 @@
-#include "RendererManager.h"
+﻿#include "RendererManager.h"
 
 RendererManager::RendererManager() noexcept
 {
@@ -8,21 +8,23 @@ RendererManager::RendererManager() noexcept
 		m_renderer = new Rasterizer;
 	}
 	else {
-		// No such renderer!
-		assert(false);
+		assert(false); // No such renderer!
 	}
 }
 
 void RendererManager::StartUp() noexcept
 {
 	m_renderer->StartUp();
+	frame_height = Singleton<Config>::GetInstance()->render_height;
+	frame_width = Singleton<Config>::GetInstance()->render_width;
 }
 
-void RendererManager::Update(HDC hdc_buffer) noexcept
+void RendererManager::Update(HBITMAP& bitmap) noexcept
 {
 	m_renderer->SwapBuffer();
-	SetPixel(hdc_buffer, 100, 100, RGB(0, 0, 0));
-	SetPixel(hdc_buffer, 101, 100, RGB(0, 0, 0));
-	SetPixel(hdc_buffer, 100, 101, RGB(0, 0, 0));
-	SetPixel(hdc_buffer, 101, 101, RGB(0, 0, 0));
+	p_frame_buffer frame = m_renderer->GetBuffer();
+
+	// 用渲染器返回的帧刷新hdc
+	// sizeof(COLORREF) = 4(32bits)
+	SetBitmapBits(bitmap, frame_height * frame_width * sizeof(COLORREF), frame);
 }

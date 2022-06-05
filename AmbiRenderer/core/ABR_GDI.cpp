@@ -5,7 +5,7 @@ LRESULT CALLBACK HandleMessage(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 
 void ABR_GDI::InitWindow() noexcept {
     WNDCLASSEX wndClass = { 0 };
-    MSG msg;
+    
     auto appName = Singleton<Config>::GetInstance()->name.c_str();
     wndClass.style = CS_HREDRAW | CS_VREDRAW;   // 设置当长宽改变时窗口重画
     wndClass.lpfnWndProc = HandleMessage;   // 消息处理回调
@@ -39,7 +39,11 @@ void ABR_GDI::InitWindow() noexcept {
 
     ShowWindow(root_hwnd, SW_SHOWDEFAULT);  // 以默认大小显示
     UpdateWindow(root_hwnd);    // 发送WM_PAINT
+}
 
+void ABR_GDI::StartHandleMessage() noexcept
+{
+    MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))    // 消息循环
     {
         TranslateMessage(&msg);
@@ -65,18 +69,16 @@ void ABR_GDI::KeyBoardMessage(WPARAM wParam) noexcept
     }
 }
 
-LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam,
-    LPARAM lParam)
+LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     int wmId, wmEvent;
     PAINTSTRUCT ps;
     HDC hdc;
 
-    // 双缓冲机制
+    // static防止多次生成
     static int cxClient, cyClient;
-    static HDC hdcBackBuffer;
+    static HDC hdcBuffer;
     static HBITMAP hBitmap;
-    static HBITMAP hOldBitmap;
 
     // 处理消息后必须返回0
     switch (message) {
@@ -86,47 +88,28 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam,
     }
 
     case WM_CREATE: {
-        //获取客户区尺寸
-        RECT rect;
-        GetClientRect(hWnd, &rect);
-        cxClient = rect.right;
-        cyClient = rect.bottom;
-        //创建后备缓冲区
-        //先创建一个内存DC
-        hdcBackBuffer = CreateCompatibleDC(NULL);
-        //获得前置缓冲区的DC
+        cxClient = LOWORD(lParam);
+        cyClient = HIWORD(lParam);
         hdc = GetDC(hWnd);
-        hBitmap = CreateCompatibleBitmap(hdc, Singleton<Config>::GetInstance()->render_width, Singleton<Config>::GetInstance()->render_height);
-        //将bitmap装入内存DC
-        hOldBitmap = (HBITMAP)SelectObject(hdcBackBuffer, hBitmap);
-        //释放DC
+        hdcBuffer = CreateCompatibleDC(hdc);
+        hBitmap = CreateBitmap(Singleton<Config>::GetInstance()->render_width, Singleton<Config>::GetInstance()->render_height, 1, 32, NULL);
+        SelectObject(hdcBuffer, hBitmap);
         ReleaseDC(hWnd, hdc);
         break;
     }
 
     case WM_SIZE:
-        RECT rect;
-        GetClientRect(hWnd, &rect);
-        cxClient = rect.right;
-        cyClient = rect.bottom;
+        cxClient = LOWORD(lParam);
+        cyClient = HIWORD(lParam);
 
     case WM_PAINT:{  // 更新画面的消息
         hdc = BeginPaint(hWnd, &ps);
-        BitBlt(hdcBackBuffer,
-            0,
-            0,
-            cxClient,
-            cyClient,
-            NULL,
-            NULL,
-            NULL,
-            BLACKNESS);
         clock_t start;
         start = clock();//paint start clock
         {
             // 渲染测试
             ABR_DEBUG_OUTPUT("PAINT");
-            Singleton<RendererManager>::GetInstance()->Update(hdcBackBuffer);            
+            Singleton<RendererManager>::GetInstance()->Update(hBitmap);
         }
         clock_t stop;
         stop = clock();//paint end clock
@@ -136,15 +119,15 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam,
         int fps;
         fps = (int)min(1000, 1.0 / dur);
         // 文字输出
-        TextOut(hdcBackBuffer, 0, 0, (L"FPS: " + std::to_wstring(fps)).c_str(), 9);
-        //--------------------------------------------------------
-        //现在把back buffer内容用位块传送方法传到front buffer
-        StretchBlt(ps.hdc,
+        //TextOut(hdcBuffer, 0, 0, (L"FPS: " + std::to_wstring(fps)).c_str(), std::to_wstring(fps).size()+5);
+        SetWindowText(hWnd, (L"AmbiRenderer (fps=" + std::to_wstring(fps)+L")").c_str());
+        // 渲染到画面
+        StretchBlt(hdc,
             0,
             0,
             cxClient,
             cyClient,
-            hdcBackBuffer,
+            hdcBuffer,
             0,
             0,
             Singleton<Config>::GetInstance()->render_width,
@@ -155,10 +138,8 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam,
     }
 
     case WM_DESTROY: {
-        SelectObject(hdcBackBuffer, hOldBitmap);
-        DeleteDC(hdcBackBuffer);
+        DeleteDC(hdcBuffer);
         DeleteObject(hBitmap);
-        //delete gdi3dScene;
 
         PostQuitMessage(0);
         break;
@@ -175,5 +156,6 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam,
         // 否则返回默认的处理
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
+    // 消息捕获后必须返回0
     return 0;
 }

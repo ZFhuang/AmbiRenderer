@@ -31,7 +31,7 @@ int WINAPI WinMain(
     std::thread t_GDI = ComponentsStartUp();
 
     while (true) {
-        Sleep(30);
+        Sleep(60);
         Singleton<ABR_GDI>::GetInstance()->Update();
         if (gdi_exited) {
             break;

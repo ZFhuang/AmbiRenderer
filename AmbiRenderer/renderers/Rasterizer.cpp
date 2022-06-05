@@ -1,24 +1,42 @@
-#include "Rasterizer.h"
-
-Rasterizer::Rasterizer() noexcept {
-	width = 0;
-	height = 0;
-}
+ï»¿#include "Rasterizer.h"
 
 void Rasterizer::StartUp() noexcept
 {
-	;
+	frame_height = Singleton<Config>::GetInstance()->render_height;
+	frame_width = Singleton<Config>::GetInstance()->render_width;
+	p_front_buffer = new COLORREF[frame_height * frame_width];
+	p_back_buffer = new COLORREF[frame_height * frame_width];
+}
+
+p_frame_buffer Rasterizer::GetBuffer() noexcept
+{
+	return p_front_buffer;
 }
 
 void Rasterizer::SwapBuffer() noexcept
 {
-	;
+	// do nothing now
+	static int sum_elem = frame_height * frame_width;
+	for (int idx = 0; idx < sum_elem; ++idx) {
+		p_front_buffer[idx] = RGB(255, 0, 255);
+	}
+	//for (int y = 0; y < frame_height; ++y) {
+	//	for (int x = 0; x < frame_width; ++x) {
+	//		p_front_buffer[FRAME_PIXEL_IDX(x, y)] = RGB(255, 0, 255);
+	//	}
+	//}
+}
+
+Rasterizer::~Rasterizer()
+{
+	delete[] p_front_buffer;
+	delete[] p_back_buffer;
 }
 
 //std::vector<std::vector<float>> triangleTraversal(TGAImage* frameBuffer, std::vector<std::vector<float>>&& v_out) {
 //    std::vector<std::vector<float>> f_in;
 //
-//    // Éú³ÉÈı½ÇĞÎµÄ¶şÎ¬°üÎ§ºĞ
+//    // ç”Ÿæˆä¸‰è§’å½¢çš„äºŒç»´åŒ…å›´ç›’
 //    Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 //    Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 //    Vec2f clamp(frameBuffer->get_width() - 1, frameBuffer->get_height() - 1);
@@ -37,24 +55,24 @@ void Rasterizer::SwapBuffer() noexcept
 //            }
 //        }
 //
-//        // ¹âÕ¤»¯
+//        // å…‰æ …åŒ–
 //        Vec3f P;
 //        for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++)
 //        {
 //            for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++)
 //            {
-//                // µÃµ½°üÎ§ºĞÄÚÏñËØµÄÖØĞÄ×ø±êÅĞ¶ÏÊÇ·ñÔÚÈı½ÇĞÎÄÚ
+//                // å¾—åˆ°åŒ…å›´ç›’å†…åƒç´ çš„é‡å¿ƒåæ ‡åˆ¤æ–­æ˜¯å¦åœ¨ä¸‰è§’å½¢å†…
 //                Vec3f bc_screen = barycentric(pts[0], pts[1], pts[2], P);
 //                if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0)
 //                {
 //                    continue;
 //                }
 //
-//                // ²åÖµÄ¿±êÏñËØµÄzÖµ
+//                // æ’å€¼ç›®æ ‡åƒç´ çš„zå€¼
 //                P.z = 0;
 //                for (int j = 0; j < 3; j++) P.z += pts[j][2] * bc_screen[j];
 //
-//                // ²åÖµÄ£ÊÓ±ä»»Ö®Ç°µÄÆ¬Ôª¶¥µãÎ»ÖÃ´«µİµ½ºóÃæ
+//                // æ’å€¼æ¨¡è§†å˜æ¢ä¹‹å‰çš„ç‰‡å…ƒé¡¶ç‚¹ä½ç½®ä¼ é€’åˆ°åé¢
 //                Vec3f ori_P;
 //                for (int j = 0; j < 3; j++)
 //                {
@@ -197,7 +215,7 @@ void Rasterizer::SwapBuffer() noexcept
 //                continue;
 //            }
 //            float total = 0;
-//            // ³¯µ±Ç°µãÖÜÎ§·½Ïò·¢ÉäÉäÏß, ¸½´øËæ»úÈÅ¶¯
+//            // æœå½“å‰ç‚¹å‘¨å›´æ–¹å‘å‘å°„å°„çº¿, é™„å¸¦éšæœºæ‰°åŠ¨
 //            for (float a = 0; a < M_PI * 2 - 1e-4; a += M_PI / 4)
 //            {
 //                srand(time(NULL));

@@ -10,6 +10,8 @@ public:
 
     void InitWindow() noexcept;
 
+    void StartHandleMessage() noexcept;
+
     void Update() noexcept;
 
     void KeyBoardMessage(WPARAM wParam) noexcept;
@@ -17,6 +19,7 @@ public:
     inline void StartUp() noexcept {
         ABR_DEBUG_OUTPUT("Starting...");
         InitWindow();
+        StartHandleMessage();
     }
 
 private:

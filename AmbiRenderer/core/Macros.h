@@ -33,13 +33,13 @@
 #else
 
 #define ABR_RUN_FUNCTION(function) \
-    function##();\
+    function;\
 
 #define ABR_RUN_TEST(function) \
-    function##();\
+    function;\
 
 // do nothing
-#define ABR_DEBUG_OUT(str) (void)0;
+#define ABR_DEBUG_OUTPUT(output_string) ;
 
 #define ABR_RUN_WITH_CLOCK(sth)\
     sth;\

@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include <string>
 #include "Utils.h"
+#include <Windows.h>
 
 //namespace CONFIG
 //{
 //	const std::string RESOURCES = "C:/Work/AmbiRenderer/Resources/";
 //}
-
 
 class Config
 {
@@ -17,6 +17,7 @@ public:
 	int screen_height = 600;
 	int render_width = 400;
 	int render_height = 300;
+	int core_num = 4;
 
 	void StartUp() {
 		ABR_DEBUG_OUTPUT("Should loading config file here...");
