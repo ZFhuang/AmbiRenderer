@@ -13,15 +13,6 @@
     <Filter Include="renderers">
       <UniqueIdentifier>{b36109b8-7e86-4562-884b-6f03acf321c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="renderers\rasterizer">
-      <UniqueIdentifier>{6f9650cd-db3f-46d1-ae3c-36a2722f5295}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="renderers\rasterizer\include">
-      <UniqueIdentifier>{ac40af79-c736-4580-95c5-b22806259f9c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="renderers\rasterizer\source">
-      <UniqueIdentifier>{8dd02047-5604-4301-a505-6af103648b0e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="app">
       <UniqueIdentifier>{2ad0ee7e-1ed1-4b30-95ba-c21bd19f566a}</UniqueIdentifier>
     </Filter>
@@ -37,6 +28,24 @@
     <Filter Include="core\utils">
       <UniqueIdentifier>{01d65152-1572-42e1-9e09-a38c93093409}</UniqueIdentifier>
     </Filter>
+    <Filter Include="renderers\rasterizer">
+      <UniqueIdentifier>{85451dad-4c8c-4acc-a20d-978535d9f4f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderers\rasterizer\include">
+      <UniqueIdentifier>{c5f30f77-6bf7-4ada-94ba-2ba7531a674b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderers\rasterizer\source">
+      <UniqueIdentifier>{43b0da3e-3d00-416b-997a-97e7b12c9de4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderers\painter">
+      <UniqueIdentifier>{509a4331-61df-4fc9-ad01-1bab4559c73c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderers\painter\include">
+      <UniqueIdentifier>{4e0b784c-8acf-48cd-ada0-f53e564e278c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderers\painter\source">
+      <UniqueIdentifier>{b76af260-dff8-4dce-b9ee-bdf93c207720}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\Config.h">
@@ -47,21 +56,6 @@
     </ClInclude>
     <ClInclude Include="core\RendererManager.h">
       <Filter>core\include</Filter>
-    </ClInclude>
-    <ClInclude Include="renderers\geometry.h">
-      <Filter>renderers\rasterizer\include</Filter>
-    </ClInclude>
-    <ClInclude Include="renderers\gl_soft.h">
-      <Filter>renderers\rasterizer\include</Filter>
-    </ClInclude>
-    <ClInclude Include="renderers\model.h">
-      <Filter>renderers\rasterizer\include</Filter>
-    </ClInclude>
-    <ClInclude Include="renderers\Rasterizer.h">
-      <Filter>renderers\rasterizer\include</Filter>
-    </ClInclude>
-    <ClInclude Include="renderers\tgaimage.h">
-      <Filter>renderers\rasterizer\include</Filter>
     </ClInclude>
     <ClInclude Include="core\ControlManager.h">
       <Filter>core\include</Filter>
@@ -90,6 +84,24 @@
     <ClInclude Include="core\Systems.h">
       <Filter>core\utils</Filter>
     </ClInclude>
+    <ClInclude Include="renderers\rasterizer\geometry.h">
+      <Filter>renderers\rasterizer\include</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\rasterizer\gl_soft.h">
+      <Filter>renderers\rasterizer\include</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\rasterizer\model.h">
+      <Filter>renderers\rasterizer\include</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\rasterizer\Rasterizer.h">
+      <Filter>renderers\rasterizer\include</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\rasterizer\tgaimage.h">
+      <Filter>renderers\rasterizer\include</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\painter\Painter.h">
+      <Filter>renderers\painter\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\ABR_GDI.cpp">
@@ -100,18 +112,6 @@
     </ClCompile>
     <ClCompile Include="core\RendererManager.cpp">
       <Filter>core\source</Filter>
-    </ClCompile>
-    <ClCompile Include="renderers\gl_soft.cpp">
-      <Filter>renderers\rasterizer\source</Filter>
-    </ClCompile>
-    <ClCompile Include="renderers\model.cpp">
-      <Filter>renderers\rasterizer\source</Filter>
-    </ClCompile>
-    <ClCompile Include="renderers\Rasterizer.cpp">
-      <Filter>renderers\rasterizer\source</Filter>
-    </ClCompile>
-    <ClCompile Include="renderers\tgaimage.cpp">
-      <Filter>renderers\rasterizer\source</Filter>
     </ClCompile>
     <ClCompile Include="core\ControlManager.cpp">
       <Filter>core\source</Filter>
@@ -124,6 +124,21 @@
     </ClCompile>
     <ClCompile Include="core\DesignPatterns.cpp">
       <Filter>core\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="renderers\rasterizer\gl_soft.cpp">
+      <Filter>renderers\rasterizer\source</Filter>
+    </ClCompile>
+    <ClCompile Include="renderers\rasterizer\model.cpp">
+      <Filter>renderers\rasterizer\source</Filter>
+    </ClCompile>
+    <ClCompile Include="renderers\rasterizer\Rasterizer.cpp">
+      <Filter>renderers\rasterizer\source</Filter>
+    </ClCompile>
+    <ClCompile Include="renderers\rasterizer\tgaimage.cpp">
+      <Filter>renderers\rasterizer\source</Filter>
+    </ClCompile>
+    <ClCompile Include="renderers\painter\Painter.cpp">
+      <Filter>renderers\painter\source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

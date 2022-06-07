@@ -7,6 +7,10 @@ RendererManager::RendererManager() noexcept
 		ABR_DEBUG_OUTPUT("Loading Rasterizer");
 		m_renderer = new Rasterizer;
 	}
+	else if (cur_renderer == std::wstring(L"Painter")) {
+		ABR_DEBUG_OUTPUT("Loading Painter");
+		m_renderer = new Painter;
+	}
 	else {
 		assert(false); // No such renderer!
 	}
@@ -21,7 +25,7 @@ void RendererManager::StartUp() noexcept
 
 void RendererManager::Update(HBITMAP& bitmap) noexcept
 {
-	p_frame_buffer frame = m_renderer->GetBuffer();
+	p_frame_buffer frame = m_renderer->GetFrontBuffer();
 
 	// 用渲染器返回的帧刷新hdc
 	SetBitmapBits(bitmap, frame_height * frame_width * sizeof(COLORREF), frame);

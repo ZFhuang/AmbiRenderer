@@ -12,7 +12,7 @@ class Config
 {
 public:
 	std::wstring name = L"AmbiRenderer";
-	std::wstring cur_renderer = L"Rasterizer";
+	std::wstring cur_renderer = L"Painter";
 	int screen_width = 800;
 	int screen_height = 600;
 	int render_width = 400;

@@ -2,23 +2,7 @@
 
 void Rasterizer::StartUp() noexcept
 {
-	frame_height = Singleton<Config>::GetInstance()->render_height;
-	frame_width = Singleton<Config>::GetInstance()->render_width;
-	p_front_buffer = new COLORREF[frame_height * frame_width];
-	p_back_buffer = new COLORREF[frame_height * frame_width];
-}
-
-p_frame_buffer Rasterizer::GetBuffer() noexcept
-{
-	return p_front_buffer;
-}
-
-void Rasterizer::SwapBuffer() noexcept
-{
-	static int sum_elem = frame_height * frame_width;
-	for (int idx = 0; idx < sum_elem; ++idx) {
-		p_front_buffer[idx] = RGB(255, 0, 255);
-	}
+	RendererBase::StartUp();
 }
 
 void Rasterizer::Draw() noexcept
@@ -29,8 +13,7 @@ void Rasterizer::Draw() noexcept
 
 Rasterizer::~Rasterizer()
 {
-	delete[] p_front_buffer;
-	delete[] p_back_buffer;
+	RendererBase::~RendererBase();
 }
 
 //std::vector<std::vector<float>> triangleTraversal(TGAImage* frameBuffer, std::vector<std::vector<float>>&& v_out) {

@@ -22,8 +22,8 @@ private:
 	void MainThread() noexcept;
 
 private:
-	AppBase* app;
-	ABR_GDI* gdi;
+	AppBase* app = nullptr;
+	ABR_GDI* gdi = nullptr;
 	bool thread_exited = false;
 	std::thread* mainThread = nullptr;
 };

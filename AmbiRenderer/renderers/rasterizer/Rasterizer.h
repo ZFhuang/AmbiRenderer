@@ -19,21 +19,12 @@
 
 #include <string>
 #include <memory>
-#include "../core/RendererBase.h"
-#include <random>
+#include "../../core/RendererBase.h"
 
 class Rasterizer :public RendererBase {
 public:
 	Rasterizer() = default;
 	void StartUp() noexcept override;
-	p_frame_buffer GetBuffer() noexcept override;
-	void SwapBuffer() noexcept override;
 	void Draw() noexcept override;
 	~Rasterizer();
-
-private:
-	int frame_width;
-	int frame_height;
-	p_frame_buffer p_front_buffer;
-	p_frame_buffer p_back_buffer;
 };

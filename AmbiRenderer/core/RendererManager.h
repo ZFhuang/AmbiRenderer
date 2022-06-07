@@ -1,7 +1,8 @@
 #pragma once
 #include "Config.h"
 #include "Utils.h"
-#include "../renderers/Rasterizer.h"
+#include "../renderers/rasterizer/Rasterizer.h"
+#include "../renderers/painter/Painter.h"
 #include "RendererBase.h"
 
 class RendererManager {
@@ -12,7 +13,7 @@ public:
 	void Draw() noexcept;
 
 private:
-	RendererBase* m_renderer;
-	int frame_width;
-	int frame_height;
+	RendererBase* m_renderer = nullptr;
+	int frame_width = 0;
+	int frame_height = 0;
 };

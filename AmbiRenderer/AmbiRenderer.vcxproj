@@ -26,10 +26,11 @@
     <ClCompile Include="core\EngineCore.cpp" />
     <ClCompile Include="core\RendererManager.cpp" />
     <ClCompile Include="core\WinMain.cpp" />
-    <ClCompile Include="renderers\gl_soft.cpp" />
-    <ClCompile Include="renderers\model.cpp" />
-    <ClCompile Include="renderers\Rasterizer.cpp" />
-    <ClCompile Include="renderers\tgaimage.cpp" />
+    <ClCompile Include="renderers\painter\Painter.cpp" />
+    <ClCompile Include="renderers\rasterizer\gl_soft.cpp" />
+    <ClCompile Include="renderers\rasterizer\model.cpp" />
+    <ClCompile Include="renderers\rasterizer\Rasterizer.cpp" />
+    <ClCompile Include="renderers\rasterizer\tgaimage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app\TestApp.h" />
@@ -44,11 +45,12 @@
     <ClInclude Include="core\ABR_GDI.h" />
     <ClInclude Include="core\Systems.h" />
     <ClInclude Include="core\Utils.h" />
-    <ClInclude Include="renderers\geometry.h" />
-    <ClInclude Include="renderers\gl_soft.h" />
-    <ClInclude Include="renderers\model.h" />
-    <ClInclude Include="renderers\Rasterizer.h" />
-    <ClInclude Include="renderers\tgaimage.h" />
+    <ClInclude Include="renderers\painter\Painter.h" />
+    <ClInclude Include="renderers\rasterizer\geometry.h" />
+    <ClInclude Include="renderers\rasterizer\gl_soft.h" />
+    <ClInclude Include="renderers\rasterizer\model.h" />
+    <ClInclude Include="renderers\rasterizer\Rasterizer.h" />
+    <ClInclude Include="renderers\rasterizer\tgaimage.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
