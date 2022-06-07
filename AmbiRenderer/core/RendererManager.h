@@ -11,6 +11,7 @@ public:
 	void StartUp() noexcept;
 	void Update(HBITMAP& hdc_buffer) noexcept;
 	void Draw() noexcept;
+	const RendererBase* GetRenderer() noexcept;
 
 private:
 	RendererBase* m_renderer = nullptr;

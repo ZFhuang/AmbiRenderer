@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app\TestApp.cpp" />
+    <ClCompile Include="core\AppBase.cpp" />
     <ClCompile Include="core\ControlManager.cpp" />
     <ClCompile Include="core\ABR_GDI.cpp" />
     <ClCompile Include="core\DesignPatterns.cpp" />

@@ -14,8 +14,6 @@ public:
     ABR_GDI(HINSTANCE hInstance) noexcept : root_hInstance(hInstance) { ; }
     ~ABR_GDI();
 
-    void KeyBoardMessage(WPARAM wParam) noexcept;
-
     void Update() noexcept;
 
     void WaitForEnd() noexcept;

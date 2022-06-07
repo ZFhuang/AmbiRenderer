@@ -45,3 +45,6 @@
     sth;\
 
 #endif // DEBUG
+
+#define KEY unsigned char
+#define KB_K 0x4B

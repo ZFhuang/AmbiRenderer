@@ -36,3 +36,8 @@ void RendererManager::Draw() noexcept
 	m_renderer->Draw();
 	m_renderer->SwapBuffer();
 }
+
+const RendererBase* RendererManager::GetRenderer() noexcept
+{
+	return m_renderer;
+}

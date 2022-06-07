@@ -1,13 +1,15 @@
-#include "Systems.h"
 #include <thread>
 
-static std::atomic<bool> gdi_exited = false;
+#include "Systems.h"
+#include "../app/TestApp.h"
 
 void SystemsInitialize(HINSTANCE hInstance) {
     ABR_STATE_FUNCTION("INITING", Singleton<Config>::Initialize());
+    ABR_STATE_FUNCTION("INITING", Singleton<ControlManager>::Initialize());
     ABR_STATE_FUNCTION("INITING", Singleton<RendererManager>::Initialize());
     ABR_STATE_FUNCTION("INITING", Singleton<ABR_GDI>::Initialize(hInstance));
-    ABR_STATE_FUNCTION("INITING", Singleton<EngineCore>::Initialize());
+    AppBase* app = new TestApp();
+    ABR_STATE_FUNCTION("INITING", Singleton<EngineCore>::Initialize(app));
 }
 
 void SystemsStartUp(void) {
@@ -21,10 +23,11 @@ void SystemsWaitForEnd(void) {
     ABR_STATE_FUNCTION("WAITING", Singleton<EngineCore>::GetInstance()->WaitForEnd());
 }
 
-void SystemsQuit(void) {
+void SystemsDestory(void) {
     ABR_STATE_FUNCTION("QUITING", Singleton<RendererManager>::Destory());
     ABR_STATE_FUNCTION("QUITING", Singleton<ABR_GDI>::Destory());
     ABR_STATE_FUNCTION("QUITING", Singleton<EngineCore>::Destory());
+    ABR_STATE_FUNCTION("QUITING", Singleton<ControlManager>::Destory());
     ABR_STATE_FUNCTION("QUITING", Singleton<Config>::Destory());
 }
 
@@ -37,6 +40,6 @@ int WinMain(
     SystemsInitialize(hInstance);
     SystemsStartUp();
     SystemsWaitForEnd();
-    SystemsQuit();
+    SystemsDestory();
     return 0;
 }

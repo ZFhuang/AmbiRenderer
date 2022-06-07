@@ -140,5 +140,8 @@
     <ClCompile Include="renderers\painter\Painter.cpp">
       <Filter>renderers\painter\source</Filter>
     </ClCompile>
+    <ClCompile Include="core\AppBase.cpp">
+      <Filter>core\bases</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

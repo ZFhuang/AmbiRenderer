@@ -69,19 +69,6 @@ void ABR_GDI::WaitForEnd() noexcept
 	Singleton<EngineCore>::GetInstance()->Shutdown();
 }
 
-void ABR_GDI::KeyBoardMessage(WPARAM wParam) noexcept
-{
-	switch (wParam)
-	{
-	case VK_BACK:
-		ABR_DEBUG_OUTPUT("VK_BACK!");
-		Update();
-		break;
-	default:
-		break;
-	}
-}
-
 LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -94,10 +81,18 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 	// 处理消息后必须返回0
 	switch (message) {
-	case WM_KEYDOWN: {
-		Singleton<ABR_GDI>::GetInstance()->KeyBoardMessage(wParam);
+	case WM_KILLFOCUS:
+		// 失焦时清除所有按键状态防止死循环
+		Singleton<ControlManager>::GetInstance()->CleanState();
 		break;
-	}
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		Singleton<ControlManager>::GetInstance()->OnKeyDown(static_cast<unsigned char>(wParam));
+		break;
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		Singleton<ControlManager>::GetInstance()->OnKeyUp(static_cast<unsigned char>(wParam));
+		break;
 
 	case WM_CREATE: {
 		cxClient = LOWORD(lParam);
@@ -121,7 +116,7 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		start = clock();//paint start clock
 		{
 			// 渲染测试
-			ABR_DEBUG_OUTPUT("PAINT");
+			//ABR_DEBUG_OUTPUT("PAINT");
 			Singleton<RendererManager>::GetInstance()->Update(hBitmap);
 		}
 		clock_t stop;
