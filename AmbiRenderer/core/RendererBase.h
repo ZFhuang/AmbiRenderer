@@ -7,12 +7,13 @@ using p_frame_buffer = COLORREF*;
 
 #define FRAME_PIXEL_IDX(x, y) y*frame_width+x
 
-class Renderer {
+class RendererBase {
 public:
-	Renderer() = default;
+	RendererBase() = default;
 	virtual void StartUp() noexcept = 0;
 	// 返回当前的帧缓冲
 	virtual p_frame_buffer GetBuffer() noexcept = 0;
 	// 交换内部的帧缓冲
 	virtual void SwapBuffer() noexcept = 0;
+	virtual void Draw() noexcept = 0;
 };

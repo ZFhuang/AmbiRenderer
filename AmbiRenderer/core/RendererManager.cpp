@@ -21,10 +21,14 @@ void RendererManager::StartUp() noexcept
 
 void RendererManager::Update(HBITMAP& bitmap) noexcept
 {
-	m_renderer->SwapBuffer();
 	p_frame_buffer frame = m_renderer->GetBuffer();
 
 	// 用渲染器返回的帧刷新hdc
-	// sizeof(COLORREF) = 4(32bits)
 	SetBitmapBits(bitmap, frame_height * frame_width * sizeof(COLORREF), frame);
+}
+
+void RendererManager::Draw() noexcept
+{
+	m_renderer->Draw();
+	m_renderer->SwapBuffer();
 }

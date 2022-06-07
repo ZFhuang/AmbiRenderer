@@ -6,18 +6,18 @@
 #include <sstream>
 #include <Windows.h>
 
-#define ABR_RUN_FUNCTION(function) \
+#define ABR_STATE_FUNCTION(state, function) \
 { \
     std::wostringstream os_; \
-    os_ << "RUNNING: "<<#function<<"\n";\
+    os_ << #state <<": "<<#function<<"\n";\
     OutputDebugStringW( os_.str().c_str() );  \
     function;\
 } \
 
-#define ABR_DEBUG_OUTPUT(output_string) \
+#define ABR_DEBUG_OUTPUT(output_any) \
 { \
     std::wostringstream os_; \
-    os_ <<"["<<__FILE__<<": "<<__func__<<"(). L: "<<__LINE__<<"]: "<<##output_string##<<"\n";\
+    os_ <<"["<<__FILE__<<": "<<__func__<<"(). L: "<<__LINE__<<"]: "<<##output_any##<<"\n";\
     OutputDebugStringW( os_.str().c_str() );  \
 } \
 
@@ -32,14 +32,14 @@
 
 #else
 
-#define ABR_RUN_FUNCTION(function) \
+#define ABR_STATE_FUNCTION(state, function) \
     function;\
 
 #define ABR_RUN_TEST(function) \
     function;\
 
 // do nothing
-#define ABR_DEBUG_OUTPUT(output_string) ;
+#define ABR_DEBUG_OUTPUT(output_any) ;
 
 #define ABR_RUN_WITH_CLOCK(sth)\
     sth;\

@@ -1,15 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Utils">
-      <UniqueIdentifier>{d125f531-f898-41d5-be6b-35d038c8d50d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Utils\include">
-      <UniqueIdentifier>{6f5bbee9-e570-4fe7-badb-c5d291dc2159}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Utils\source">
-      <UniqueIdentifier>{c535f6eb-0617-4d72-866a-02c1d7fa1991}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core">
       <UniqueIdentifier>{01542ba1-9506-446d-a2b2-c67a8fbe75aa}</UniqueIdentifier>
     </Filter>
@@ -31,25 +22,28 @@
     <Filter Include="renderers\rasterizer\source">
       <UniqueIdentifier>{8dd02047-5604-4301-a505-6af103648b0e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="app">
+      <UniqueIdentifier>{2ad0ee7e-1ed1-4b30-95ba-c21bd19f566a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="app\include">
+      <UniqueIdentifier>{ab9a3abd-3598-4df3-9ae8-c7e57e6e4ee3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="app\source">
+      <UniqueIdentifier>{01e7f350-c8d5-4440-bd1d-5c7f39d5fab7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\bases">
+      <UniqueIdentifier>{9acc7891-e581-4673-8c06-93c03a03da50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\utils">
+      <UniqueIdentifier>{01d65152-1572-42e1-9e09-a38c93093409}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\Renderer.h">
-      <Filter>core\include</Filter>
-    </ClInclude>
     <ClInclude Include="core\Config.h">
       <Filter>core\include</Filter>
     </ClInclude>
     <ClInclude Include="core\ABR_GDI.h">
       <Filter>core\include</Filter>
-    </ClInclude>
-    <ClInclude Include="core\DesignPatterns.h">
-      <Filter>Utils\include</Filter>
-    </ClInclude>
-    <ClInclude Include="core\Macros.h">
-      <Filter>Utils\include</Filter>
-    </ClInclude>
-    <ClInclude Include="core\Utils.h">
-      <Filter>Utils\include</Filter>
     </ClInclude>
     <ClInclude Include="core\RendererManager.h">
       <Filter>core\include</Filter>
@@ -69,13 +63,37 @@
     <ClInclude Include="renderers\tgaimage.h">
       <Filter>renderers\rasterizer\include</Filter>
     </ClInclude>
+    <ClInclude Include="core\ControlManager.h">
+      <Filter>core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\EngineCore.h">
+      <Filter>core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\RendererBase.h">
+      <Filter>core\bases</Filter>
+    </ClInclude>
+    <ClInclude Include="core\AppBase.h">
+      <Filter>core\bases</Filter>
+    </ClInclude>
+    <ClInclude Include="app\TestApp.h">
+      <Filter>app\include</Filter>
+    </ClInclude>
+    <ClInclude Include="core\DesignPatterns.h">
+      <Filter>core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Macros.h">
+      <Filter>core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Utils.h">
+      <Filter>core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="core\Systems.h">
+      <Filter>core\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\ABR_GDI.cpp">
       <Filter>core\source</Filter>
-    </ClCompile>
-    <ClCompile Include="core\DesignPatterns.cpp">
-      <Filter>Utils\source</Filter>
     </ClCompile>
     <ClCompile Include="core\WinMain.cpp">
       <Filter>core\source</Filter>
@@ -94,6 +112,18 @@
     </ClCompile>
     <ClCompile Include="renderers\tgaimage.cpp">
       <Filter>renderers\rasterizer\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\ControlManager.cpp">
+      <Filter>core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\EngineCore.cpp">
+      <Filter>core\source</Filter>
+    </ClCompile>
+    <ClCompile Include="app\TestApp.cpp">
+      <Filter>app\source</Filter>
+    </ClCompile>
+    <ClCompile Include="core\DesignPatterns.cpp">
+      <Filter>core\utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

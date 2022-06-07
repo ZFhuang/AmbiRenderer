@@ -15,16 +15,16 @@ p_frame_buffer Rasterizer::GetBuffer() noexcept
 
 void Rasterizer::SwapBuffer() noexcept
 {
-	// do nothing now
 	static int sum_elem = frame_height * frame_width;
 	for (int idx = 0; idx < sum_elem; ++idx) {
 		p_front_buffer[idx] = RGB(255, 0, 255);
 	}
-	//for (int y = 0; y < frame_height; ++y) {
-	//	for (int x = 0; x < frame_width; ++x) {
-	//		p_front_buffer[FRAME_PIXEL_IDX(x, y)] = RGB(255, 0, 255);
-	//	}
-	//}
+}
+
+void Rasterizer::Draw() noexcept
+{
+	// do nothing now
+	Sleep(10);
 }
 
 Rasterizer::~Rasterizer()

@@ -19,9 +19,7 @@ public:
 	int render_height = 300;
 	int core_num = 4;
 
-	void StartUp() {
+	Config() {
 		ABR_DEBUG_OUTPUT("Should loading config file here...");
-	}
-
-	Config() = default;
+	};
 };

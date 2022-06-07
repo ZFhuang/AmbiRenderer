@@ -19,8 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="core\DesignPatterns.cpp" />
+    <ClCompile Include="app\TestApp.cpp" />
+    <ClCompile Include="core\ControlManager.cpp" />
     <ClCompile Include="core\ABR_GDI.cpp" />
+    <ClCompile Include="core\DesignPatterns.cpp" />
+    <ClCompile Include="core\EngineCore.cpp" />
     <ClCompile Include="core\RendererManager.cpp" />
     <ClCompile Include="core\WinMain.cpp" />
     <ClCompile Include="renderers\gl_soft.cpp" />
@@ -29,13 +32,18 @@
     <ClCompile Include="renderers\tgaimage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="app\TestApp.h" />
+    <ClInclude Include="core\AppBase.h" />
     <ClInclude Include="core\Config.h" />
+    <ClInclude Include="core\ControlManager.h" />
     <ClInclude Include="core\DesignPatterns.h" />
+    <ClInclude Include="core\EngineCore.h" />
     <ClInclude Include="core\Macros.h" />
-    <ClInclude Include="core\Renderer.h" />
+    <ClInclude Include="core\RendererBase.h" />
     <ClInclude Include="core\RendererManager.h" />
-    <ClInclude Include="core\Utils.h" />
     <ClInclude Include="core\ABR_GDI.h" />
+    <ClInclude Include="core\Systems.h" />
+    <ClInclude Include="core\Utils.h" />
     <ClInclude Include="renderers\geometry.h" />
     <ClInclude Include="renderers\gl_soft.h" />
     <ClInclude Include="renderers\model.h" />
@@ -140,7 +148,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Work\AmbiRenderer\Rasterizer\core</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,7 +164,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Work\AmbiRenderer\Rasterizer\core</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
