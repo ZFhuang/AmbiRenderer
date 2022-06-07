@@ -22,7 +22,7 @@ https://github.com/ssloy/tinyrenderer
 - [x] Lesson 6bis: tangent space normal mapping
 - [x] Lesson 7: Shadow mapping
 - [x] Lesson 8: Ambient occlusion
-- [ ] Lesson 9: Real OpenGL (GLSL) application
+- [x] 增加基于GDI的界面, 还未连接到渲染器
 - [ ] 完善渲染管线的组成
 - [ ] 优化片元着色器, 将顶点插值改写为固定管线
 - [ ] 提前深度测试
@@ -34,7 +34,7 @@ https://github.com/ssloy/tinyrenderer
 
 **现状:**
 
-![Result](./Documents/Results/tinyrenderer/Lesson8.jpg)
+![image](https://user-images.githubusercontent.com/22721612/172044682-d6a88da3-ef9d-4ac0-8456-b7539e1ba265.png)
 
 ## Notes
 
