@@ -5,6 +5,7 @@ class EngineCore;
 #include <Windows.h>
 #include <thread>
 #include "Utils.h"
+#include "Timer.h"
 #include "Config.h"
 #include "RendererManager.h"
 #include "EngineCore.h"
@@ -32,4 +33,5 @@ private:
     HINSTANCE root_hInstance;
     HWND root_hwnd = nullptr;
     std::thread* mainThread = nullptr;
+    friend EngineCore;
 };

@@ -23,9 +23,9 @@
     <ClCompile Include="core\AppBase.cpp" />
     <ClCompile Include="core\ControlManager.cpp" />
     <ClCompile Include="core\ABR_GDI.cpp" />
-    <ClCompile Include="core\DesignPatterns.cpp" />
     <ClCompile Include="core\EngineCore.cpp" />
     <ClCompile Include="core\RendererManager.cpp" />
+    <ClCompile Include="core\Timer.cpp" />
     <ClCompile Include="core\WinMain.cpp" />
     <ClCompile Include="renderers\painter\Painter.cpp" />
     <ClCompile Include="renderers\rasterizer\gl_soft.cpp" />
@@ -45,6 +45,7 @@
     <ClInclude Include="core\RendererManager.h" />
     <ClInclude Include="core\ABR_GDI.h" />
     <ClInclude Include="core\Systems.h" />
+    <ClInclude Include="core\Timer.h" />
     <ClInclude Include="core\Utils.h" />
     <ClInclude Include="renderers\painter\Painter.h" />
     <ClInclude Include="renderers\rasterizer\geometry.h" />

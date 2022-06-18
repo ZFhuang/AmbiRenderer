@@ -54,25 +54,32 @@ void EngineCore::ReactFunc(KEY k)
 
 void EngineCore::MainThread() noexcept
 {
-	clock_t start = clock(), stop = clock();
+	Timer core_timer;
 	float delta_time = 0;
 	
 	app->Create();
 
-	while (true) {
-		delta_time = (float)(stop - start);
-		start = clock();
+	while (!thread_exited) {
+		delta_time = core_timer.elapsed_seconds();
+		core_timer.reset();
 
-		control_manager->Update();
-		app->Update(delta_time);
-		renderer_manager->Draw();
-		gdi->Update();
-
-		if (thread_exited) {
-			break;
-		}
-		stop = clock();
+		GameplayTick(delta_time);
+		RenderTick(delta_time);
 	}
 
-	app->Destory();
+	app->Destroy();
+}
+
+void EngineCore::GameplayTick(float delta_time) noexcept
+{
+	control_manager->Update();
+	app->Update(delta_time);
+}
+
+void EngineCore::RenderTick(float delta_time) noexcept
+{
+	renderer_manager->Draw();
+	gdi->Update();
+	// 在标题栏显示帧数
+	SetWindowText(gdi->root_hwnd, (L"AmbiRenderer (fps=" + std::to_wstring(min(1000, 1 / delta_time)) + L")").c_str());
 }

@@ -8,7 +8,7 @@ class AppBase {
 protected:
 	virtual void Create();
 	virtual void Update(float delta_time) = 0;
-	virtual void Destory() = 0;
+	virtual void Destroy() = 0;
 	virtual void Init() final;
 
 protected:
@@ -26,6 +26,6 @@ inline void AppBase::Update(float delta_time) {
 	//ABR_DEBUG_OUTPUT(delta_time);
 }
 
-inline void AppBase::Destory() {
-	ABR_DEBUG_OUTPUT("Defalut Destory!");
+inline void AppBase::Destroy() {
+	ABR_DEBUG_OUTPUT("Defalut Destroy!");
 }

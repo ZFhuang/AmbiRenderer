@@ -102,6 +102,9 @@
     <ClInclude Include="renderers\painter\Painter.h">
       <Filter>renderers\painter\include</Filter>
     </ClInclude>
+    <ClInclude Include="core\Timer.h">
+      <Filter>core\utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\ABR_GDI.cpp">
@@ -122,9 +125,6 @@
     <ClCompile Include="app\TestApp.cpp">
       <Filter>app\source</Filter>
     </ClCompile>
-    <ClCompile Include="core\DesignPatterns.cpp">
-      <Filter>core\utils</Filter>
-    </ClCompile>
     <ClCompile Include="renderers\rasterizer\gl_soft.cpp">
       <Filter>renderers\rasterizer\source</Filter>
     </ClCompile>
@@ -142,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="core\AppBase.cpp">
       <Filter>core\bases</Filter>
+    </ClCompile>
+    <ClCompile Include="core\Timer.cpp">
+      <Filter>core\utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

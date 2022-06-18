@@ -112,23 +112,11 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 	case WM_PAINT: {  // 更新画面的消息
 		hdc = BeginPaint(hWnd, &ps);
-		clock_t start;
-		start = clock();//paint start clock
-		{
-			// 渲染测试
-			//ABR_DEBUG_OUTPUT("PAINT");
-			Singleton<RendererManager>::GetInstance()->Update(hBitmap);
-		}
-		clock_t stop;
-		stop = clock();//paint end clock
-		//calculate fps
-		double dur;
-		dur = (double)(stop - start) / (double)CLOCKS_PER_SEC;
-		int fps;
-		fps = (int)min(1000, 1.0 / dur);
-		// 文字输出
-		//TextOut(hdcBuffer, 0, 0, (L"FPS: " + std::to_wstring(fps)).c_str(), std::to_wstring(fps).size()+5);
-		SetWindowText(hWnd, (L"AmbiRenderer (fps=" + std::to_wstring(fps) + L")").c_str());
+		Timer timer;
+		// 刷新帧画面
+		Singleton<RendererManager>::GetInstance()->Update(hBitmap);
+		std::wstring render_time = L"Refresh: " + std::to_wstring(timer.elapsed_milliseconds());
+		TextOut(hdcBuffer, 0, 0, render_time.c_str(), render_time.size());
 		// 渲染到画面
 		StretchBlt(hdc,
 			0,

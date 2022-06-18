@@ -12,6 +12,7 @@ class ControlManager;
 #include "AppBase.h"
 #include "RendererBase.h"
 #include "ControlManager.h"
+#include "Timer.h"
 
 class EngineCore {
 	using AppEventMap = std::vector<void (AppBase::*)()>;
@@ -27,6 +28,8 @@ public:
 
 private:
 	void MainThread() noexcept;
+	void GameplayTick(float delta_time) noexcept;
+	void RenderTick(float delta_time) noexcept;
 
 private:
 	AppBase* app = nullptr;

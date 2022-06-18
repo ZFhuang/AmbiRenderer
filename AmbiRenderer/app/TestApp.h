@@ -13,8 +13,8 @@ public:
 
 	void Create() noexcept override;
 
-	void Destory() noexcept override {
-		ABR_DEBUG_OUTPUT("TestApp Destory!");
+	void Destroy() noexcept override {
+		ABR_DEBUG_OUTPUT("TestApp Destroy!");
 	}
 
 private:

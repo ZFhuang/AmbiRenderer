@@ -13,7 +13,7 @@ public:
 		return m_pInstance;
 	}
 
-	static void Destory() {
+	static void Destroy() {
 		delete m_pInstance;
 		m_pInstance = nullptr;
 	}

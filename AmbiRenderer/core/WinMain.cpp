@@ -23,12 +23,12 @@ void SystemsWaitForEnd(void) {
     ABR_STATE_FUNCTION("WAITING", Singleton<EngineCore>::GetInstance()->WaitForEnd());
 }
 
-void SystemsDestory(void) {
-    ABR_STATE_FUNCTION("QUITING", Singleton<RendererManager>::Destory());
-    ABR_STATE_FUNCTION("QUITING", Singleton<ABR_GDI>::Destory());
-    ABR_STATE_FUNCTION("QUITING", Singleton<EngineCore>::Destory());
-    ABR_STATE_FUNCTION("QUITING", Singleton<ControlManager>::Destory());
-    ABR_STATE_FUNCTION("QUITING", Singleton<Config>::Destory());
+void SystemsDestroy(void) {
+    ABR_STATE_FUNCTION("QUITING", Singleton<RendererManager>::Destroy());
+    ABR_STATE_FUNCTION("QUITING", Singleton<ABR_GDI>::Destroy());
+    ABR_STATE_FUNCTION("QUITING", Singleton<EngineCore>::Destroy());
+    ABR_STATE_FUNCTION("QUITING", Singleton<ControlManager>::Destroy());
+    ABR_STATE_FUNCTION("QUITING", Singleton<Config>::Destroy());
 }
 
 int WinMain(
@@ -40,6 +40,6 @@ int WinMain(
     SystemsInitialize(hInstance);
     SystemsStartUp();
     SystemsWaitForEnd();
-    SystemsDestory();
+    SystemsDestroy();
     return 0;
 }
