@@ -6,13 +6,15 @@
 using p_frame_buffer = COLORREF*;
 
 #define FRAME_PIXEL_IDX(x, y) y*frame_width+x
+#define FRAME_SIZE frame_height * frame_width
 
 class RendererBase {
 public:
 	RendererBase() = default;
 	virtual void StartUp() noexcept = 0;
 	// 返回前缓冲
-	virtual p_frame_buffer GetFrontBuffer() noexcept;
+	virtual p_frame_buffer GetFrontBuffer() const noexcept;
+	virtual void CopyBuffer() noexcept;
 	// 交换内部的帧缓冲
 	virtual void SwapBuffer() noexcept;
 	// 清除后缓冲
@@ -30,26 +32,27 @@ protected:
 inline void RendererBase::StartUp() noexcept {
 	frame_height = Singleton<Config>::GetInstance()->render_height;
 	frame_width = Singleton<Config>::GetInstance()->render_width;
-	p_front_buffer = new COLORREF[frame_height * frame_width];
-	p_back_buffer = new COLORREF[frame_height * frame_width];
+	p_front_buffer = new COLORREF[FRAME_SIZE];
+	p_back_buffer = new COLORREF[FRAME_SIZE];
 }
 
-inline p_frame_buffer RendererBase::GetFrontBuffer() noexcept {
+inline p_frame_buffer RendererBase::GetFrontBuffer() const noexcept {
 	return p_front_buffer;
+}
+
+inline void RendererBase::CopyBuffer() noexcept
+{
+	memcpy(p_front_buffer, p_back_buffer, FRAME_SIZE*sizeof(COLORREF));
 }
 
 inline void RendererBase::SwapBuffer() noexcept {
 	p_frame_buffer tmp = p_front_buffer;
 	p_front_buffer = p_back_buffer;
 	p_back_buffer = tmp;
-	CleanBackBuffer();
 }
 
 inline void RendererBase::CleanBackBuffer() noexcept {
-	static int sum_elem = frame_height * frame_width;
-	for (int idx = 0; idx < sum_elem; ++idx) {
-		p_back_buffer[idx] = RGB(0, 0, 0);
-	}
+	memset(p_back_buffer, 0, FRAME_SIZE * sizeof(COLORREF));
 }
 
 inline RendererBase::~RendererBase() noexcept

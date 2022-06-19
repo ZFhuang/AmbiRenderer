@@ -13,6 +13,7 @@ void TestApp::ReactK()
 void TestApp::Update(float delta_time) noexcept
 {
 	AppBase::Update(delta_time);
+	Sleep(10);
 }
 
 void TestApp::Create() noexcept{

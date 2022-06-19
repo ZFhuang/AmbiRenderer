@@ -12,13 +12,13 @@ public:
     void reset() noexcept;
 
 public:
-    float elapsed_micro() const noexcept;
-    float elapsed_milliseconds() const noexcept;
-    float elapsed_seconds() const noexcept;
-    float elapsed_minutes() const noexcept;
+    int64_t elapsed_micro() const noexcept;
+    int64_t elapsed_milliseconds() const noexcept;
+    int64_t elapsed_seconds() const noexcept;
+    int64_t elapsed_minutes() const noexcept;
 
 private:
     // 返回自上次计时以来经过的时间, 默认返回毫秒
     template<typename Duration>
-    float elapsed() const noexcept;
+    int64_t elapsed() const noexcept;
 };

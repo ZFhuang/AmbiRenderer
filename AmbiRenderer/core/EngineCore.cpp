@@ -30,6 +30,7 @@ void EngineCore::Shutdown() noexcept
 {
 	ABR_DEBUG_OUTPUT("Exiting thread...");
 	thread_exited = true;
+	Singleton<RendererManager>::GetInstance()->Shutdown();
 }
 
 void EngineCore::WaitForEnd() noexcept
@@ -60,7 +61,7 @@ void EngineCore::MainThread() noexcept
 	app->Create();
 
 	while (!thread_exited) {
-		delta_time = core_timer.elapsed_seconds();
+		delta_time = core_timer.elapsed_milliseconds() / MS_PER_SEC;
 		core_timer.reset();
 
 		GameplayTick(delta_time);
@@ -78,7 +79,7 @@ void EngineCore::GameplayTick(float delta_time) noexcept
 
 void EngineCore::RenderTick(float delta_time) noexcept
 {
-	renderer_manager->Draw();
+	//renderer_manager->Draw();
 	gdi->Update();
 	// 在标题栏显示帧数
 	SetWindowText(gdi->root_hwnd, (L"AmbiRenderer (fps=" + std::to_wstring(min(1000, 1 / delta_time)) + L")").c_str());

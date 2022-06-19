@@ -14,6 +14,7 @@ void Painter::Draw() noexcept
 			DrawLayer(layer_idx);
 		}
 	}
+	Sleep(10);
 }
 
 void Painter::SetLayer(p_frame_buffer inp_layer, int layer_idx, float alpha) noexcept

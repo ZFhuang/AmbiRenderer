@@ -58,7 +58,8 @@ void ABR_GDI::MainThread() noexcept
 
 void ABR_GDI::Update() noexcept
 {
-	RedrawWindow(root_hwnd, NULL, NULL, RDW_INTERNALPAINT);    // 发送WM_PAINT
+	InvalidateRect(root_hwnd, NULL, false);	// 标记整个画面失效
+	RedrawWindow(root_hwnd, NULL, NULL, RDW_INTERNALPAINT);    // 发送WM_PAINT进行绘制
 }
 
 void ABR_GDI::WaitForEnd() noexcept
@@ -115,8 +116,7 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		Timer timer;
 		// 刷新帧画面
 		Singleton<RendererManager>::GetInstance()->Update(hBitmap);
-		std::wstring render_time = L"Refresh: " + std::to_wstring(timer.elapsed_milliseconds());
-		TextOut(hdcBuffer, 0, 0, render_time.c_str(), render_time.size());
+		SelectObject(hdcBuffer, hBitmap);
 		// 渲染到画面
 		StretchBlt(hdc,
 			0,

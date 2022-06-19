@@ -8,7 +8,12 @@ void Rasterizer::StartUp() noexcept
 void Rasterizer::Draw() noexcept
 {
 	// do nothing now
-	Sleep(10);
+	for (int y = 0; y < frame_height; ++y) {
+		for (int x = 0; x < frame_width; ++x) {
+			p_back_buffer[FRAME_PIXEL_IDX(x, y)] = RGB(0, 0, 255);
+		}
+		Sleep(1);
+	}
 }
 
 Rasterizer::~Rasterizer()
