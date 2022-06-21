@@ -20,7 +20,7 @@ public:
 	ControlManager() noexcept;
 	void SetKeyDown(KeyCode k) noexcept;
 	void SetKeyUp(KeyCode k) noexcept;
-	void SetMousePos(int x, int y) noexcept;
+	void SetMousePos(float x, float y) noexcept;
 	void SetMouseLeft(bool state) noexcept;
 	void SetMouseRight(bool state) noexcept;
 	template<typename T>
@@ -30,8 +30,8 @@ public:
 
 	struct MousePos
 	{
-		int x = 0;
-		int y = 0;
+		float x = 0;
+		float y = 0;
 
 		bool operator!=(const MousePos& other) const noexcept {
 			return x != other.x || y != other.y;
@@ -53,13 +53,13 @@ private:
 GEN_STATIC_DYN_CALL_1(GetKeyUp, KeyCode _1, ControlManager);
 GEN_STATIC_DYN_CALL_1(GetKeyDown, KeyCode _1, ControlManager);
 GEN_STATIC_DYN_CALL_1(GetKeyHold, KeyCode _1, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseMove, int _1, int _2, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseLeftHold, int _1, int _2, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseLeftDown, int _1, int _2, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseLeftUp, int _1, int _2, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseRightHold, int _1, int _2, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseRightDown, int _1, int _2, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseRightUp, int _1, int _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseMove, float _1, float _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseLeftHold, float _1, float _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseLeftDown, float _1, float _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseLeftUp, float _1, float _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseRightHold, float _1, float _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseRightDown, float _1, float _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseRightUp, float _1, float _2, ControlManager);
 
 template<typename T>
 void ControlManager::Update(T* callback) noexcept{

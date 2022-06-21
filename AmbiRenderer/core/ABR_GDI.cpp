@@ -102,7 +102,9 @@ LRESULT CALLBACK HandleMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
     }
     case WM_MOUSEMOVE:
     {
-        Singleton<ControlManager>::GetInstance()->SetMousePos(LOWORD(lParam), HIWORD(lParam));
+        Singleton<ControlManager>::GetInstance()->SetMousePos(
+            (float)LOWORD(lParam)/ (float)cxClient,
+            (float)HIWORD(lParam)/ (float)cyClient);
         break;
     }
     case WM_LBUTTONDOWN:

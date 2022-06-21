@@ -28,8 +28,8 @@ void Painter::SetLayer(p_frame_buffer inp_layer, int layer_idx, float alpha) noe
 
 void Painter::DrawLayer(int layer_idx) noexcept {
 	static int sum_elem = frame_height * frame_width;
-	int alpha = layers[layer_idx].alpha;
-	int minus_alpha = 1 - alpha;
+	float alpha = layers[layer_idx].alpha;
+	float minus_alpha = 1 - alpha;
 	p_frame_buffer layer = layers[layer_idx].p_frame;
 	for (int idx = 0; idx < sum_elem; ++idx) {
 		p_back_buffer[idx] = p_back_buffer[idx]* alpha + layer[idx]*minus_alpha;

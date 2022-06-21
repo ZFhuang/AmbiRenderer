@@ -14,11 +14,12 @@ public:
 	virtual void StartUp() noexcept = 0;
 	// 返回前缓冲
 	virtual p_frame_buffer GetFrontBuffer() const noexcept;
+	void SetPixel(float x, float y, COLORREF color) const noexcept;
 	virtual void CopyBuffer() noexcept;
 	// 交换内部的帧缓冲
 	virtual void SwapBuffer() noexcept;
 	// 清除后缓冲
-	virtual void CleanBackBuffer() noexcept;
+	virtual void CleanBackBuffer() const noexcept;
 	virtual void Draw() noexcept = 0;
 	virtual ~RendererBase() noexcept = 0;
 
@@ -33,11 +34,20 @@ inline void RendererBase::StartUp() noexcept {
 	frame_height = Singleton<Config>::GetInstance()->render_height;
 	frame_width = Singleton<Config>::GetInstance()->render_width;
 	p_front_buffer = new COLORREF[FRAME_SIZE];
+	memset(p_front_buffer, 0, FRAME_SIZE * sizeof(COLORREF));
 	p_back_buffer = new COLORREF[FRAME_SIZE];
+	memset(p_back_buffer, 0, FRAME_SIZE * sizeof(COLORREF));
 }
 
 inline p_frame_buffer RendererBase::GetFrontBuffer() const noexcept {
 	return p_front_buffer;
+}
+
+inline void RendererBase::SetPixel(float x, float y, COLORREF color) const noexcept
+{
+	GetFrontBuffer()[FRAME_PIXEL_IDX(
+		static_cast<int>(x* frame_width),
+		static_cast<int>(y* frame_height))] = color;
 }
 
 inline void RendererBase::CopyBuffer() noexcept
@@ -51,7 +61,7 @@ inline void RendererBase::SwapBuffer() noexcept {
 	p_back_buffer = tmp;
 }
 
-inline void RendererBase::CleanBackBuffer() noexcept {
+inline void RendererBase::CleanBackBuffer() const noexcept {
 	memset(p_back_buffer, 0, FRAME_SIZE * sizeof(COLORREF));
 }
 

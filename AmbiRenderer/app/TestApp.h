@@ -1,15 +1,15 @@
 #pragma once
 #include "../core/AppBase.h"
 #include "../core/ControlManager.h"
+#include "../core/RendererManager.h"
 
 class TestApp : public AppBase
 {
 public:
 	TestApp();
 
-	void GetKeyDown(KeyCode key) noexcept;
-	void GetKeyUp(KeyCode key) noexcept;
-	void GetMouseLeftHold(int x, int y) noexcept;
+	void GetKeyHold(KeyCode key) noexcept;
+	void GetMouseLeftHold(float x, float y) noexcept;
 
 	void Update(float delta_time) noexcept override;
 
@@ -21,4 +21,5 @@ public:
 
 private:
 	ControlManager* controlManager = nullptr;
+	RendererManager* rendererManager = nullptr;
 };

@@ -15,7 +15,7 @@ void ControlManager::SetKeyUp(KeyCode k) noexcept
 	cur_kb_states[unsigned(k)] = KEY_UP;
 }
 
-void ControlManager::SetMousePos(int x, int y) noexcept
+void ControlManager::SetMousePos(float x, float y) noexcept
 {
 	cur_mouse_pos.x = x;
 	cur_mouse_pos.y = y;
