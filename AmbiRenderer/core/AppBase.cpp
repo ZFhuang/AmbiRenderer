@@ -1,15 +1,9 @@
 #include "AppBase.h"
 
-void AppBase::Init()
+void AppBase::PreInit()
 {
-	engine = Singleton<EngineCore>::GetInstance();
 }
 
-void AppBase::BindKeyDown(KEY k, void (AppBase::* func)())
-{
-	engine->BindFunc(k, func);
-}
-
-void AppBase::Create() {
+void AppBase::Init() {
 	ABR_DEBUG_OUTPUT("Defalut Create!");
 }

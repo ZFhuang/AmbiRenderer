@@ -5,39 +5,50 @@ ControlManager::ControlManager() noexcept
 	CleanState();
 }
 
-void ControlManager::OnKeyDown(Key k) noexcept
+void ControlManager::SetKeyDown(KeyCode k) noexcept
 {
 	cur_kb_states[unsigned(k)] = KEY_DOWN;
 }
 
-void ControlManager::OnKeyUp(Key k) noexcept
+void ControlManager::SetKeyUp(KeyCode k) noexcept
 {
 	cur_kb_states[unsigned(k)] = KEY_UP;
 }
 
-void ControlManager::Update() noexcept
+void ControlManager::SetMousePos(int x, int y) noexcept
 {
-	// call keyboard events
-	for (int i = 0; i < MAXKEY; ++i) {
-		if (last_kb_states[i] == KEY_DOWN && cur_kb_states[i] == KEY_DOWN) {
-		}
-		else if (last_kb_states[i] == KEY_UP && cur_kb_states[i] == KEY_DOWN) {
-			last_kb_states[i] = KEY_DOWN;
-			Singleton<EngineCore>::GetInstance()->ReactFunc(i);
-		}
-		else if (last_kb_states[i] == KEY_DOWN && cur_kb_states[i] == KEY_UP) {
-			last_kb_states[i] = KEY_UP;
-		}
-	}
+	cur_mouse_pos.x = x;
+	cur_mouse_pos.y = y;
+}
 
-	// call mouse events
-	// ...
+void ControlManager::SetMouseLeft(bool state) noexcept
+{
+	cur_mouse_left = state;
+}
+
+void ControlManager::SetMouseRight(bool state) noexcept
+{
+	cur_mouse_right = state;
+}
+
+void ControlManager::Refresh() noexcept
+{
+	for (int i = 0; i < MAXKEY; ++i) {
+		last_kb_states[i] = cur_kb_states[i];
+	}
+	last_mouse_pos = cur_mouse_pos;
+	last_mouse_left = cur_mouse_left;
+	last_mouse_right = cur_mouse_right;
 }
 
 void ControlManager::CleanState() noexcept
 {
 	cur_kb_states = KB_States(MAXKEY, KEY_UP);
 	last_kb_states = KB_States(MAXKEY, KEY_UP);
-	cur_mouse = MouseState();
-	last_mouse = MouseState();
+	cur_mouse_left = false;
+	last_mouse_left = false;
+	cur_mouse_right = false;
+	last_mouse_right = false;
+	cur_mouse_pos = MousePos();
+	last_mouse_pos = MousePos();
 }

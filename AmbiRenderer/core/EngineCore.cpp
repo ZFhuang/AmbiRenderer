@@ -22,7 +22,7 @@ EngineCore::~EngineCore() noexcept
 void EngineCore::StartUp() noexcept
 {
 	ABR_DEBUG_OUTPUT("Strating thread...");
-	app->Init();
+	app->PreInit();
 	mainThread = new std::thread([this]{MainThread();});
 }
 
@@ -40,25 +40,12 @@ void EngineCore::WaitForEnd() noexcept
 	}
 }
 
-void EngineCore::BindFunc(KEY k, void(AppBase::* func)())
-{
-	(* app_event_map)[k] = func;
-}
-
-void EngineCore::ReactFunc(KEY k)
-{
-	auto func = (*app_event_map)[k];
-	if (func != nullptr) {
-		(app->*func)();
-	}
-}
-
 void EngineCore::MainThread() noexcept
 {
 	Timer core_timer;
 	float delta_time = 0;
 	
-	app->Create();
+	app->Init();
 
 	while (!thread_exited) {
 		delta_time = core_timer.elapsed_milliseconds() / MS_PER_SEC;
@@ -73,13 +60,11 @@ void EngineCore::MainThread() noexcept
 
 void EngineCore::GameplayTick(float delta_time) noexcept
 {
-	control_manager->Update();
 	app->Update(delta_time);
 }
 
 void EngineCore::RenderTick(float delta_time) noexcept
 {
-	//renderer_manager->Draw();
 	gdi->Update();
 	// 在标题栏显示帧数
 	SetWindowText(gdi->root_hwnd, (L"AmbiRenderer (fps=" + std::to_wstring(min(1000, 1 / delta_time)) + L")").c_str());

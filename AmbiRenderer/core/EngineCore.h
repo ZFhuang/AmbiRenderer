@@ -23,8 +23,6 @@ public:
 	void StartUp() noexcept;
 	void Shutdown() noexcept;
 	void WaitForEnd() noexcept;
-	void BindFunc(KEY k, void (AppBase::* func)());
-	void ReactFunc(KEY k);
 
 private:
 	void MainThread() noexcept;
