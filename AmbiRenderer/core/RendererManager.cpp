@@ -43,7 +43,7 @@ void RendererManager::MainThread() noexcept
 		delta_time = render_timer.elapsed_milliseconds();
 		render_timer.reset();
 		//ABR_DEBUG_OUTPUT(L"Render used: "+std::to_wstring(delta_time)+ L"ms");
-		m_renderer->Draw();
+		m_renderer->Render();
 		m_renderer->SwapBuffer();
 		//m_renderer->CleanBackBuffer();
 	}
@@ -58,7 +58,7 @@ void RendererManager::ClockThread() noexcept
 	}
 }
 
-const RendererBase* RendererManager::GetRenderer() noexcept
+RendererBase* const RendererManager::GetRenderer() noexcept
 {
 	return m_renderer;
 }

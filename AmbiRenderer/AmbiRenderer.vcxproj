@@ -31,7 +31,6 @@
     <ClCompile Include="renderers\rasterizer\gl_soft.cpp" />
     <ClCompile Include="renderers\rasterizer\model.cpp" />
     <ClCompile Include="renderers\rasterizer\Rasterizer.cpp" />
-    <ClCompile Include="renderers\rasterizer\tgaimage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app\TestApp.h" />
@@ -47,12 +46,14 @@
     <ClInclude Include="core\Systems.h" />
     <ClInclude Include="core\Timer.h" />
     <ClInclude Include="core\Utils.h" />
+    <ClInclude Include="renderers\Graphics.h" />
     <ClInclude Include="renderers\painter\Painter.h" />
     <ClInclude Include="renderers\rasterizer\geometry.h" />
     <ClInclude Include="renderers\rasterizer\gl_soft.h" />
     <ClInclude Include="renderers\rasterizer\model.h" />
     <ClInclude Include="renderers\rasterizer\Rasterizer.h" />
-    <ClInclude Include="renderers\rasterizer\tgaimage.h" />
+    <ClInclude Include="renderers\shaders\TestVertexShader.h" />
+    <ClInclude Include="renderers\shaders\VertexShaderBase.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

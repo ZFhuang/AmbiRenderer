@@ -6,7 +6,7 @@
 class Painter :public RendererBase {
 public:
 	void StartUp() noexcept override;
-	void Draw() noexcept override;
+	void Render() noexcept override;
 
 public:
 	void SetLayer(p_frame_buffer inp_layer, int layer_idx, float alpha = 0.0f) noexcept;

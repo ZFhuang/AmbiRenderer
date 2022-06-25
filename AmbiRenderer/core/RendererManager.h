@@ -15,7 +15,7 @@ public:
 	void MainThread() noexcept;
 	void ClockThread() noexcept;
 	void Shutdown() noexcept;
-	const RendererBase* GetRenderer() noexcept;
+	RendererBase* const GetRenderer() noexcept;
 
 private:
 	RendererBase* m_renderer = nullptr;

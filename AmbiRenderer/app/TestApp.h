@@ -2,14 +2,18 @@
 #include "../core/AppBase.h"
 #include "../core/ControlManager.h"
 #include "../core/RendererManager.h"
+#include "../renderers/Graphics.h"
+
+#include "../renderers/rasterizer/Rasterizer.h"
+#include "../renderers/shaders/TestVertexShader.h"
 
 class TestApp : public AppBase
 {
 public:
 	TestApp();
 
-	void GetKeyHold(KeyCode key) noexcept;
-	void GetMouseLeftHold(float x, float y) noexcept;
+	void GetKeyPress(KeyCode key) noexcept;
+	void GetMouseLeftPress(float x, float y) noexcept;
 
 	void Update(float delta_time) noexcept override;
 
@@ -20,6 +24,22 @@ public:
 	}
 
 private:
+	void BuildGeometryBuffer();
+	void BuildVertexLayout();
+	void BuildVertexShader();
+	void DrawScene();
+
+private:
+	ABR_BYTE_BUFFER pVertexBuffer;
+	ABR_BYTE_BUFFER pIndexBuffer;
+
+private:
 	ControlManager* controlManager = nullptr;
 	RendererManager* rendererManager = nullptr;
+	Rasterizer* renderer = nullptr;
+};
+
+struct Vertex {
+	VectorF3 position;
+	ColorU3 color;
 };

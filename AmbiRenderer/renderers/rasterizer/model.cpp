@@ -80,15 +80,15 @@ std::vector<int> Model::face(int idx) {
 	return faces_[idx];
 }
 
-void Model::initTextureCoord(TGAImage& texture)
-{
-	int tex_width = texture.get_width();
-	int tex_height = texture.get_height();
-	for (int i = 0; i < ntex(); i++) {
-		tex_[i].x *= tex_width;
-		tex_[i].y *= tex_height;
-	}
-}
+//void Model::initTextureCoord(TGAImage& texture)
+//{
+//	int tex_width = texture.get_width();
+//	int tex_height = texture.get_height();
+//	for (int i = 0; i < ntex(); i++) {
+//		tex_[i].x *= tex_width;
+//		tex_[i].y *= tex_height;
+//	}
+//}
 
 Vec3f Model::vert(int i) {
 	return verts_[i];

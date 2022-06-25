@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "geometry.h"
-#include "tgaimage.h"
+//#include "tgaimage.h"
 
 class Model {
 private:
@@ -21,7 +21,7 @@ public:
 	std::vector<Vec2f> tex_;
 	std::vector<Vec3f> verts_;
 	std::vector<Vec3f> norms_;
-	void initTextureCoord(TGAImage& texture);
+	//void initTextureCoord(TGAImage& texture);
 };
 
 #endif //__MODEL_H__

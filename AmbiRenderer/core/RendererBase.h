@@ -20,7 +20,7 @@ public:
 	virtual void SwapBuffer() noexcept;
 	// 清除后缓冲
 	virtual void CleanBackBuffer() const noexcept;
-	virtual void Draw() noexcept = 0;
+	virtual void Render() noexcept = 0;
 	virtual ~RendererBase() noexcept = 0;
 
 protected:

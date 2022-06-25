@@ -52,12 +52,12 @@ private:
 
 GEN_STATIC_DYN_CALL_1(GetKeyUp, KeyCode _1, ControlManager);
 GEN_STATIC_DYN_CALL_1(GetKeyDown, KeyCode _1, ControlManager);
-GEN_STATIC_DYN_CALL_1(GetKeyHold, KeyCode _1, ControlManager);
+GEN_STATIC_DYN_CALL_1(GetKeyPress, KeyCode _1, ControlManager);
 GEN_STATIC_DYN_CALL_2(GetMouseMove, float _1, float _2, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseLeftHold, float _1, float _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseLeftPress, float _1, float _2, ControlManager);
 GEN_STATIC_DYN_CALL_2(GetMouseLeftDown, float _1, float _2, ControlManager);
 GEN_STATIC_DYN_CALL_2(GetMouseLeftUp, float _1, float _2, ControlManager);
-GEN_STATIC_DYN_CALL_2(GetMouseRightHold, float _1, float _2, ControlManager);
+GEN_STATIC_DYN_CALL_2(GetMouseRightPress, float _1, float _2, ControlManager);
 GEN_STATIC_DYN_CALL_2(GetMouseRightDown, float _1, float _2, ControlManager);
 GEN_STATIC_DYN_CALL_2(GetMouseRightUp, float _1, float _2, ControlManager);
 
@@ -66,8 +66,8 @@ void ControlManager::Update(T* callback) noexcept{
 	// update keyboard events
 	for (int i = 0; i < MAXKEY; ++i) {
 		if (last_kb_states[i] == KEY_DOWN && cur_kb_states[i] == KEY_DOWN) {
-			// GetKeyHold
-			_ControlManager::GetKeyHold<T>(callback, i);
+			// GetKeyPress
+			_ControlManager::GetKeyPress<T>(callback, i);
 		}
 		else if (last_kb_states[i] == KEY_UP && cur_kb_states[i] == KEY_DOWN) {
 			// GetKeyDown
@@ -85,8 +85,8 @@ void ControlManager::Update(T* callback) noexcept{
 		_ControlManager::GetMouseMove<T>(callback, cur_mouse_pos.x, cur_mouse_pos.y);
 	}
 	if (cur_mouse_left == true && last_mouse_left == true) {
-		// GetMouseLeftHold
-		_ControlManager::GetMouseLeftHold<T>(callback, cur_mouse_pos.x, cur_mouse_pos.y);
+		// GetMouseLeftPress
+		_ControlManager::GetMouseLeftPress<T>(callback, cur_mouse_pos.x, cur_mouse_pos.y);
 	}
 	else if (cur_mouse_left == true && last_mouse_left == false) {
 		// GetMouseLeftDown
@@ -97,8 +97,8 @@ void ControlManager::Update(T* callback) noexcept{
 		_ControlManager::GetMouseLeftUp<T>(callback, cur_mouse_pos.x, cur_mouse_pos.y);
 	}
 	if (cur_mouse_right == true && last_mouse_right == true) {
-		// GetMouseRightHold
-		_ControlManager::GetMouseRightHold<T>(callback, cur_mouse_pos.x, cur_mouse_pos.y);
+		// GetMouseRightPress
+		_ControlManager::GetMouseRightPress<T>(callback, cur_mouse_pos.x, cur_mouse_pos.y);
 	}
 	else if (cur_mouse_right == true && last_mouse_right == false) {
 		// GetMouseRightDown

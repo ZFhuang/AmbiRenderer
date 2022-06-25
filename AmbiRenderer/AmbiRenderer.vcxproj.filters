@@ -46,6 +46,12 @@
     <Filter Include="renderers\painter\source">
       <UniqueIdentifier>{b76af260-dff8-4dce-b9ee-bdf93c207720}</UniqueIdentifier>
     </Filter>
+    <Filter Include="renderers\common">
+      <UniqueIdentifier>{4ae04ddf-f130-4f37-821d-6b0c2c6c753a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderers\shaders">
+      <UniqueIdentifier>{60174121-2b5a-4cc5-96bd-50563da9638d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\Config.h">
@@ -96,14 +102,20 @@
     <ClInclude Include="renderers\rasterizer\Rasterizer.h">
       <Filter>renderers\rasterizer\include</Filter>
     </ClInclude>
-    <ClInclude Include="renderers\rasterizer\tgaimage.h">
-      <Filter>renderers\rasterizer\include</Filter>
-    </ClInclude>
     <ClInclude Include="renderers\painter\Painter.h">
       <Filter>renderers\painter\include</Filter>
     </ClInclude>
     <ClInclude Include="core\Timer.h">
       <Filter>core\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\Graphics.h">
+      <Filter>renderers\common</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\shaders\TestVertexShader.h">
+      <Filter>renderers\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="renderers\shaders\VertexShaderBase.h">
+      <Filter>renderers\shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -132,9 +144,6 @@
       <Filter>renderers\rasterizer\source</Filter>
     </ClCompile>
     <ClCompile Include="renderers\rasterizer\Rasterizer.cpp">
-      <Filter>renderers\rasterizer\source</Filter>
-    </ClCompile>
-    <ClCompile Include="renderers\rasterizer\tgaimage.cpp">
       <Filter>renderers\rasterizer\source</Filter>
     </ClCompile>
     <ClCompile Include="renderers\painter\Painter.cpp">

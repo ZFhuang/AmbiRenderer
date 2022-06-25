@@ -2,8 +2,9 @@
 
 void AppBase::PreInit()
 {
+	ABR_DEBUG_OUTPUT("Defalut PreInit!");
 }
 
 void AppBase::Init() {
-	ABR_DEBUG_OUTPUT("Defalut Create!");
+	ABR_DEBUG_OUTPUT("Defalut Init!");
 }

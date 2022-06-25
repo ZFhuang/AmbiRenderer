@@ -6,7 +6,7 @@ void Painter::StartUp() noexcept
 	layers = std::vector<Layer>(layer_num);
 }
 
-void Painter::Draw() noexcept
+void Painter::Render() noexcept
 {
 	// do nothing now
 	for (int layer_idx = 0; layer_idx < layer_num; ++layer_idx) {

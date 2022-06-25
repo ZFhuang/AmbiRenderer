@@ -5,8 +5,15 @@ void Rasterizer::StartUp() noexcept
 	RendererBase::StartUp();
 }
 
-void Rasterizer::Draw() noexcept
+void Rasterizer::Render() noexcept
 {
+	// Input Assembler 输入装配
+	// Vertex Shader 顶点着色
+	// Rasterization 光栅化
+	// Pixel Shader 像素着色
+	// Output Merger 输出合并
+	// Output Blending 输出混合
+
 	// do nothing now
 	//for (int y = 0; y < frame_height; ++y) {
 	//	for (int x = 0; x < frame_width; ++x) {
@@ -19,6 +26,52 @@ void Rasterizer::Draw() noexcept
 Rasterizer::~Rasterizer()
 {
 	RendererBase::~RendererBase();
+}
+
+void Rasterizer::IASetPrimitiveTopology(const ABR_PRIMITIVE_TOPOLOGY& topology)
+{
+	mPrimitiveTopology = topology;
+}
+
+void Rasterizer::IASetVertexBuffers(const ABR_BYTE_BUFFER pVertexBuffer)
+{
+	mpVertexBuffer = pVertexBuffer;
+}
+
+void Rasterizer::CreateBuffer(const ABR_BUFFER_DESC* pBufferDesc, const void* pInitialData, ABR_BYTE_BUFFER pOut)
+{
+	pOut = new BYTE[pBufferDesc->ByteWidth];
+	memcpy(pOut, pInitialData, pBufferDesc->ByteWidth);
+}
+
+void Rasterizer::DrawIndexed(UINT indexxCount, UINT startIndexLocation) noexcept
+{
+	//InputAssemblerStage();
+	VertexShaderStage();
+	//RasterizerStage();
+	//PixelShaderStage();
+	//OutputMergerStage();
+}
+
+void Rasterizer::VertexShaderStage()
+{
+	mpVertexShader->Run(mpVertexBuffer, nullptr, mpInputLayout);
+}
+
+void Rasterizer::IASetIndexBuffers(const ABR_BYTE_BUFFER pIndexBuffer)
+{
+	mpIndexBuffer = pIndexBuffer;
+}
+
+void Rasterizer::IASetInputLayout(ABR_INPUT_LAYOUT pInputLayout, UINT layoutNum)
+{
+	mpInputLayout = new ABR_INPUT_ELEMENT_DESC[layoutNum];
+	memcpy(mpInputLayout, pInputLayout, layoutNum);
+}
+
+void Rasterizer::VSSetShader(VertexShaderBase* pVertexShader)
+{
+	mpVertexShader = pVertexShader;
 }
 
 //std::vector<std::vector<float>> triangleTraversal(TGAImage* frameBuffer, std::vector<std::vector<float>>&& v_out) {
