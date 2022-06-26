@@ -22,9 +22,10 @@
 #include <functional>
 #include "../Graphics.h"
 #include "../../core/RendererBase.h"
-#include "../shaders/VertexShaderBase.h"
 
 class Rasterizer :public RendererBase {
+	typedef std::function<void(BYTE* in, BYTE* out, ABR_INPUT_LAYOUT inDesc)> Shader;
+
 public:
 	Rasterizer() = default;
 	void StartUp() noexcept override;
@@ -38,17 +39,17 @@ public:
 	void IASetInputLayout(ABR_INPUT_LAYOUT pInputLayout, UINT layoutNum);
 
 public:
-	void VSSetShader(VertexShaderBase* pVertexShader);
-
-public:
-	void CreateBuffer(const ABR_BUFFER_DESC* pBufferDesc, const void* pInitialData, ABR_BYTE_BUFFER pOut);
-	ABR_BUFFER_DESC mVertexBufferDesc;
-	ABR_BUFFER_DESC mIndexBufferDesc;
-	VertexShaderBase* mpVertexShader;
+	void VSSetShader(Shader vertexShader);
 
 public:
 	void Draw(UINT vertexCount, UINT startVertexLocation) noexcept;
 	void DrawIndexed(UINT indexxCount, UINT startIndexLocation) noexcept;
+	void CreateBuffer(const ABR_BUFFER_DESC* pBufferDesc, const void* pInitialData, ABR_BYTE_BUFFER& pOut);
+
+public:
+	ABR_BUFFER_DESC mVertexBufferDesc;
+	ABR_BUFFER_DESC mIndexBufferDesc;
+	Shader mVertexShader;
 
 private:
 	void InputAssemblerStage();

@@ -38,7 +38,7 @@ void Rasterizer::IASetVertexBuffers(const ABR_BYTE_BUFFER pVertexBuffer)
 	mpVertexBuffer = pVertexBuffer;
 }
 
-void Rasterizer::CreateBuffer(const ABR_BUFFER_DESC* pBufferDesc, const void* pInitialData, ABR_BYTE_BUFFER pOut)
+void Rasterizer::CreateBuffer(const ABR_BUFFER_DESC* pBufferDesc, const void* pInitialData, ABR_BYTE_BUFFER& pOut)
 {
 	pOut = new BYTE[pBufferDesc->ByteWidth];
 	memcpy(pOut, pInitialData, pBufferDesc->ByteWidth);
@@ -55,7 +55,7 @@ void Rasterizer::DrawIndexed(UINT indexxCount, UINT startIndexLocation) noexcept
 
 void Rasterizer::VertexShaderStage()
 {
-	mpVertexShader->Run(mpVertexBuffer, nullptr, mpInputLayout);
+	 mVertexShader(mpVertexBuffer, nullptr, mpInputLayout);
 }
 
 void Rasterizer::IASetIndexBuffers(const ABR_BYTE_BUFFER pIndexBuffer)
@@ -66,12 +66,12 @@ void Rasterizer::IASetIndexBuffers(const ABR_BYTE_BUFFER pIndexBuffer)
 void Rasterizer::IASetInputLayout(ABR_INPUT_LAYOUT pInputLayout, UINT layoutNum)
 {
 	mpInputLayout = new ABR_INPUT_ELEMENT_DESC[layoutNum];
-	memcpy(mpInputLayout, pInputLayout, layoutNum);
+	memcpy(mpInputLayout, pInputLayout, layoutNum*sizeof(ABR_INPUT_ELEMENT_DESC));
 }
 
-void Rasterizer::VSSetShader(VertexShaderBase* pVertexShader)
+void Rasterizer::VSSetShader(Shader vertexShader)
 {
-	mpVertexShader = pVertexShader;
+	mVertexShader = std::move(vertexShader);
 }
 
 //std::vector<std::vector<float>> triangleTraversal(TGAImage* frameBuffer, std::vector<std::vector<float>>&& v_out) {

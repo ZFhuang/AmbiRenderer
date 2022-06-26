@@ -5,7 +5,7 @@
 #include "../renderers/Graphics.h"
 
 #include "../renderers/rasterizer/Rasterizer.h"
-#include "../renderers/shaders/TestVertexShader.h"
+#include "../renderers/shaders/v_Test.h"
 
 class TestApp : public AppBase
 {

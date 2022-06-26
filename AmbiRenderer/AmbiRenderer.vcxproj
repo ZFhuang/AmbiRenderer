@@ -52,8 +52,7 @@
     <ClInclude Include="renderers\rasterizer\gl_soft.h" />
     <ClInclude Include="renderers\rasterizer\model.h" />
     <ClInclude Include="renderers\rasterizer\Rasterizer.h" />
-    <ClInclude Include="renderers\shaders\TestVertexShader.h" />
-    <ClInclude Include="renderers\shaders\VertexShaderBase.h" />
+    <ClInclude Include="renderers\shaders\v_Test.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

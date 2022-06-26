@@ -52,6 +52,12 @@
     <Filter Include="renderers\shaders">
       <UniqueIdentifier>{60174121-2b5a-4cc5-96bd-50563da9638d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="renderers\shaders\vs">
+      <UniqueIdentifier>{307ce185-2491-426a-b872-0ce505b74963}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="renderers\shaders\ps">
+      <UniqueIdentifier>{d03fbe00-65ce-49da-91b1-744360db6d5f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\Config.h">
@@ -111,11 +117,8 @@
     <ClInclude Include="renderers\Graphics.h">
       <Filter>renderers\common</Filter>
     </ClInclude>
-    <ClInclude Include="renderers\shaders\TestVertexShader.h">
-      <Filter>renderers\shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="renderers\shaders\VertexShaderBase.h">
-      <Filter>renderers\shaders</Filter>
+    <ClInclude Include="renderers\shaders\v_Test.h">
+      <Filter>renderers\shaders\vs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

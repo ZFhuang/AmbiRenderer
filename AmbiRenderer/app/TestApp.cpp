@@ -81,14 +81,14 @@ void TestApp::BuildVertexLayout()
 {
     ABR_INPUT_ELEMENT_DESC vertexDesc[] = {
         0,
-        9,
+        sizeof(Vertex::position),
     };
     renderer->IASetInputLayout(vertexDesc, 2);
 }
 
 void TestApp::BuildVertexShader()
 {
-    renderer->VSSetShader(new TestVertexShader);
+    renderer->VSSetShader(v_Test);
 }
 
 void TestApp::DrawScene()
@@ -96,6 +96,5 @@ void TestApp::DrawScene()
     renderer->IASetPrimitiveTopology(ABR_PRIMITIVE_TOPOLOGY::ABR_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     renderer->IASetVertexBuffers(pVertexBuffer);
     renderer->IASetIndexBuffers(pIndexBuffer);
-
     renderer->DrawIndexed(36, 0);
 }
