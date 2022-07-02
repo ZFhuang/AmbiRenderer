@@ -7,13 +7,6 @@ void Rasterizer::StartUp() noexcept
 
 void Rasterizer::Render() noexcept
 {
-	// Input Assembler 输入装配
-	// Vertex Shader 顶点着色
-	// Rasterization 光栅化
-	// Pixel Shader 像素着色
-	// Output Merger 输出合并
-	// Output Blending 输出混合
-
 	// do nothing now
 	//for (int y = 0; y < frame_height; ++y) {
 	//	for (int x = 0; x < frame_width; ++x) {
@@ -31,11 +24,37 @@ Rasterizer::~Rasterizer()
 void Rasterizer::IASetPrimitiveTopology(const ABR_PRIMITIVE_TOPOLOGY& topology)
 {
 	mPrimitiveTopology = topology;
+	switch (mPrimitiveTopology)
+	{
+	case ABR_PRIMITIVE_TOPOLOGY::ABR_PRIMITIVE_TOPOLOGY_UNDEFINED:
+		assert(false);
+		break;
+	case ABR_PRIMITIVE_TOPOLOGY::ABR_PRIMITIVE_TOPOLOGY_POINTLIST:
+		mPrimitiveInfo.Step = 1;
+		mPrimitiveInfo.Stride = 1;
+		break;
+	case ABR_PRIMITIVE_TOPOLOGY::ABR_PRIMITIVE_TOPOLOGY_LINELIST:
+		mPrimitiveInfo.Step = 2;
+		mPrimitiveInfo.Stride = 2;
+		break;
+	case ABR_PRIMITIVE_TOPOLOGY::ABR_PRIMITIVE_TOPOLOGY_TRIANGLETRIP:
+		mPrimitiveInfo.Step = 1;
+		mPrimitiveInfo.Stride = 3;
+		break;
+	case ABR_PRIMITIVE_TOPOLOGY::ABR_PRIMITIVE_TOPOLOGY_TRIANGLELIST:
+		mPrimitiveInfo.Step = 3;
+		mPrimitiveInfo.Stride = 3;
+		break;
+	default:
+		break;
+	}
 }
 
-void Rasterizer::IASetVertexBuffers(const ABR_BYTE_BUFFER pVertexBuffer)
+void Rasterizer::IASetVertexBuffers(const ABR_BYTE_BUFFER pVertexBuffer, const UINT* pStride, const UINT* pOffset, UINT slot)
 {
 	mpVertexBuffer = pVertexBuffer;
+	mVertexInfo.Stride = *pStride;
+	mVertexInfo.Offset = *pOffset;
 }
 
 void Rasterizer::CreateBuffer(const ABR_BUFFER_DESC* pBufferDesc, const void* pInitialData, ABR_BYTE_BUFFER& pOut)
@@ -44,21 +63,92 @@ void Rasterizer::CreateBuffer(const ABR_BUFFER_DESC* pBufferDesc, const void* pI
 	memcpy(pOut, pInitialData, pBufferDesc->ByteWidth);
 }
 
-void Rasterizer::DrawIndexed(UINT indexxCount, UINT startIndexLocation) noexcept
+void Rasterizer::Draw(UINT vertexCount, UINT startVertexLocation) noexcept
 {
-	//InputAssemblerStage();
+	InputAssemblerStage_Common(vertexCount, startVertexLocation);
 	VertexShaderStage();
-	//RasterizerStage();
+	RasterizerStage();
 	//PixelShaderStage();
 	//OutputMergerStage();
 }
 
-void Rasterizer::VertexShaderStage()
+void Rasterizer::DrawIndexed(UINT indexxCount, UINT startIndexLocation) noexcept
 {
-	 mVertexShader(mpVertexBuffer, nullptr, mpInputLayout);
+	InputAssemblerStage_Indexed(indexxCount, startIndexLocation);
+	VertexShaderStage();
+	RasterizerStage();
+	//PixelShaderStage();
+	//OutputMergerStage();
 }
 
-void Rasterizer::IASetIndexBuffers(const ABR_BYTE_BUFFER pIndexBuffer)
+void Rasterizer::InitStream(UINT count, UINT start)
+{
+	// 分配顶点流和图元流
+	mVertexStream = std::vector<BYTE*>(count);
+	if (mPrimitiveInfo.Stride != mPrimitiveInfo.Step) {
+		mPrimitiveStream = std::vector<BYTE*>((count - mPrimitiveInfo.Stride + 1) * mPrimitiveInfo.Stride);
+	}
+	else {
+		mPrimitiveStream = std::vector<BYTE*>(count);
+	}
+}
+
+void Rasterizer::InputAssemblerStage_Common(UINT count, UINT start)
+{
+	InitStream(count, start);
+
+	ABR_BUFFER_PTR curVB = mpVertexBuffer + start * sizeof(mVertexInfo.Stride) + mVertexInfo.Offset;
+	for (UINT i = 0; i < count; ++i) {
+		ABR_BUFFER_PTR pVertex = curVB + i * mVertexInfo.Stride;
+		mVertexStream[i] = pVertex;
+		if (mPrimitiveInfo.Stride != mPrimitiveInfo.Step) {
+			assert(false);
+		}
+		else {
+			mPrimitiveStream[i] = pVertex;
+		}
+	}
+}
+
+void Rasterizer::InputAssemblerStage_Indexed(UINT count, UINT start)
+{
+	InitStream(count, start);
+	
+	ABR_BUFFER_PTR curIB = mpIndexBuffer + start * sizeof(UINT);
+	ABR_BUFFER_PTR curVB = mpVertexBuffer + mVertexInfo.Offset;
+	for (UINT i = 0; i < count; ++i) {
+		UINT* idx = reinterpret_cast<UINT*>(curIB + i * sizeof(UINT));
+		ABR_BUFFER_PTR pVertex = curVB + (*idx) * mVertexInfo.Stride;
+		mVertexStream[i] = pVertex;
+		if (mPrimitiveInfo.Stride != mPrimitiveInfo.Step) {
+			assert(false);
+		}
+		else {
+			mPrimitiveStream[i] = pVertex;
+		}
+	}
+}
+
+void Rasterizer::VertexShaderStage()
+{
+	UINT numVertices = mVertexStream.size();
+	for (UINT SV_VertexID = 0; SV_VertexID < numVertices; ++SV_VertexID) {
+		mVertexShader(mVertexStream[SV_VertexID], nullptr, mpInputLayout);
+	}
+}
+
+void Rasterizer::RasterizerStage()
+{
+	UINT numPrimitive = mPrimitiveStream.size()/mPrimitiveInfo.Stride;
+	for (UINT SV_PrimitiveID = 0; SV_PrimitiveID < numPrimitive; ++SV_PrimitiveID) {
+		VectorF3* SV_Position_0 = reinterpret_cast<VectorF3*>(mPrimitiveStream[SV_PrimitiveID * mPrimitiveInfo.Stride]);
+		VectorF3* SV_Position_1 = reinterpret_cast<VectorF3*>(mPrimitiveStream[SV_PrimitiveID * mPrimitiveInfo.Stride + 1]);
+		VectorF3* SV_Position_2 = reinterpret_cast<VectorF3*>(mPrimitiveStream[SV_PrimitiveID * mPrimitiveInfo.Stride + 2]);
+		ABR_DEBUG_OUTPUT(SV_Position_0->x);
+	}
+}
+
+void Rasterizer::IASetIndexBuffer(const ABR_BYTE_BUFFER pIndexBuffer)
 {
 	mpIndexBuffer = pIndexBuffer;
 }

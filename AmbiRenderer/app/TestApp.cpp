@@ -94,7 +94,9 @@ void TestApp::BuildVertexShader()
 void TestApp::DrawScene()
 {
     renderer->IASetPrimitiveTopology(ABR_PRIMITIVE_TOPOLOGY::ABR_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    renderer->IASetVertexBuffers(pVertexBuffer);
-    renderer->IASetIndexBuffers(pIndexBuffer);
+    UINT stride = sizeof(Vertex);
+    UINT offset = 0;
+    renderer->IASetVertexBuffers(pVertexBuffer, &stride, &offset);
+    renderer->IASetIndexBuffer(pIndexBuffer);
     renderer->DrawIndexed(36, 0);
 }

@@ -17,7 +17,8 @@
 //#include "../shaders/f_AO.cpp"
 //#include "../shaders/f_SSAO.cpp"
 
-#include <string>
+#include <vector>
+#include <tuple>
 #include <memory>
 #include <functional>
 #include "../Graphics.h"
@@ -34,12 +35,14 @@ public:
 
 public:
 	void IASetPrimitiveTopology(const ABR_PRIMITIVE_TOPOLOGY& topology);
-	void IASetVertexBuffers(ABR_BYTE_BUFFER pVertexBuffer);
-	void IASetIndexBuffers(ABR_BYTE_BUFFER pIndexBuffer);
+	void IASetVertexBuffers(const ABR_BYTE_BUFFER pVertexBuffer, const UINT* pStride, const UINT* pOffset, UINT slot = 0);
+	void IASetIndexBuffer(ABR_BYTE_BUFFER pIndexBuffer);
 	void IASetInputLayout(ABR_INPUT_LAYOUT pInputLayout, UINT layoutNum);
 
 public:
 	void VSSetShader(Shader vertexShader);
+	void VSSetConstantBuffers(UINT StartSlot, UINT NumBuffers, const ABR_BYTE_BUFFER pVertexBuffer);
+	void VSSetShaderResources(UINT StartSlot, UINT NumBuffers, const ABR_BYTE_BUFFER pVertexBuffer);
 
 public:
 	void Draw(UINT vertexCount, UINT startVertexLocation) noexcept;
@@ -52,7 +55,9 @@ public:
 	Shader mVertexShader;
 
 private:
-	void InputAssemblerStage();
+	void InitStream(UINT count, UINT start);
+	void InputAssemblerStage_Indexed(UINT count, UINT start);
+	void InputAssemblerStage_Common(UINT count, UINT start);
 	void VertexShaderStage();
 	void RasterizerStage();
 	void PixelShaderStage();
@@ -62,5 +67,18 @@ private:
 	ABR_PRIMITIVE_TOPOLOGY mPrimitiveTopology;
 	ABR_BYTE_BUFFER mpVertexBuffer;
 	ABR_BYTE_BUFFER mpIndexBuffer;
+	ABR_BYTE_BUFFER mpPositionBuffer;
 	ABR_INPUT_LAYOUT mpInputLayout;
+	std::vector<BYTE*> mVertexStream;
+	std::vector<BYTE*> mPrimitiveStream;
+
+	struct PrimitiveInfo {
+		UINT Stride;
+		UINT Step;
+	} mPrimitiveInfo;
+	
+	struct VertexInfo {
+		UINT Stride;
+		UINT Offset;
+	} mVertexInfo;
 };

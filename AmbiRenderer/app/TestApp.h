@@ -30,8 +30,8 @@ private:
 	void DrawScene();
 
 private:
-	ABR_BYTE_BUFFER pVertexBuffer;
-	ABR_BYTE_BUFFER pIndexBuffer;
+	ABR_BYTE_BUFFER pVertexBuffer = nullptr;
+	ABR_BYTE_BUFFER pIndexBuffer = nullptr;
 
 private:
 	ControlManager* controlManager = nullptr;
